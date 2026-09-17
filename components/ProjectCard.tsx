@@ -29,8 +29,8 @@ export function ProjectCard({ projet }: { projet: Projet }) {
       </div>
       <div className="pa-card-foot">
         <span className="pa-meta">{projet.cadre}</span>
-        <Link className="pa-link" href={`/projets/${projet.slug}`} aria-label={`Ouvrir le dossier ${projet.titre}`}>
-          Ouvrir le dossier →
+        <Link className="pa-link" href={`/projets/${projet.slug}`}>
+          Ouvrir le dossier<span className="pa-sr"> {projet.titre}</span> →
         </Link>
       </div>
     </article>

@@ -27,6 +27,7 @@ body { margin: 0; min-height: 100vh; }
 
 /* Cartouche du portrait */
 .pa-frame-media { display: block; width: 100%; object-fit: cover; }
+.pa-ph.pa-frame-media { display: flex; }
 .pa-frame--accueil { width: 250px; }
 .pa-frame--accueil .pa-frame-media { height: 290px; }
 .pa-frame--apropos { width: 100%; }
@@ -41,7 +42,6 @@ body { margin: 0; min-height: 100vh; }
 .pa-herometa { margin-top: 48px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line); }
 .pa-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .pa-main { display: flex; flex-direction: column; gap: var(--space-9); padding-top: var(--space-9); padding-bottom: var(--space-9); }
-.pa-intro-inner { max-width: var(--page-max); margin: 0 auto; display: contents; }
 
 /* Page Projets */
 .pa-filterbar { margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-top: 20px; border-top: 1px solid var(--line); flex-wrap: wrap; }
@@ -51,8 +51,7 @@ body { margin: 0; min-height: 100vh; }
 
 /* Étude de cas */
 .pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; border-top: 1px solid var(--line); }
-.pa-casebody { padding-bottom: 96px; min-width: 0; }
-.pa-casebody { display: flex; flex-direction: column; }
+.pa-casebody { display: flex; flex-direction: column; padding-bottom: 96px; min-width: 0; }
 .pa-secmeta { display: block; margin-top: 72px; }
 .pa-casebody h2.pa-h2 { margin: 8px 0 24px; scroll-margin-top: 110px; }
 .pa-casebody > .pa-adr + .pa-adr { margin-top: 24px; }
@@ -106,15 +105,20 @@ body { margin: 0; min-height: 100vh; }
   .pa-main { gap: var(--space-8); padding-top: var(--space-8); padding-bottom: var(--space-8); }
   .pa-h1 { font-size: 34px; line-height: 40px; }
   .pa-context, .pa-ops, .pa-gallery { grid-template-columns: 1fr; }
-  .pa-casebody > section { padding-top: 48px; }
+  .pa-secmeta { margin-top: 48px; }
   .pa-metaband { grid-template-columns: 1fr; }
   .pa-metaband > div { border-right: 0; }
   .pa-adr dl > div { grid-template-columns: 1fr; gap: 4px; }
   .pa-next { grid-template-columns: 1fr; }
   .pa-next a + a { border-left: 0; border-top: 1px solid var(--line); }
   .pa-timeline li { grid-template-columns: 76px 20px 1fr; gap: var(--space-3); }
-  .pa-article { grid-template-columns: 1fr auto; }
   .pa-cta h2 { font-size: 34px; line-height: 40px; }
   .pa-prose { font-size: 17px; line-height: 28px; }
   .pa-footer-bar { flex-direction: column; }
 }
+
+/* Apparition : l'en-tête part d'un état déjà lisible (jamais invisible), ce qui garde le titre candidat au LCP. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes pa-rise { from { opacity: 0.35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+}
+

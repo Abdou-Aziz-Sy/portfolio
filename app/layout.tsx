@@ -10,18 +10,14 @@ import { JsonLd } from "@/components/JsonLd";
 import { Navigation } from "@/components/Navigation";
 import { ThemeScript } from "@/components/ThemeScript";
 
-const sans = Schibsted_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-sans",
-});
+const sans = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-sans" });
 const accent = DM_Serif_Display({
   subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
   variable: "--font-accent",
 });
-const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
