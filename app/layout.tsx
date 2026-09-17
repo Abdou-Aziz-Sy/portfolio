@@ -6,6 +6,7 @@ import { getArticles } from "@/lib/content";
 import { siteUrl } from "@/lib/site-url";
 import { CtaBand } from "@/components/CtaBand";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 import { Navigation } from "@/components/Navigation";
 import { ThemeScript } from "@/components/ThemeScript";
 
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <ThemeScript />
+        <JsonLd />
       </head>
       <body className="pa pa-ground">
         <a className="pa-skip pa-btn pa-btn--primary pa-btn--sm" href="#contenu">

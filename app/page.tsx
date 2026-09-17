@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/content/site";
 import { getArticles, getProjets } from "@/lib/content";
@@ -11,6 +12,8 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { numeroteur, SectionHead } from "@/components/SectionHead";
 import { MetaLine } from "@/components/StatusMeta";
 import { Testimonial } from "@/components/Testimonial";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function Accueil() {
   const projets = getProjets();
