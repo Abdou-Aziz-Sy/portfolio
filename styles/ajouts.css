@@ -91,6 +91,8 @@ body { margin: 0; min-height: 100vh; }
 .pa-feature > * { min-width: 0; }
 .pa-diagram-scroll { max-width: 100%; }
 .pa-dot.is-dispo { animation: none !important; }
+.pa-theme { display: inline-flex; align-items: center; justify-content: center; }
+.pa-theme-icone { display: none; }
 
 @media (max-width: 1023px) {
   .pa-hero-xl { font-size: 88px; line-height: 92px; }
@@ -132,6 +134,12 @@ body { margin: 0; min-height: 100vh; }
   .pa-prose { font-size: 17px; line-height: 28px; }
   .pa-footer-bar { flex-direction: column; }
   .pa-feature { grid-template-columns: minmax(0, 1fr); }
+  .pa-theme { min-width: 44px; min-height: 44px; padding: 0; }
+  .pa-theme-texte { display: none; }
+  .pa-theme-icone { display: block; }
+  .pa-nav-actions { gap: var(--space-2); }
+  .pa-nav-actions .pa-btn--sm { padding: 10px 12px; }
+  .pa-nav-actions .pa-arr { display: none; }
 }
 
 /* Apparition : l'en-tête part d'un état déjà lisible (jamais invisible), ce qui garde le titre candidat au LCP. */

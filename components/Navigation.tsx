@@ -19,7 +19,7 @@ export function Navigation({ avecBlog }: { avecBlog: boolean }) {
         </nav>
         <div className="pa-nav-actions">
           <ThemeToggle />
-          <Button href="#contact" size="sm" arrow className="pa-desktop-only">
+          <Button href="#contact" size="sm" arrow>
             Me contacter
           </Button>
           <MobileMenu liens={liens} />
