@@ -10,6 +10,16 @@ export type DecisionRecordProps = {
   consequences: string;
 };
 
+/** Une décision est « acceptée » indépendamment des accents ou de la casse du texte MDX. */
+function estAcceptee(statut: string) {
+  return (
+    statut
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase() === "acceptee"
+  );
+}
+
 /** Fiche de décision d'architecture (ADR) — gabarit unique. */
 export function DecisionRecord({
   numero,
@@ -20,6 +30,7 @@ export function DecisionRecord({
   decision,
   consequences,
 }: DecisionRecordProps) {
+  const acceptee = estAcceptee(statut);
   return (
     <article className="pa-surface pa-adr">
       <div className="pa-head">
@@ -27,8 +38,8 @@ export function DecisionRecord({
           Fiche de décision<span className="pa-sep">—</span>ADR-{numero}
         </span>
         <span className="pa-meta">
-          <span className="pa-st-open">
-            <span className="pa-dot is-open" />
+          <span className={acceptee ? "pa-st-ok" : "pa-st-open"}>
+            <span className={acceptee ? "pa-dot is-accepte" : "pa-dot is-open"} />
             {statut}
           </span>
         </span>

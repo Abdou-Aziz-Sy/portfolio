@@ -70,7 +70,18 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
             <div key={ligne.terme}>
               <dt>{ligne.terme}</dt>
               {ligne.statut ? (
-                <dd style={{ color: projet.statut === "en-production" ? "var(--ok)" : "var(--accent)", fontWeight: 600 }}>
+                <dd
+                  className={projet.statut === "termine" ? "pa-st-done" : undefined}
+                  style={{
+                    color:
+                      projet.statut === "en-production"
+                        ? "var(--ok)"
+                        : projet.statut === "en-cours"
+                          ? "var(--accent)"
+                          : undefined,
+                    fontWeight: 600,
+                  }}
+                >
                   <StatusMeta statut={projet.statut} />
                 </dd>
               ) : (
