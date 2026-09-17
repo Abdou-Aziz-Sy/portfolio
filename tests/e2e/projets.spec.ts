@@ -25,6 +25,15 @@ test("un lien filtré s'ouvre directement sur le bon filtre", async ({ page }) =
   await expect(page.getByRole("button", { name: "Full stack" })).toHaveAttribute("aria-pressed", "true");
 });
 
+test("toute la carte ouvre le dossier", async ({ page }) => {
+  await page.goto("/projets");
+  const carte = page.getByTestId("project-card").first();
+  expect(await carte.getByRole("link").count()).toBe(1);
+  const boite = await carte.boundingBox();
+  await page.mouse.click(boite!.x + boite!.width / 2, boite!.y + 20);
+  await expect(page).toHaveURL(/\/projets\/[a-z0-9-]+$/);
+});
+
 test("une étude de cas mène au dossier suivant et son sommaire pointe vers ses sections", async ({ page }) => {
   await page.goto("/projets/ugb-link");
   const sommaire = page.getByRole("navigation", { name: "Sommaire" });

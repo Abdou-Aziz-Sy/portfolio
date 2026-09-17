@@ -10,7 +10,11 @@ export function numeroDossier(n: number) {
 
 export function ProjectCard({ projet }: { projet: Projet }) {
   return (
-    <article className="pa-surface pa-card" data-cats={projet.categories.join(" ")} data-testid="project-card">
+    <article
+      className="pa-surface pa-card pa-card--lien"
+      data-cats={projet.categories.join(" ")}
+      data-testid="project-card"
+    >
       <div className="pa-head">
         <span className="pa-meta">
           <MetaLine parties={[numeroDossier(projet.dossier), projet.annee]} />
@@ -29,7 +33,7 @@ export function ProjectCard({ projet }: { projet: Projet }) {
       </div>
       <div className="pa-card-foot">
         <span className="pa-meta">{projet.cadre}</span>
-        <Link className="pa-link" href={`/projets/${projet.slug}`}>
+        <Link className="pa-link pa-card-cible" href={`/projets/${projet.slug}`}>
           Ouvrir le dossier<span className="pa-sr"> {projet.titre}</span> →
         </Link>
       </div>
