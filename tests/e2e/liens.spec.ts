@@ -47,3 +47,20 @@ test("les images de partage sont servies", async ({ request }) => {
     expect(reponse.headers()["content-type"]).toContain("image/png");
   }
 });
+
+test("la section vedette s'empile sur mobile", async ({ page }) => {
+  const viewportSize = page.viewportSize();
+  const viewportWidth = viewportSize?.width ?? 0;
+  test.skip(viewportWidth > 800, "Test réservé au profil mobile (viewport < 800px)");
+  await page.goto("/");
+  const paFeature = await page.locator(".pa-feature").first();
+  expect(paFeature).toBeTruthy();
+  const gridColumns = await paFeature.evaluate((el) => {
+    const computed = window.getComputedStyle(el);
+    return computed.gridTemplateColumns;
+  });
+  // Sur mobile (viewport 412px), gridTemplateColumns doit être « minmax(0px, 1fr) »
+  // (une seule piste), pas « minmax(0px, 5fr) minmax(0px, 7fr) » (deux pistes).
+  const colonnes = gridColumns.split(" ").filter((v) => v.trim());
+  expect(colonnes.length, `gridTemplateColumns: ${gridColumns}`).toBe(1);
+});
