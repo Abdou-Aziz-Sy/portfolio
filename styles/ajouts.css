@@ -43,6 +43,12 @@ body { margin: 0; min-height: 100vh; }
 .pa-main { display: flex; flex-direction: column; gap: var(--space-9); padding-top: var(--space-9); padding-bottom: var(--space-9); }
 .pa-intro-inner { max-width: var(--page-max); margin: 0 auto; display: contents; }
 
+/* Page Projets */
+.pa-filterbar { margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-top: 20px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.pa-grid-projets > div { display: flex; }
+.pa-grid-projets > div > .pa-card { flex: 1; }
+.pa-tabs button:disabled { cursor: default; opacity: 1; }
+
 /* Étude de cas */
 .pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; border-top: 1px solid var(--line); }
 .pa-casebody { padding-bottom: 96px; min-width: 0; }
