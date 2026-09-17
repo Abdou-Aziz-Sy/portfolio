@@ -75,7 +75,7 @@ export const site = {
         "Conteneurisation",
         "Déploiement continu",
         "Durcissement de serveurs",
-        "Sauvegardes et restauration testée",
+        "Sauvegardes et exercices de restauration",
       ],
       outils: [
         { libelle: "Docker", icone: "docker" },

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import path from "node:path";
 import { extraireSections, getArticle, getArticles, getProjet, getProjets } from "@/lib/content";
 
@@ -28,6 +28,22 @@ describe("getArticles", () => {
   });
   it("calcule le temps de lecture", () => expect(getArticle("recent", blog)?.minutes).toBe(1));
   it("ne renvoie pas un brouillon", () => expect(getArticle("cache", blog)).toBeUndefined());
+});
+
+describe("aperçu des brouillons", () => {
+  afterEach(() => {
+    delete process.env.AFFICHER_BROUILLONS;
+    delete process.env.VERCEL_ENV;
+  });
+  it("inclut les brouillons quand AFFICHER_BROUILLONS=1", () => {
+    process.env.AFFICHER_BROUILLONS = "1";
+    expect(getArticles(blog).map((a) => a.slug)).toContain("cache");
+  });
+  it("les ignore toujours en production Vercel", () => {
+    process.env.AFFICHER_BROUILLONS = "1";
+    process.env.VERCEL_ENV = "production";
+    expect(getArticles(blog).map((a) => a.slug)).not.toContain("cache");
+  });
 });
 
 describe("extraireSections", () => {

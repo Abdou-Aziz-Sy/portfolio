@@ -12,6 +12,11 @@ export type Article = ArticleMeta & { slug: string; corps: string; minutes: numb
 
 const CONTENU = path.join(process.cwd(), "content");
 
+/** Aperçu local des brouillons : `AFFICHER_BROUILLONS=1 pnpm build`. Jamais en production. */
+function avecBrouillons() {
+  return process.env.AFFICHER_BROUILLONS === "1" && process.env.VERCEL_ENV !== "production";
+}
+
 export function extraireSections(corps: string): Section[] {
   const sections: Section[] = [];
   let dansCode = false;
@@ -46,7 +51,7 @@ function lireDossier<T>(dossier: string, schema: z.ZodType<T>) {
 
 export function getProjets(dossier = path.join(CONTENU, "projets")): Projet[] {
   return lireDossier(dossier, projetSchema)
-    .filter(({ meta }) => meta.publie)
+    .filter(({ meta }) => meta.publie || avecBrouillons())
     .map(({ slug, meta, corps }) => ({ ...meta, slug, corps, sections: extraireSections(corps) }))
     .sort((a, b) => a.dossier - b.dossier);
 }
@@ -57,7 +62,7 @@ export function getProjet(slug: string, dossier?: string): Projet | undefined {
 
 export function getArticles(dossier = path.join(CONTENU, "blog")): Article[] {
   return lireDossier(dossier, articleSchema)
-    .filter(({ meta }) => meta.publie)
+    .filter(({ meta }) => meta.publie || avecBrouillons())
     .map(({ slug, meta, corps }) => ({ ...meta, slug, corps, minutes: tempsDeLecture(corps) }))
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 }

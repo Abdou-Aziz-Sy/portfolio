@@ -1,0 +1,69 @@
+---
+titre: Faire tourner un modèle de langage sur une machine modeste
+chapo: Ce qu'on gagne et ce qu'on perd en gardant le modèle chez soi, quand les services payants sont exclus et que le serveur n'a pas de GPU.
+date: 2026-09-17
+etiquettes: [IA appliquée, OCR, Ollama, Docker]
+projetLie: ugb-link
+publie: false
+---
+
+Sur UGB Link, créer un appel à candidature voulait dire recopier à la main le document officiel : titre, type d'appel, UFR, date limite, frais, pièces requises. J'ai voulu que l'agent importe simplement le document et retrouve le formulaire déjà rempli.
+
+Deux contraintes cadraient le problème. Aucun service tiers payant n'était envisageable. Et le serveur de production est une machine virtuelle de 6 vCPU et 12 Go de mémoire, **sans GPU**. Le modèle devait donc tourner sur place, sur le processeur.
+
+## Lire le texte avant de le comprendre
+
+Un modèle de langage ne lit pas un PDF. La première étape consiste à en sortir du texte, et elle a deux chemins.
+
+Le texte est d'abord lu directement avec `pdf-parse`. Si le résultat fait moins de 50 caractères, le document est considéré comme scanné : chaque page est convertie en image à 300 DPI avec `pdftoppm`, puis passée à Tesseract. Les pages sont traitées en parallèle, sur plusieurs cœurs.
+
+Conséquence contre-intuitive pour les agents : un PDF natif donne un meilleur résultat qu'un scan. Il n'y a aucun bruit de reconnaissance de caractères à corriger.
+
+## Imposer la forme de la réponse
+
+Laisser le modèle écrire librement, puis essayer de relire sa réponse, produisait des échecs de lecture. Ollama accepte un schéma JSON dans son paramètre `format` : la sortie est alors toujours un JSON valide et conforme.
+
+```js
+// backend/services/ollamaService.js — extrait
+const EXTRACTION_SCHEMA = {
+  type: 'object',
+  properties: {
+    title:    { type: 'string' },
+    callType: { type: 'string', enum: ['FORMATION', 'ADMISSION', 'RECRUTEMENT', 'BOURSE', 'STAGE', 'AUTRE'] },
+    deadline: { type: ['string', 'null'] },
+    isPaid:   { type: 'boolean' },
+    // …
+  },
+};
+```
+
+Les énumérations font une partie du travail : le modèle ne peut pas inventer un type d'appel qui n'existe pas dans l'application.
+
+## Mesurer où part le temps
+
+Avant d'optimiser, j'ai chronométré chaque étape sur un vrai PDF scanné de quatre pages, le 4 juin 2026 :
+
+- reconnaissance de caractères, quatre pages en parallèle : **11,7 secondes** ;
+- modèle `phi3:mini` : **135 secondes** ;
+- modèle `qwen2.5:1.5b` : **86,6 secondes**.
+
+Le modèle représentait l'essentiel du temps. Optimiser l'OCR n'aurait presque rien changé.
+
+## Arbitrer, puis rendre l'attente invisible
+
+J'ai d'abord gardé `phi3:mini`, plus précis. Puis la vitesse est devenue prioritaire pour les agents, et la production est passée à `qwen2.5:1.5b`. Sur un processeur sans GPU, aucun des deux n'est rapide : le vrai déblocage serait matériel.
+
+La solution a donc été de ne plus faire attendre personne. L'API répond immédiatement avec un identifiant de tâche, l'extraction continue en arrière-plan, et le résultat est poussé au navigateur par Server-Sent Events. Le formulaire se remplit tout seul quand c'est prêt, et plus aucune requête ne tombe en délai dépassé.
+
+## Garder l'humain dans la boucle
+
+Un petit modèle se trompe. Le formulaire pré-rempli n'est donc jamais enregistré sans l'agent : il relit, corrige et valide. L'objectif n'est pas la perfection, c'est un premier jet assez bon pour être corrigé en quelques secondes.
+
+<Callout>
+
+1. Mesurer chaque étape avant d'optimiser : ici, le modèle prenait presque tout le temps.
+2. Contraindre la sortie du modèle avec un schéma plutôt que d'interpréter du texte libre.
+3. Rendre le traitement asynchrone : l'utilisateur n'attend pas le modèle.
+4. Laisser la décision à un humain : le modèle propose, l'agent valide.
+
+</Callout>

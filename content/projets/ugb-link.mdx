@@ -53,27 +53,27 @@ L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, c
 <DecisionRecord
   numero="01"
   titre="Un modèle de langage auto-hébergé plutôt qu'une API"
-  contexte="Les dossiers de candidature contiennent des pièces à extraire sans ressaisie manuelle. Les services tiers payants sont exclus du projet."
+  contexte="Créer un appel à candidature obligeait à ressaisir à la main le document officiel : titre, dates, frais, pièces requises. Les services tiers payants sont exclus du projet, et la machine virtuelle n'a pas de GPU."
   options={[
-    { libelle: "API de modèle hébergée", note: "exclue : payante" },
-    { libelle: "Règles sur le texte OCR", note: "fragiles d'un formulaire à l'autre" },
-    { libelle: "Petit modèle auto-hébergé couplé à l'OCR", retenue: true },
+    { libelle: "API de modèle hébergée", note: "exclue : payante, et les documents sortiraient du serveur" },
+    { libelle: "Règles d'extraction sur le texte", note: "fragiles d'un document à l'autre" },
+    { libelle: "Petit modèle de langage auto-hébergé", retenue: true },
   ]}
-  decision="Un petit modèle de langage tourne sur la machine virtuelle, dans son propre conteneur, et reçoit le texte produit par l'OCR."
-  consequences="Aucun coût par requête, aucune donnée qui sort du serveur. Compromis assumé entre taille du modèle et temps de réponse."
+  decision="L'agent importe le document de l'appel. Le texte est lu directement, ou par OCR s'il est scanné, puis confié à un petit modèle qui tourne dans son propre conteneur et répond dans un format JSON imposé. Le formulaire se pré-remplit et l'agent le valide."
+  consequences="Aucun coût par requête, aucune donnée qui sort du serveur. Sans GPU, l'inférence prend plus d'une minute : l'extraction est donc asynchrone et son résultat est poussé à l'agent quand il est prêt."
 />
 
 <DecisionRecord
   numero="02"
   titre="Server-Sent Events plutôt que WebSocket"
-  contexte="Les agents doivent voir arriver les notifications sans recharger la page. Le flux ne va que du serveur vers le navigateur."
+  contexte="Les agents doivent voir arriver les changements — bordereaux, courriers, candidatures, paiements, notifications, résultats d'extraction — sans recharger la page. Le flux ne va que du serveur vers le navigateur."
   options={[
     { libelle: "WebSocket", note: "bidirectionnel, inutile ici" },
     { libelle: "Interrogation périodique", note: "charge et latence inutiles" },
     { libelle: "Server-Sent Events", retenue: true },
   ]}
-  decision="Les notifications passent par un flux text/event-stream servi par l'API Express."
-  consequences="SSE traverse Nginx et les proxys sans configuration particulière et coûte moins cher à exploiter. À revoir si un besoin bidirectionnel apparaît."
+  decision="Chaque onglet ouvre un flux text/event-stream servi par l'API Express. Un bus d'événements en mémoire distribue chaque message aux seuls utilisateurs ou rôles concernés ; sans audience précisée, personne ne le reçoit."
+  consequences="Un simple flux HTTP, plus léger à exploiter qu'un serveur WebSocket. Derrière Nginx, il faut désactiver la mise en mémoire tampon de la réponse et envoyer un ping toutes les 25 secondes pour éviter les coupures. À revoir si un besoin bidirectionnel apparaît."
 />
 
 <DecisionRecord
@@ -94,7 +94,7 @@ L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, c
   items={[
     { titre: "Déploiement continu", texte: "GitHub Actions construit l'application, la déploie par SSH, puis vérifie que le site public répond." },
     { titre: "Runbook", texte: "Les procédures d'exploitation et de reprise sont écrites." },
-    { titre: "Sauvegardes", texte: "Sauvegardes nocturnes, avec restauration vérifiée." },
+    { titre: "Sauvegardes", texte: "Sauvegardes nocturnes envoyées hors site, et un exercice de restauration automatisé qui restaure une sauvegarde dans un environnement isolé puis en contrôle le contenu." },
     { titre: "Durcissement", texte: "Le serveur est durci avant la mise en production." },
   ]}
 />
@@ -104,7 +104,7 @@ L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, c
 <Liste
   prefixe="R"
   items={[
-    "Fin de la ressaisie manuelle des dossiers de candidature.",
+    "Appels à candidature pré-remplis à partir de leur document officiel, au lieu d'une ressaisie manuelle.",
     "Documents officiels générés et archivés automatiquement.",
     "Notifications à la place des relances téléphoniques.",
     "Un suivi partagé entre Dakar et Saint-Louis.",
