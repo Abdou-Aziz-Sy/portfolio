@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-// @ts-expect-error — module ESM sans déclaration de types
 import { porterCss } from "../../scripts/port-css.mjs";
 
 const source = readFileSync(path.join(__dirname, "../../docs/design/components/bundle.css"), "utf8");

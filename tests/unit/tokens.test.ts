@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-// @ts-expect-error — module ESM sans déclaration de types
 import { renderTokens } from "../../scripts/build-tokens.mjs";
 
 const json = JSON.parse(
