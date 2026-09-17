@@ -41,4 +41,12 @@ test("le pied de page annonce la disponibilité, pas un faux statut de service",
   const pied = page.getByRole("contentinfo");
   await expect(pied).toContainText("Disponible pour un poste · Dakar ou à distance");
   await expect(pied).not.toContainText("services opérationnels");
+
+  // Vérifie que la pastille n'a pas d'animation en cours
+  const dot = pied.locator(".pa-dot");
+  const hasAnimation = await dot.evaluate((el) => {
+    const computed = window.getComputedStyle(el);
+    return computed.animationName !== "none" && computed.animationName !== "";
+  });
+  await expect(hasAnimation).toBe(false);
 });

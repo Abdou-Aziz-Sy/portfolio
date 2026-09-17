@@ -33,8 +33,8 @@ export function Footer() {
           </ul>
         </div>
         <div className="pa-footer-bar">
-          <span>
-            <span className="pa-dot" />
+          <span className="is-dispo">
+            <span className="pa-dot is-dispo" />
             {site.disponibiliteDetail}
           </span>
           <span>Dakar, SN · © 2026</span>
