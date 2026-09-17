@@ -34,6 +34,21 @@ test("toute la carte ouvre le dossier", async ({ page }) => {
   await expect(page).toHaveURL(/\/projets\/[a-z0-9-]+$/);
 });
 
+test("le lien de la carte reste atteignable au clavier avec un contour de focus visible", async ({ page }) => {
+  await page.goto("/projets");
+  const lien = page.getByTestId("project-card").first().getByRole("link");
+  const cible = await lien.elementHandle();
+  let estActif = false;
+  for (let i = 0; i < 40 && !estActif; i++) {
+    await page.keyboard.press("Tab");
+    estActif = await page.evaluate((el) => document.activeElement === el, cible);
+  }
+  expect(estActif).toBe(true);
+  await expect(lien).toBeFocused();
+  const outline = await lien.evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(outline).not.toBe("none");
+});
+
 test("une étude de cas mène au dossier suivant et son sommaire pointe vers ses sections", async ({ page }) => {
   await page.goto("/projets/ugb-link");
   const sommaire = page.getByRole("navigation", { name: "Sommaire" });
