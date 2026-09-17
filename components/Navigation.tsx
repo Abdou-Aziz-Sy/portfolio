@@ -1,9 +1,8 @@
-import Link from "next/link";
-import { site } from "@/content/site";
 import { Button } from "@/components/Button";
 import { MobileMenu } from "@/components/MobileMenu";
 import { NavLinks, type LienNav } from "@/components/NavLinks";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Wordmark } from "@/components/Wordmark";
 
 export function Navigation({ avecBlog }: { avecBlog: boolean }) {
   const liens: LienNav[] = [
@@ -14,10 +13,7 @@ export function Navigation({ avecBlog }: { avecBlog: boolean }) {
   return (
     <header className="pa-nav">
       <div className="pa-wrap">
-        <Link className="pa-mark" href="/" aria-label={`${site.nom} — accueil`}>
-          {site.initiales}
-          <i>.</i>
-        </Link>
+        <Wordmark />
         <nav className="pa-navlinks pa-desktop-only" aria-label="Principale">
           <NavLinks liens={liens} />
         </nav>

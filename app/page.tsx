@@ -27,6 +27,9 @@ export default function Accueil() {
       <section className="pa-wrap" style={{ paddingTop: 88, paddingBottom: 96 }}>
         <div className="pa-herogrid">
           <div className="pa-rise">
+            <span className="pa-meta" data-testid="surtitre-identite">
+              {site.nom} <span className="pa-sep">·</span> {site.metier}
+            </span>
             <h1 className="pa-hero">
               Ingénieur logiciel à Dakar. Je construis des{" "}
               <Link className="pa-inlink" href="/projets?categorie=backend">

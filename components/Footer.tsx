@@ -1,17 +1,14 @@
-import Link from "next/link";
 import { site } from "@/content/site";
 import { hoteAffiche } from "@/lib/site-url";
 import { TechIcon } from "@/components/TechIcon";
+import { Wordmark } from "@/components/Wordmark";
 
 export function Footer() {
   return (
     <footer className="pa-footer">
       <div className="pa-wrap">
         <div className="pa-footer-top">
-          <Link className="pa-mark" href="/" style={{ margin: 0 }} aria-label={`${site.nom} — accueil`}>
-            {site.initiales}
-            <i>.</i>
-          </Link>
+          <Wordmark style={{ margin: 0 }} />
           <ul>
             <li>
               <a href={`mailto:${site.email}`}>{site.email}</a>
