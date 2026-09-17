@@ -32,3 +32,13 @@ test("un second clic rapproché prolonge le message de confirmation", async ({ p
   await page.waitForTimeout(1000);
   await expect(bouton).toContainText(/Copié|Copie impossible/);
 });
+
+test("le CV se télécharge sous un nom explicite", async ({ page }) => {
+  await page.goto("/");
+  const liens = page.locator('a[href="/cv.pdf"]');
+  const n = await liens.count();
+  expect(n).toBeGreaterThan(0);
+  for (let i = 0; i < n; i++) {
+    await expect(liens.nth(i)).toHaveAttribute("download", "CV_Abdou_Aziz_SY.pdf");
+  }
+});

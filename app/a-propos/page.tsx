@@ -30,7 +30,7 @@ export default function APropos() {
             ]}
           />
         </span>
-        <Button href="/cv.pdf" download className="pa-btn--center">
+        <Button href={site.cv.href} download={site.cv.fichier} className="pa-btn--center">
           <CvLabel />
         </Button>
         <Button href="#contact" variant="secondary" className="pa-btn--center">

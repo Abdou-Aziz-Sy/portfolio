@@ -6,7 +6,7 @@ type Props = {
   variant?: "primary" | "secondary";
   size?: "sm";
   arrow?: boolean;
-  download?: boolean;
+  download?: boolean | string;
   className?: string;
   children: ReactNode;
 };
@@ -28,7 +28,7 @@ export function Button({ href, variant = "primary", size, arrow, download, class
   const horsRouteur = /^(mailto:|https?:|#)/.test(href) || download;
   if (horsRouteur) {
     return (
-      <a className={classes} href={href} download={download || undefined}>
+      <a className={classes} href={href} download={typeof download === "string" ? download : download || undefined}>
         {contenu}
       </a>
     );

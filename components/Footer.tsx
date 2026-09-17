@@ -26,7 +26,7 @@ export function Footer() {
               </li>
             ) : null}
             <li>
-              <a href="/cv.pdf" download>
+              <a href={site.cv.href} download={site.cv.fichier}>
                 Télécharger le CV
               </a>
             </li>

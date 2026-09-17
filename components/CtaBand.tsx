@@ -31,7 +31,7 @@ export function CtaBand() {
           <Button href={`mailto:${site.email}`} arrow className="pa-btn--center">
             Me contacter
           </Button>
-          <Button href="/cv.pdf" variant="secondary" download className="pa-btn--center">
+          <Button href={site.cv.href} variant="secondary" download={site.cv.fichier} className="pa-btn--center">
             <CvLabel />
           </Button>
         </div>
