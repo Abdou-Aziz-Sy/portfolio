@@ -52,8 +52,11 @@ body { margin: 0; min-height: 100vh; }
 /* Étude de cas */
 .pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; border-top: 1px solid var(--line); }
 .pa-casebody { padding-bottom: 96px; min-width: 0; }
-.pa-casebody > section { padding-top: 72px; }
-.pa-casebody h2.pa-h2 { margin: 8px 0 24px; }
+.pa-casebody { display: flex; flex-direction: column; }
+.pa-secmeta { display: block; margin-top: 72px; }
+.pa-casebody h2.pa-h2 { margin: 8px 0 24px; scroll-margin-top: 110px; }
+.pa-casebody > .pa-adr + .pa-adr { margin-top: 24px; }
+.pa-casebody > p { font-size: 18px; line-height: 30px; margin: 0 0 16px; max-width: 68ch; }
 .pa-context { display: grid; grid-template-columns: 3fr 2fr; gap: 32px; align-items: start; }
 .pa-context > p { font-size: 18px; line-height: 30px; }
 .pa-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
