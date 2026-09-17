@@ -1,0 +1,64 @@
+---
+titre: "Server-Sent Events plutôt que WebSocket : choisir la technologie la moins impressionnante"
+chapo: Pour pousser des mises à jour vers le navigateur, un flux HTTP à sens unique suffisait. Ce qu'il a fallu régler pour qu'il tienne derrière Nginx.
+date: 2026-09-17
+etiquettes: [Backend, Temps réel, Node.js, Nginx]
+projetLie: ugb-link
+publie: false
+---
+
+Dans UGB Link, plusieurs agents travaillent sur les mêmes dossiers, parfois à 260 kilomètres de distance. Quand un bordereau change d'état à Saint-Louis, l'agent de Dakar doit le voir sans recharger sa page.
+
+Les messages à transporter sont nombreux mais de même nature : création ou changement d'état d'un bordereau, d'un courrier, d'une candidature, d'un paiement, une nouvelle notification, le résultat d'une extraction de document. Ils vont **tous du serveur vers le navigateur**.
+
+## Pourquoi pas WebSocket
+
+WebSocket est la réponse réflexe au « temps réel ». C'est aussi un protocole bidirectionnel, avec sa propre poignée de main et son propre cycle de vie de connexion. Ici, le navigateur n'avait rien à envoyer par ce canal : ses actions passent déjà par l'API REST.
+
+Server-Sent Events fait exactement ce qui était demandé : une réponse HTTP qui reste ouverte et dans laquelle le serveur écrit des événements. Le navigateur le gère nativement avec `EventSource`, reconnexion comprise.
+
+## Le flux, côté serveur
+
+Chaque onglet ouvre une connexion sur `/api/events/stream`. Le contrôleur s'abonne à un bus d'événements et n'écrit que ce qui concerne l'utilisateur connecté.
+
+```js
+// backend/controllers/eventsController.js — extrait
+const unsubscribe = subscribe(({ type, audience, payload, ts }) => {
+  if (!isAudienceMatch(audience, user)) return;
+  res.write(`event: ${type}\n`);
+  res.write(`data: ${JSON.stringify({ type, payload, ts })}\n\n`);
+});
+```
+
+## Filtrer à la source, et fermer par défaut
+
+Chaque message publié porte une audience : des utilisateurs, des rôles, ou tout le monde. Le choix important est la valeur par défaut. **Un message sans audience ne part chez personne.** Oublier de préciser l'audience produit un message perdu, jamais une fuite vers un utilisateur qui n'aurait pas dû le voir.
+
+## Ce que Nginx change
+
+C'est la partie qu'on ne voit pas dans les tutoriels. Derrière un proxy inverse, un flux SSE peut rester bloqué ou se couper. Deux réglages ont suffi :
+
+- l'en-tête `X-Accel-Buffering: no`, qui demande à Nginx de ne pas garder la réponse en mémoire tampon et de transmettre chaque événement immédiatement ;
+- un commentaire SSE envoyé toutes les 25 secondes, ignoré par le navigateur, qui garde la connexion active et évite les coupures pour inactivité.
+
+```js
+res.setHeader('Content-Type', 'text/event-stream');
+res.setHeader('X-Accel-Buffering', 'no');
+
+const heartbeat = setInterval(() => {
+  res.write(`: ping ${Date.now()}\n\n`);
+}, 25_000);
+```
+
+## La limite assumée
+
+Le bus d'événements vit en mémoire, dans le processus de l'API. Il suppose une seule instance du backend, ce qui est le cas aujourd'hui. Le jour où l'API serait répliquée, il faudrait faire passer les messages par un intermédiaire partagé, comme le Redis déjà présent dans l'architecture.
+
+<Callout>
+
+1. Choisir le protocole d'après le sens réel des échanges, pas d'après sa réputation.
+2. Faire d'un message sans destinataire un message perdu, jamais un message diffusé.
+3. Derrière un proxy, désactiver la mise en mémoire tampon et entretenir la connexion.
+4. Écrire la limite de sa solution avant qu'elle ne devienne un incident.
+
+</Callout>

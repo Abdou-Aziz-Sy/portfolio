@@ -1,0 +1,79 @@
+---
+titre: "Treize suites de tests bout en bout : ce qu'elles m'ont coûté, ce qu'elles m'ont évité"
+chapo: Pourquoi j'ai d'abord testé l'API déployée plutôt que des fonctions isolées, et ce que je ferais différemment aujourd'hui.
+date: 2026-09-17
+etiquettes: [Qualité, Tests, Backend, Bash]
+projetLie: ugb-link
+publie: false
+---
+
+UGB Link couvre huit processus administratifs, avec des règles différentes selon le rôle et le site de chaque agent. Les incidents qui comptaient n'étaient pas des erreurs de calcul dans une fonction : c'étaient un agent qui voyait un bouton qu'il n'aurait pas dû voir, ou un document émis au mauvais moment d'un parcours.
+
+J'ai donc commencé par tester ce que les agents utilisent réellement : l'API déployée, route par route, rôle par rôle.
+
+## Une suite par domaine
+
+Les tests sont des scripts Bash qui interrogent l'API avec `curl` et vérifient les réponses avec `jq`. Il y a une suite par domaine de l'application :
+
+- authentification et sessions ;
+- gestion des utilisateurs ;
+- appels à candidature ;
+- portail public ;
+- validation des candidatures ;
+- paiements, reçus PDF et e-mails ;
+- courriers ;
+- bordereaux de navette ;
+- copies d'examens ;
+- salles et réservations ;
+- notifications ;
+- documents stockés dans MinIO ;
+- espace du chef des archives.
+
+## L'anatomie d'une suite
+
+Chaque suite suit la même discipline :
+
+- des **sections sélectionnables**, pour ne relancer que la partie concernée par une modification ;
+- des **préfixes reconnaissables** sur toutes les données qu'elle crée ;
+- une **purge** de ces données à l'ouverture et à la fermeture, pour pouvoir relancer la suite sans polluer l'environnement ;
+- des **compteurs** de scénarios réussis, échoués, ignorés et à vérifier à la main, et un journal complet.
+
+```bash
+# backend/scripts/tests/P1.5_candidature_validation.sh — extrait
+SECTION="${SECTION:-all}"
+
+CANDIDATURE_LAST_PREFIX="P15TEST-"
+CALL_TITLE_PREFIX="P1.5-TEST-"
+
+PASS=0; FAIL=0; SKIP=0; MANUAL=0
+```
+
+## Les contrôles d'accès, dans les deux sens
+
+Vérifier qu'un rôle autorisé peut agir ne suffit pas. Chaque suite vérifie aussi que les rôles **non autorisés** reçoivent un refus. C'est ce second sens qui protège contre les régressions les plus graves : une permission élargie par erreur ne fait échouer aucun test « positif ».
+
+## Les incidents deviennent des scénarios
+
+Quand un bug apparaît en production, il rejoint la suite concernée sous forme de section de non-régression. Par exemple, la suite des candidatures contient une section dédiée à une décharge qui était émise à tort au moment de l’encaissement. Le bug corrigé ne peut plus revenir sans que la suite échoue.
+
+## Ce que ça m'a coûté
+
+Ces suites ne remplacent pas une pyramide de tests classique, et leur coût est réel :
+
+- elles sont **lentes**, parce qu'elles passent par le réseau, la base et les rôles réels ;
+- elles demandent **un environnement déployé** et des comptes de test ;
+- elles ne tournent **pas dans l'intégration continue**, qui construit et déploie sans les lancer ;
+- elles ne remplacent pas les **tests unitaires**, que je n'avais pas posés : une règle métier se vérifie plus vite et plus précisément isolément.
+
+## Ce que je referais
+
+Je garderais les tests bout en bout pour les parcours et les droits : c'est là qu'ils sont irremplaçables. Mais je poserais les tests unitaires dès le début, sur les règles métier et les calculs, pour qu'ils tournent en quelques secondes à chaque modification. Et je ferais exécuter une partie des suites bout en bout par la CI, contre un environnement jetable.
+
+<Callout>
+
+1. Tester d'abord ce qui casse vraiment chez les utilisateurs : ici, les parcours et les droits.
+2. Vérifier les refus autant que les autorisations.
+3. Transformer chaque incident en scénario de non-régression.
+4. Ne pas en faire la seule couche de tests : les tests unitaires rapides restent nécessaires.
+
+</Callout>

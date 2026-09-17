@@ -1,0 +1,55 @@
+/* Fichier généré par scripts/build-tokens.mjs — ne pas modifier à la main. */
+
+:root, [data-theme="dark"] {
+  --ground: #020a13;
+  --surface: #091521;
+  --surface-2: #0d1b29;
+  --grid: rgba(127, 179, 224, 0.055);
+  --grid-major: rgba(127, 179, 224, 0.1);
+  --line: #14202b;
+  --line-strong: #5a6d80;
+  --ink: #e1e1e1;
+  --ink-muted: #9e9e9c;
+  --ink-faint: #8c9299;
+  --accent: #7fb3e0;
+  --accent-hover: #a6cbeb;
+  --accent-soft: #0c2136;
+  --on-accent: #020a13;
+  --ok: #3fb68b;
+}
+
+[data-theme="light"] {
+  --ground: #f3f5f7;
+  --surface: #fbfcfd;
+  --surface-2: #e7ecf1;
+  --grid: rgba(31, 78, 121, 0.07);
+  --grid-major: rgba(31, 78, 121, 0.12);
+  --line: #cfd7df;
+  --line-strong: #707f90;
+  --ink: #0f1b27;
+  --ink-muted: #4a5663;
+  --ink-faint: #5a6875;
+  --accent: #1f4e79;
+  --accent-hover: #173c5e;
+  --accent-soft: #e2eaf2;
+  --on-accent: #ffffff;
+  --ok: #1b7350;
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 72px;
+  --space-9: 120px;
+  --radius-0: 0px;
+  --radius-1: 3px;
+  --page-max: 1200px;
+  --measure: 680px;
+  --grid-pitch: 24px;
+  --hairline: 1px;
+}

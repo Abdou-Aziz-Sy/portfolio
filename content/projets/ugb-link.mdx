@@ -1,0 +1,122 @@
+---
+titre: UGB Link
+accroche: Une application de gestion interne pour l'Antenne de l'Université Gaston Berger
+resume: Huit processus administratifs sortis d'Excel et du papier, suivis entre Dakar et Saint-Louis.
+dossier: 1
+annee: 2026
+statut: en-production
+cadre: Alternance
+categories: [backend, infrastructure, ia]
+stack: [nodedotjs, postgresql, docker, nginx, ollama]
+libelles:
+  ollama: IA auto-hébergée
+role: Ingénieur logiciel en alternance
+periode: Février 2026 — aujourd'hui
+stackDetail: React · Node.js/Express · PostgreSQL · Redis · MinIO · Docker · Nginx · GitHub Actions · modèle de langage auto-hébergé
+misEnAvant: true
+lignesStatut:
+  - { service: "nginx · proxy inverse", detail: "", etat: "en production" }
+  - { service: "backend · express + ocr", detail: "", etat: "en production" }
+  - { service: "ollama · llm", detail: "", etat: "en production" }
+  - { service: "sauvegarde · nocturne", detail: "", etat: "opérationnel" }
+miniSchema:
+  - { titre: Nginx, sous: ":443" }
+  - { titre: API, sous: Express }
+  - { titre: PostgreSQL, sous: données }
+publie: true
+---
+
+## Contexte
+
+<Contexte flux={[["candidatures", "excel"], ["courrier", "papier"], ["copies d'examens", "papier"], ["paiements", "téléphone"]]}>
+L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, courrier, copies d'examens et paiements étaient suivis sur Excel, sur papier et par téléphone, **sans traçabilité**.
+</Contexte>
+
+## Contraintes
+
+<Liste
+  prefixe="C"
+  items={[
+    "Aucun service tiers payant.",
+    "Une machine virtuelle aux ressources modestes.",
+    "Des utilisateurs non techniciens.",
+    "Un périmètre de huit processus.",
+  ]}
+/>
+
+## Architecture
+
+<SchemaUgbLink numero="02" />
+
+## Décisions
+
+<DecisionRecord
+  numero="01"
+  titre="Un modèle de langage auto-hébergé plutôt qu'une API"
+  contexte="Créer un appel à candidature obligeait à ressaisir à la main le document officiel : titre, dates, frais, pièces requises. Les services tiers payants sont exclus du projet, et la machine virtuelle n'a pas de GPU."
+  options={[
+    { libelle: "API de modèle hébergée", note: "exclue : payante, et les documents sortiraient du serveur" },
+    { libelle: "Règles d'extraction sur le texte", note: "fragiles d'un document à l'autre" },
+    { libelle: "Petit modèle de langage auto-hébergé", retenue: true },
+  ]}
+  decision="L'agent importe le document de l'appel. Le texte est lu directement, ou par OCR s'il est scanné, puis confié à un petit modèle qui tourne dans son propre conteneur et répond dans un format JSON imposé. Le formulaire se pré-remplit et l'agent le valide."
+  consequences="Aucun coût par requête, aucune donnée qui sort du serveur. Sans GPU, l'inférence prend plus d'une minute : l'extraction est donc asynchrone et son résultat est poussé à l'agent quand il est prêt."
+/>
+
+<DecisionRecord
+  numero="02"
+  titre="Server-Sent Events plutôt que WebSocket"
+  contexte="Les agents doivent voir arriver les changements — bordereaux, courriers, candidatures, paiements, notifications, résultats d'extraction — sans recharger la page. Le flux ne va que du serveur vers le navigateur."
+  options={[
+    { libelle: "WebSocket", note: "bidirectionnel, inutile ici" },
+    { libelle: "Interrogation périodique", note: "charge et latence inutiles" },
+    { libelle: "Server-Sent Events", retenue: true },
+  ]}
+  decision="Chaque onglet ouvre un flux text/event-stream servi par l'API Express. Un bus d'événements en mémoire distribue chaque message aux seuls utilisateurs ou rôles concernés ; sans audience précisée, personne ne le reçoit."
+  consequences="Un simple flux HTTP, plus léger à exploiter qu'un serveur WebSocket. Derrière Nginx, il faut désactiver la mise en mémoire tampon de la réponse et envoyer un ping toutes les 25 secondes pour éviter les coupures. À revoir si un besoin bidirectionnel apparaît."
+/>
+
+<DecisionRecord
+  numero="03"
+  titre="Des tests bout en bout plutôt que des tests unitaires"
+  contexte="Il fallait vérifier les parcours réels — routes, rôles, base de données — et empêcher le retour des incidents de production."
+  options={[
+    { libelle: "Tests unitaires d'abord", note: "loin des incidents réels" },
+    { libelle: "Tests bout en bout de l'API", retenue: true },
+  ]}
+  decision="Treize domaines de l'API sont couverts de bout en bout, contrôles d'accès inclus."
+  consequences="Les incidents de production ont donné lieu à des cas de non-régression. Contrepartie : des suites plus lentes, et des tests unitaires à poser plus tôt."
+/>
+
+## Exploitation
+
+<Exploitation
+  items={[
+    { titre: "Déploiement continu", texte: "GitHub Actions construit l'application, la déploie par SSH, puis vérifie que le site public répond." },
+    { titre: "Runbook", texte: "Les procédures d'exploitation et de reprise sont écrites." },
+    { titre: "Sauvegardes", texte: "Sauvegardes nocturnes envoyées hors site, et un exercice de restauration automatisé qui restaure une sauvegarde dans un environnement isolé puis en contrôle le contenu." },
+    { titre: "Durcissement", texte: "Le serveur est durci avant la mise en production." },
+  ]}
+/>
+
+## Résultats
+
+<Liste
+  prefixe="R"
+  items={[
+    "Appels à candidature pré-remplis à partir de leur document officiel, au lieu d'une ressaisie manuelle.",
+    "Documents officiels générés et archivés automatiquement.",
+    "Notifications à la place des relances téléphoniques.",
+    "Un suivi partagé entre Dakar et Saint-Louis.",
+  ]}
+/>
+
+## Ce que je referais autrement
+
+<Liste
+  items={[
+    "**Poser des tests unitaires plus tôt** — en complément des tests bout en bout.",
+    "**Stocker les numéros de documents** — au lieu de les recalculer.",
+    "**Resserrer le périmètre initial** — avant d'ouvrir les huit processus.",
+  ]}
+/>
