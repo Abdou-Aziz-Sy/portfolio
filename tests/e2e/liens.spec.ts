@@ -1,6 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-const PAGES = ["/", "/projets", "/projets/ugb-link", "/projets/gamecupsn", "/a-propos"];
+export const PAGES_TEST = [
+  "/",
+  "/projets",
+  "/projets/ugb-link",
+  "/projets/gamecupsn",
+  "/projets/hackathon-mcn",
+  "/projets/plusutra",
+  "/a-propos",
+  "/page-qui-nexiste-pas",
+];
+
+const PAGES = PAGES_TEST.filter((c) => c !== "/page-qui-nexiste-pas");
 
 test("aucun lien interne n'est cassé", async ({ page, request }) => {
   const liens = new Set<string>();
@@ -17,10 +28,15 @@ test("aucun lien interne n'est cassé", async ({ page, request }) => {
 });
 
 test("les pages ne défilent pas horizontalement", async ({ page }) => {
-  for (const chemin of PAGES) {
+  for (const chemin of PAGES_TEST) {
     await page.goto(chemin);
-    const deborde = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-    expect(deborde, chemin).toBe(false);
+    const mesure = await page.evaluate(() => ({
+      defile: document.documentElement.scrollWidth,
+      visible: document.documentElement.clientWidth,
+    }));
+    // clientWidth, et non innerWidth : en émulation mobile, innerWidth grandit avec la page
+    // et le test ne peut jamais échouer.
+    expect(mesure.defile, `${chemin} (${mesure.defile} > ${mesure.visible})`).toBeLessThanOrEqual(mesure.visible);
   }
 });
 
