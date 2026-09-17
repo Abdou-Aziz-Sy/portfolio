@@ -33,8 +33,14 @@ test.describe("en-tête mobile", () => {
   test("Échap ferme le menu et rend le focus au bouton", async ({ page }) => {
     await page.goto("/");
     const bouton = page.getByRole("button", { name: "Menu" });
+    const panneau = page.getByRole("navigation", { name: "Principale (mobile)" });
+    const premierLien = panneau.getByRole("link").first();
     await bouton.click();
     await expect(bouton).toHaveAttribute("aria-expanded", "true");
+    // Le focus doit avoir explicitement quitté le bouton avant Échap, sinon
+    // le test ne prouve rien (il resterait vert même sans retour de focus).
+    await premierLien.focus();
+    await expect(premierLien).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(bouton).toHaveAttribute("aria-expanded", "false");
     await expect(bouton).toBeFocused();
