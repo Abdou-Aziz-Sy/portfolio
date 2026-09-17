@@ -1,0 +1,80 @@
+/* Ajouts au système « Plan d'architecte » : éléments absents de la maquette
+   (menu mobile, grilles de page, variantes responsive des pages sans planche mobile). */
+
+html { background: var(--ground); color-scheme: dark; scroll-padding-top: 88px; }
+html[data-theme="light"] { color-scheme: light; }
+body { margin: 0; min-height: 100vh; }
+.pa-skip { position: absolute; left: -9999px; top: 8px; z-index: 20; }
+.pa-skip:focus { left: 8px; }
+
+/* Grand titre de page (« Projets. », « Blog. ») */
+.pa-hero-xl { font-size: 120px; line-height: 120px; }
+
+/* Navigation : bascule de thème et menu mobile */
+.pa-nav-actions { display: flex; align-items: center; gap: var(--space-3); }
+.pa-mobile-only { display: none; }
+.pa-menu { cursor: pointer; }
+.pa-menu-panel { position: absolute; left: 0; right: 0; top: 68px; padding: var(--space-4); border-bottom: 1px solid var(--line); background: var(--ground); }
+.pa-menu-panel nav { display: flex; flex-direction: column; }
+.pa-menu-panel a { padding: 12px 0; font-size: 17px; font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--line); color: var(--ink); }
+.pa-menu-panel a[aria-current] { color: var(--accent); }
+
+/* Page d'accueil */
+.pa-herogrid { display: grid; grid-template-columns: 1fr 250px; gap: 64px; align-items: start; }
+.pa-herometa { margin-top: 48px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line); }
+.pa-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.pa-main { display: flex; flex-direction: column; gap: var(--space-9); padding-top: var(--space-9); padding-bottom: var(--space-9); }
+.pa-intro-inner { max-width: var(--page-max); margin: 0 auto; display: contents; }
+
+/* Étude de cas */
+.pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; border-top: 1px solid var(--line); }
+.pa-casebody { padding-bottom: 96px; min-width: 0; }
+.pa-casebody > section { padding-top: 72px; }
+.pa-casebody h2.pa-h2 { margin: 8px 0 24px; }
+.pa-context { display: grid; grid-template-columns: 3fr 2fr; gap: 32px; align-items: start; }
+.pa-context > p { font-size: 18px; line-height: 30px; }
+.pa-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.pa-ops > div { padding: 20px 24px; }
+.pa-gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.pa-gallery img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+.pa-prose { font-size: 18px; line-height: 30px; display: flex; flex-direction: column; gap: 22px; }
+.pa-prose ul, .pa-prose ol { margin: 0; padding-left: 22px; }
+
+/* Article */
+.pa-articlegrid { display: grid; grid-template-columns: 200px minmax(0, var(--measure)) 1fr; gap: 48px; padding-top: 64px; padding-bottom: 120px; }
+.pa-articlebar { margin: 28px 0 36px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+
+/* À propos */
+.pa-aboutgrid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 72px; align-items: start; padding-top: 88px; padding-bottom: 96px; }
+.pa-aboutside { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 100px; }
+
+@media (max-width: 1023px) {
+  .pa-hero-xl { font-size: 88px; line-height: 92px; }
+  .pa-casegrid, .pa-articlegrid, .pa-aboutgrid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .pa-toc, .pa-aboutside { position: static; }
+  .pa-casegrid > :first-child { padding-top: 32px; }
+  .pa-aboutside { max-width: 420px; }
+}
+
+@media (max-width: 767px) {
+  .pa-desktop-only { display: none; }
+  .pa-mobile-only { display: inline-flex; }
+  .pa-nav .pa-wrap { gap: var(--space-3); }
+  .pa-hero-xl { font-size: 64px; line-height: 68px; }
+  .pa-herogrid { grid-template-columns: 1fr; gap: 32px; }
+  .pa-herogrid .pa-frame { max-width: 220px; }
+  .pa-main { gap: var(--space-8); padding-top: var(--space-8); padding-bottom: var(--space-8); }
+  .pa-h1 { font-size: 34px; line-height: 40px; }
+  .pa-context, .pa-ops, .pa-gallery { grid-template-columns: 1fr; }
+  .pa-casebody > section { padding-top: 48px; }
+  .pa-metaband { grid-template-columns: 1fr; }
+  .pa-metaband > div { border-right: 0; }
+  .pa-adr dl > div { grid-template-columns: 1fr; gap: 4px; }
+  .pa-next { grid-template-columns: 1fr; }
+  .pa-next a + a { border-left: 0; border-top: 1px solid var(--line); }
+  .pa-timeline li { grid-template-columns: 76px 20px 1fr; gap: var(--space-3); }
+  .pa-article { grid-template-columns: 1fr auto; }
+  .pa-cta h2 { font-size: 34px; line-height: 40px; }
+  .pa-prose { font-size: 17px; line-height: 28px; }
+  .pa-footer-bar { flex-direction: column; }
+}
