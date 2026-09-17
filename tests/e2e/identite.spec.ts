@@ -35,3 +35,10 @@ test("le logo annonce le nom complet aux lecteurs d'écran", async ({ page }) =>
   const accessibleName = await logo.getAttribute("aria-label") || await logo.textContent() || "";
   expect(accessibleName).toContain(visibleText);
 });
+
+test("le pied de page annonce la disponibilité, pas un faux statut de service", async ({ page }) => {
+  await page.goto("/");
+  const pied = page.getByRole("contentinfo");
+  await expect(pied).toContainText("Disponible pour un poste · Dakar ou à distance");
+  await expect(pied).not.toContainText("services opérationnels");
+});

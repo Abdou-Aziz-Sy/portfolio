@@ -1,5 +1,4 @@
 import { site } from "@/content/site";
-import { hoteAffiche } from "@/lib/site-url";
 import { TechIcon } from "@/components/TechIcon";
 import { Wordmark } from "@/components/Wordmark";
 
@@ -36,7 +35,7 @@ export function Footer() {
         <div className="pa-footer-bar">
           <span>
             <span className="pa-dot" />
-            {hoteAffiche()} · tous les services opérationnels
+            {site.disponibiliteDetail}
           </span>
           <span>Dakar, SN · © 2026</span>
         </div>

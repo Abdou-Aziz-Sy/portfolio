@@ -19,6 +19,7 @@ export const site = {
   },
   diplome: "Diplômé ESP 2026",
   disponibilite: "Disponible pour un poste",
+  disponibiliteDetail: "Disponible pour un poste · Dakar ou à distance",
   /** Chemin du portrait dans public/, à renseigner quand le fichier est fourni. */
   portrait: undefined as string | undefined,
   description:
