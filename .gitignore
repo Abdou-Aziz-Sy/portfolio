@@ -44,3 +44,6 @@ next-env.d.ts
 .work/
 test-results/
 playwright-report/
+
+# maquettes du compagnon visuel
+.superpowers/
