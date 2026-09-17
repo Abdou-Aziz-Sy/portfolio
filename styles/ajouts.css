@@ -9,7 +9,7 @@ body { margin: 0; min-height: 100vh; }
 .pa-initiales { font-size: 64px; font-weight: 800; letter-spacing: -0.04em; color: var(--ink-faint); }
 .pa-skip:focus { left: 8px; }
 .pa-mark { display: inline-flex; align-items: baseline; }
-.pa-mark-court { display: none; }
+.pa-mark-court { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .pa-mark-long { white-space: nowrap; }
 
 /* Bandeau de contact */
@@ -101,7 +101,7 @@ body { margin: 0; min-height: 100vh; }
 @media (max-width: 767px) {
   .pa-desktop-only { display: none; }
   .pa-mobile-only { display: inline-flex; }
-  .pa-mark-court { display: inline; }
+  .pa-mark-court { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
   .pa-mark-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .pa-nav .pa-wrap { gap: var(--space-3); }
   .pa-hero-xl { font-size: 64px; line-height: 68px; }

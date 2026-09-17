@@ -8,7 +8,7 @@ import { site } from "@/content/site";
 export function Wordmark({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <Link className={`pa-mark ${className ?? ""}`.trim()} href={`/`} style={style}>
-      <span className="pa-mark-court" aria-hidden="true">
+      <span className="pa-mark-court">
         {site.initiales}
         <i>.</i>
       </span>
