@@ -27,7 +27,7 @@ export function MobileMenu({ liens }: { liens: LienNav[] }) {
         aria-controls={id}
         onClick={() => setOuvert((v) => !v)}
       >
-        {ouvert ? "Fermer" : "Menu"}
+        Menu
       </button>
       <div id={id} className="pa-menu-panel" hidden={!ouvert}>
         <nav aria-label="Principale (mobile)">
