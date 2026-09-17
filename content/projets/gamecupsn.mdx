@@ -1,0 +1,46 @@
+---
+titre: GamecupSN
+accroche: Une plateforme de tournois e-sport pour la scène sénégalaise
+resume: Plateforme de tournois e-sport pour la scène sénégalaise.
+dossier: 3
+annee: 2026
+statut: en-cours
+cadre: En équipe de trois
+categories: [backend, full-stack]
+stack: [typescript, express, postgresql]
+periode: 2026 — en cours
+stackDetail: React · Vite · TypeScript · Node.js/Express · PostgreSQL · Docker Compose
+miniSchema:
+  - { titre: Web, sous: inscriptions }
+  - { titre: API, sous: Express }
+  - { titre: PostgreSQL, sous: tournois }
+publie: true
+---
+
+## Contexte
+
+<Prose>
+Une plateforme pour organiser des tournois Valorant au Sénégal : inscription des équipes, arbres de tournoi, palmarès publics. Le projet est mené à trois, et chaque décision de cadrage est écrite et datée dans le dépôt.
+</Prose>
+
+## Architecture
+
+<Prose>
+Un front React construit avec Vite, une API Express en TypeScript et une base PostgreSQL. Le modèle de données sépare l'identité des joueurs de leurs données de jeu, pour pouvoir accueillir d'autres jeux sans refonte.
+</Prose>
+
+## Décisions
+
+<Liste
+  prefixe="D"
+  items={[
+    "Un seul jeu au départ, Valorant, mais un modèle multi-jeux dès l'origine.",
+    "Génération et progression automatiques des arbres de tournoi.",
+    "Paiement exclu du premier périmètre.",
+    "Profils, historiques et palmarès publics.",
+  ]}
+/>
+
+## Résultats
+
+<Liste prefixe="R" items={["Projet en cours de construction."]} />
