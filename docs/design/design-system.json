@@ -1,0 +1,148 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-16T22:55:30Z"
+  },
+  "title": "Plan d'architecte",
+  "namespace": "Plan",
+  "libraries": [],
+  "sections": {},
+  "groups": [
+    "Icones"
+  ],
+  "assetGroups": {
+    "Icones": {
+      "name": "Icones",
+      "tile": "s",
+      "order": [
+        "nodedotjs.svg",
+        "express.svg",
+        "typescript.svg",
+        "javascript.svg",
+        "postgresql.svg",
+        "redis.svg",
+        "docker.svg",
+        "githubactions.svg",
+        "github.svg",
+        "nginx.svg",
+        "linux.svg",
+        "react.svg",
+        "nextdotjs.svg",
+        "minio.svg",
+        "ollama.svg",
+        "trpc.svg"
+      ],
+      "files": {
+        "nodedotjs.svg": {
+          "name": "nodedotjs.svg",
+          "blob": "0f66670d3365de2474bde67c6cd49dd7",
+          "size": 1608,
+          "type": "image/svg+xml"
+        },
+        "express.svg": {
+          "name": "express.svg",
+          "blob": "0c213b59dc50adecf947f7339c685453",
+          "size": 959,
+          "type": "image/svg+xml"
+        },
+        "typescript.svg": {
+          "name": "typescript.svg",
+          "blob": "3a4def178d552920247a8a2871c05635",
+          "size": 1294,
+          "type": "image/svg+xml"
+        },
+        "javascript.svg": {
+          "name": "javascript.svg",
+          "blob": "8cd9a84a88083a683766a79810c340fd",
+          "size": 974,
+          "type": "image/svg+xml"
+        },
+        "postgresql.svg": {
+          "name": "postgresql.svg",
+          "blob": "f442aa306891cdaadc527ca2ae7bda56",
+          "size": 5205,
+          "type": "image/svg+xml"
+        },
+        "redis.svg": {
+          "name": "redis.svg",
+          "blob": "eafbcdbfeec03dc0bf03bab756bf67a8",
+          "size": 738,
+          "type": "image/svg+xml"
+        },
+        "docker.svg": {
+          "name": "docker.svg",
+          "blob": "0b57562e2e626dd979508e6a3e34c553",
+          "size": 1765,
+          "type": "image/svg+xml"
+        },
+        "githubactions.svg": {
+          "name": "githubactions.svg",
+          "blob": "ef2ca60a48eec2b17ae1c1e144c8d071",
+          "size": 1727,
+          "type": "image/svg+xml"
+        },
+        "github.svg": {
+          "name": "github.svg",
+          "blob": "9acf70a91f9c671162858913ce4a6b12",
+          "size": 822,
+          "type": "image/svg+xml"
+        },
+        "nginx.svg": {
+          "name": "nginx.svg",
+          "blob": "fcb50a264e42ff98dc9317aebe4ffce0",
+          "size": 413,
+          "type": "image/svg+xml"
+        },
+        "linux.svg": {
+          "name": "linux.svg",
+          "blob": "2d0a68378f25eb3dfc0fb8748086c892",
+          "size": 5463,
+          "type": "image/svg+xml"
+        },
+        "react.svg": {
+          "name": "react.svg",
+          "blob": "6062b33673ec0a8a20a3567d1df92d75",
+          "size": 2926,
+          "type": "image/svg+xml"
+        },
+        "nextdotjs.svg": {
+          "name": "nextdotjs.svg",
+          "blob": "8e2a99c224e2ec16ecf10c13d6a9dae7",
+          "size": 322,
+          "type": "image/svg+xml"
+        },
+        "minio.svg": {
+          "name": "minio.svg",
+          "blob": "6edb43a227f06b84c7158af022be08ad",
+          "size": 709,
+          "type": "image/svg+xml"
+        },
+        "ollama.svg": {
+          "name": "ollama.svg",
+          "blob": "f62d8d264d1589f7da6a66e49ac8627e",
+          "size": 4769,
+          "type": "image/svg+xml"
+        },
+        "trpc.svg": {
+          "name": "trpc.svg",
+          "blob": "dd1ba51c6a6ad6be561e001d5fd394ee",
+          "size": 1433,
+          "type": "image/svg+xml"
+        }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": {
+    "readme": "project/README.md",
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Abdou Aziz Sy",
+    "at": "2026-09-16T23:37:21Z",
+    "via": "Claude (Cowork)",
+    "note": "Logos officiels (Simple Icons), composant TechIcons, animations des flux et des statuts."
+  }
+}
