@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { Button } from "@/components/Button";
+
+export const metadata: Metadata = { title: "Page introuvable" };
 
 export default function PageIntrouvable() {
   return (

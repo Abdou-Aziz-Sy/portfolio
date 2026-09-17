@@ -52,6 +52,16 @@ test.describe("pages principales", () => {
     expect(reponse.status()).toBe(200);
     expect(reponse.headers()["content-type"]).toContain("application/pdf");
   });
+
+  test("la page 404 a un titre explicite", async ({ page }) => {
+    await page.goto("/page-qui-nexiste-pas");
+    await expect(page).toHaveTitle(/Page introuvable/);
+  });
+
+  test("la grille de projets est annoncée par un titre de section", async ({ page }) => {
+    await page.goto("/projets");
+    await expect(page.getByRole("heading", { level: 2, name: /dossiers/i })).toBeAttached();
+  });
 });
 
 test.describe("menu mobile", () => {
