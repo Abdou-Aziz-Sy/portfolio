@@ -74,7 +74,7 @@ export default function APropos() {
           <ul className="pa-techs" style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {site.stack.map((t) => (
               <li className="pa-tech" key={t.nom}>
-                <TechIcon name={t.icone} size={22} />
+                <TechIcon name={t.icone} size={28} />
                 <div>
                   <b>{t.nom}</b>
                   <span>{t.role}</span>
