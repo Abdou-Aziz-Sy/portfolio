@@ -25,7 +25,7 @@ export function Button({ href, variant = "primary", size, arrow, download, class
       ) : null}
     </>
   );
-  const horsRouteur = /^(mailto:|https?:|#)/.test(href) || download;
+  const horsRouteur = /^(mailto:|https?:|#)/.test(href) || (download !== undefined && download !== false);
   if (horsRouteur) {
     return (
       <a className={classes} href={href} download={typeof download === "string" ? download : download || undefined}>
