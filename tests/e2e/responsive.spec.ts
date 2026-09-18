@@ -173,15 +173,16 @@ test.describe("mise en page fluide", () => {
 
   test("les paragraphes ne dépassent pas 68 caractères par ligne sur grand écran", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 1440 });
-    // Écart au brief (pages testées) : /projets/ugb-link et /a-propos, citées par le brief,
-    // n'ont en réalité aucun ".pa-casebody > p" ni ".pa-prose > p" — tout le corps de
-    // /projets/ugb-link passe par des composants MDX dédiés (<Contexte>, <Liste>,
-    // <DecisionRecord>, <Exploitation>) qui n'utilisent pas ces classes, et /a-propos
-    // (app/a-propos/page.tsx) n'a ni .pa-casebody ni .pa-prose. La garde-fou ci-dessous l'a
-    // démontré (0 paragraphe mesuré) avant cette correction. /projets/gamecupsn et
-    // /projets/plusutra utilisent le composant <Prose> (rendu en ".pa-prose > p") et exposent
-    // donc de vrais paragraphes à mesurer.
-    for (const chemin of ["/projets/gamecupsn", "/projets/plusutra"]) {
+    // Écart au brief corrigé (ronde de correction 1) : /projets/ugb-link et /a-propos, citées
+    // par le brief, n'ont ni ".pa-casebody > p" ni ".pa-prose > p" — mais elles portent bien
+    // du texte courant réel ailleurs, qu'il fallait borner plutôt que déplacer le test :
+    // - /projets/ugb-link : le paragraphe de <Contexte> (.pa-context-texte > p,
+    //   components/mdx.tsx), les réponses des fiches de décision (.pa-adr dd,
+    //   components/DecisionRecord.tsx) et le texte d'exploitation (.pa-ops p).
+    // - /a-propos : le détail de chaque étape de la frise (.pa-what p,
+    //   app/a-propos/page.tsx).
+    // /projets/gamecupsn reste en plus, pour couvrir ".pa-prose > p" (composant <Prose>).
+    for (const chemin of ["/projets/ugb-link", "/a-propos", "/projets/gamecupsn"]) {
       await page.goto(chemin);
       const { nbMesures, depasse } = await page.evaluate(() => {
         const ch = (el: Element) => {
@@ -193,7 +194,11 @@ test.describe("mise en page fluide", () => {
           sonde.remove();
           return l;
         };
-        const paragraphes = Array.from(document.querySelectorAll(".pa-casebody > p, .pa-prose > p"));
+        const paragraphes = Array.from(
+          document.querySelectorAll(
+            ".pa-casebody > p, .pa-prose > p, .pa-context-texte > p, .pa-ops p, .pa-adr dd, .pa-what p",
+          ),
+        );
         return {
           nbMesures: paragraphes.length,
           depasse: paragraphes
@@ -201,8 +206,8 @@ test.describe("mise en page fluide", () => {
             .map((p) => (p.textContent ?? "").slice(0, 40)),
         };
       });
-      // Garde-fou : un sélecteur qui ne trouve aucun paragraphe ferait passer le test à vide.
-      expect(nbMesures, `${chemin} : au moins un paragraphe mesuré`).toBeGreaterThan(0);
+      // Garde-fou : un sélecteur qui ne trouve aucun élément ferait passer le test à vide.
+      expect(nbMesures, `${chemin} : au moins un élément mesuré`).toBeGreaterThan(0);
       expect(depasse, chemin).toEqual([]);
     }
   });
@@ -217,9 +222,11 @@ test.describe("mise en page fluide", () => {
     // "static", qui l'aurait fait retomber sur le bloc conteneur initial. Dans la mise en page
     // actuelle (en-tête = premier élément de <body>, sans marge), les deux se sont révélés
     // visuellement équivalents à l'essai (voir le rapport de tâche) ; "relative" reste choisi
-    // par prudence, pour ne pas dépendre de cette coïncidence de mise en page.
+    // par prudence, pour ne pas dépendre de cette coïncidence de mise en page. On ne fige pas
+    // la valeur exacte ("relative") ici, pour ne pas figer ce détail d'implémentation : seul
+    // le retrait du collant est un comportement observable à garantir ; l'alignement du
+    // panneau, lui, est vérifié explicitement par le test suivant.
     expect(position).not.toBe("sticky");
-    expect(position).toBe("relative");
   });
 
   test("sur un téléphone à l'horizontale, le panneau du menu mobile touche le bas de l'en-tête", async ({

@@ -49,7 +49,10 @@ function Liste({ prefixe, items }: { prefixe?: string; items: string[] }) {
 function Contexte({ flux, children }: { flux: [string, string][]; children: ReactNode }) {
   return (
     <div className="pa-context">
-      <div>{children}</div>
+      {/* Classe dédiée (plutôt qu'un sélecteur structurel .pa-context > div) : le paragraphe
+          de contexte est un vrai texte courant, ciblé par styles/ajouts.css (taille, hauteur
+          de ligne) et styles/mise-en-page.css (largeur bornée à 68 caractères). */}
+      <div className="pa-context-texte">{children}</div>
       <FluxAvant flux={flux} />
     </div>
   );

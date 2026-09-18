@@ -60,7 +60,12 @@ body { margin: 0; min-height: 100vh; }
 .pa-casebody > .pa-adr + .pa-adr { margin-top: 24px; }
 .pa-casebody > p { font-size: 18px; line-height: 30px; margin: 0 0 16px; max-width: 68ch; }
 .pa-context { display: grid; grid-template-columns: 3fr 2fr; gap: 32px; align-items: start; }
-.pa-context > p { font-size: 18px; line-height: 30px; }
+/* Corrigé (chantier 2, tâche 8) : le paragraphe de <Contexte> (components/mdx.tsx) est
+   `.pa-context > .pa-context-texte > p`, pas `.pa-context > p` (sélecteur mort — aucun <p>
+   n'est enfant direct de .pa-context, le second enfant étant <FluxAvant>, une <div> sans p).
+   Avant cette correction, ce paragraphe recevait la taille fluide de .pa (≈16,8px/27,4px à
+   la largeur d'écran testée) au lieu des 18px/30px voulus, seule différence visible. */
+.pa-context-texte > p { font-size: 18px; line-height: 30px; }
 .pa-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .pa-ops > div { padding: 20px 24px; }
 .pa-gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }

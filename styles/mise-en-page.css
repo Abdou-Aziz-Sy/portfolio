@@ -83,9 +83,17 @@
 
 /* Texte courant : jamais plus de 68 caractères par ligne, quelle que soit la largeur.
    .pa-casebody > p a déjà cette même valeur (68ch = var(--prose-max)) dans ajouts.css,
-   importé après ce fichier : pas de conflit, cette règle ajoute les listes et .pa-prose. */
+   importé après ce fichier : pas de conflit, cette règle ajoute les listes et .pa-prose.
+   Complété (chantier 2, tâche 8, ronde de correction) : .pa-casebody > p et .pa-prose > p ne
+   couvrent pas tout le texte courant réel des pages secondaires — sur /projets/ugb-link, le
+   paragraphe de <Contexte> (.pa-context-texte > p, components/mdx.tsx), les réponses des
+   fiches de décision (.pa-adr dd, components/DecisionRecord.tsx) et les textes d'exploitation
+   (.pa-ops p) débordaient largement des 68 caractères à grand écran (jusqu'à environ 1400px
+   pour .pa-adr dd, contre ~560-680px attendus) ; sur /a-propos, le détail de chaque étape de
+   la frise (.pa-what p) n'était pas borné non plus, par prudence pour un contenu plus long. */
 .pa-casebody > p, .pa-casebody > ul, .pa-casebody > ol,
-.pa-prose > p, .pa-prose > ul, .pa-prose > ol { max-width: var(--prose-max); }
+.pa-prose > p, .pa-prose > ul, .pa-prose > ol,
+.pa-context-texte > p, .pa-ops p, .pa-adr dd, .pa-what p { max-width: var(--prose-max); }
 
 /* Schéma large : défilement dans son cadre, avec un indice tant qu'il reste du contenu à droite. */
 .pa-schema-cadre { position: relative; }
