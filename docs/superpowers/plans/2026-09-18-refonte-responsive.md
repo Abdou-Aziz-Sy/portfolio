@@ -83,22 +83,10 @@ test.describe("mise en page fluide", () => {
     expect(marges[1]).toBeCloseTo(57.6, 0);
     expect(marges[2]).toBe(96);
   });
-
-  test("aucune page ne déborde, de 320 à 2 560 px", async ({ page }) => {
-    for (const largeur of LARGEURS) {
-      await page.setViewportSize({ width: largeur, height: 900 });
-      for (const chemin of PAGES_TEST) {
-        await page.goto(chemin);
-        const m = await page.evaluate(() => ({
-          defile: document.documentElement.scrollWidth,
-          visible: document.documentElement.clientWidth,
-        }));
-        expect(m.defile, `${chemin} à ${largeur} px`).toBeLessThanOrEqual(m.visible);
-      }
-    }
-  });
 });
 ```
+
+Ne PAS écrire de nouveau test de débordement : `tests/e2e/liens.spec.ts` en contient déjà un, paramétré par la constante `LARGEURS_CRITERE` (ajoutée à la revue finale du chantier 1, valeurs `[320, 640, 2560]`, projet `chromium` seulement). Étendre cette constante à toutes les largeurs du chantier : `[320, 375, 640, 768, 1024, 1440, 1920, 2560]` (640 px représente le zoom à 200 % sur 1 280 px). Retirer alors l'import de `PAGES_TEST` de `responsive.spec.ts` s'il n'y sert plus.
 
 Vérifier que `main` existe bien dans `app/layout.tsx` (`grep -n "<main" app/layout.tsx`) ; s'il n'existe pas, cibler le premier `.pa-wrap` qui suit l'en-tête (par exemple `page.locator(".pa-wrap").nth(1)`) et l'indiquer dans le rapport.
 
@@ -108,7 +96,7 @@ Vérifier que `main` existe bien dans `app/layout.tsx` (`grep -n "<main" app/lay
 pnpm test:e2e tests/e2e/responsive.spec.ts --project=chromium
 ```
 
-Attendu : ÉCHEC des deux premiers tests (largeur utile 1 104 px environ ; marge de 48 px à 1 440 et 2 560 px). Le troisième peut déjà passer : c'est un garde-fou pour les tâches suivantes.
+Attendu : ÉCHEC des deux tests (largeur utile 1 104 px environ ; marge de 48 px à 1 440 et 2 560 px). Le test de débordement étendu dans `liens.spec.ts` peut déjà passer : c'est un garde-fou pour les tâches suivantes.
 
 - [ ] **Step 3: Créer le fichier et l'importer**
 
@@ -144,15 +132,15 @@ Attendu : ÉCHEC des deux premiers tests (largeur utile 1 104 px environ ; marge
 - [ ] **Step 4: Relancer les tests et vérifier qu'ils passent**
 
 ```bash
-pnpm test:e2e tests/e2e/responsive.spec.ts --project=chromium
+pnpm test:e2e tests/e2e/responsive.spec.ts tests/e2e/liens.spec.ts --project=chromium
 ```
 
-Attendu : SUCCÈS des trois tests. Si le test de débordement échoue à une largeur donnée, NE PAS l'affaiblir : noter la page et la largeur dans le rapport et corriger la règle en cause (souvent une grille sans `minmax(0, …)`).
+Attendu : SUCCÈS de tous les tests. Si le test de débordement échoue à une largeur donnée, NE PAS l'affaiblir : noter la page et la largeur dans le rapport et corriger la règle en cause (souvent une grille sans `minmax(0, …)`).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add styles/mise-en-page.css app/globals.css tests/e2e/responsive.spec.ts
+git add styles/mise-en-page.css app/globals.css tests/e2e/responsive.spec.ts tests/e2e/liens.spec.ts
 git commit -m "feat(mise en page): conteneur fluide jusqu'à 1 920 px et marges adaptatives"
 ```
 
