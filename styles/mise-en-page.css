@@ -30,12 +30,19 @@
    (line-height: 26px). */
 .pa         { font-size: clamp(16px, 15.66px + 0.092vw, 18px);  line-height: 1.625em; }
 
-/* Grilles : le nombre de colonnes dépend de la place, borné à 4. */
+/* Grilles : le nombre de colonnes dépend de la place, borné à 4.
+   auto-fit (pas auto-fill) : le nombre d'éléments peut être inférieur au nombre de
+   pistes que la largeur permettrait (ex. « Autres dossiers » avec 3 cartes sur 4 pistes
+   possibles à 1 920 px). Avec auto-fill, la piste surnuméraire resterait vide mais
+   garderait sa part de 1fr, laissant un trou à droite au lieu de rendre cet espace aux
+   pistes occupées. auto-fit réduit les pistes vides à 0 px, ce qui a le même effet que
+   auto-fill dès que le nombre d'éléments atteint ou dépasse le nombre maximal de pistes
+   (le calcul du nombre maximal de colonnes est inchangé). */
 .pa-grid {
-  grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 3 * var(--space-5)) / 4)), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(280px, calc((100% - 3 * var(--space-5)) / 4)), 1fr));
 }
-.pa-grid--2 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
-.pa-techs { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+.pa-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+.pa-techs { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .pa-domains { grid-template-columns: 1fr 1fr; }

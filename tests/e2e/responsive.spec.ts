@@ -64,8 +64,15 @@ test.describe("mise en page fluide", () => {
     expect(hauteurInitiales).toBeCloseTo(26, 0);
   });
 
+  // Avec auto-fit, les pistes surnuméraires sont conservées dans gridTemplateColumns mais
+  // réduites à 0 px : on ne compte que les pistes réellement occupées.
   async function colonnes(page: import("@playwright/test").Page, selecteur: string) {
-    return page.locator(selecteur).first().evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+    return page
+      .locator(selecteur)
+      .first()
+      .evaluate(
+        (el) => getComputedStyle(el).gridTemplateColumns.split(" ").filter((piste) => parseFloat(piste) > 0).length,
+      );
   }
 
   test("la grille de projets passe à quatre colonnes sur grand écran", async ({ page }) => {
@@ -84,5 +91,17 @@ test.describe("mise en page fluide", () => {
     await page.setViewportSize({ width: 900, height: 1000 });
     await page.goto("/");
     expect(await colonnes(page, ".pa-domains")).toBe(2);
+  });
+
+  test("la grille « Autres dossiers » de l'accueil n'a pas de piste vide à 1 920 px", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto("/");
+    const grille = page.locator('section[aria-labelledby="titre-projets"] .pa-grid');
+    const droiteGrille = await grille.evaluate((el) => el.getBoundingClientRect().right);
+    const droiteDerniereCarte = await grille
+      .locator(":scope > *")
+      .last()
+      .evaluate((el) => el.getBoundingClientRect().right);
+    expect(Math.abs(droiteGrille - droiteDerniereCarte)).toBeLessThanOrEqual(2);
   });
 });
