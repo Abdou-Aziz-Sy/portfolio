@@ -202,3 +202,28 @@ test.describe("première vue mobile", () => {
     await expect(page.getByRole("definition").filter({ hasText: "260" })).toHaveCount(1);
   });
 });
+
+test.describe("schéma complet de l'étude de cas", () => {
+  test("sur mobile, il défile dans son cadre, avec un indice, et reçoit le focus", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "mobile uniquement");
+    await page.goto("/projets/ugb-link#architecture");
+    const cadre = page.getByTestId("schema-defilant");
+    await expect(cadre).toHaveAttribute("tabindex", "0");
+    await expect(cadre).toHaveAttribute("role", "region");
+    await expect(cadre).toHaveAttribute("data-deborde", "true");
+    await expect(page.getByTestId("indice-defilement")).toBeVisible();
+    // Libellés principaux des blocs (.d-t, 14 unités) : au moins 11 px rendus.
+    const tailles = await taillesRendues(cadre.locator("svg").first(), ".d-t");
+    expect(Math.min(...tailles)).toBeGreaterThanOrEqual(11);
+  });
+
+  test("sur ordinateur, il tient dans la page et n'est pas focalisable", async ({ page, isMobile }) => {
+    test.skip(isMobile, "bureau uniquement");
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/projets/ugb-link#architecture");
+    const cadre = page.getByTestId("schema-defilant");
+    await expect(cadre).toHaveAttribute("data-deborde", "false");
+    await expect(cadre).not.toHaveAttribute("tabindex", "0");
+    await expect(page.getByTestId("indice-defilement")).toBeHidden();
+  });
+});

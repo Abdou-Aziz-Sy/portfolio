@@ -81,6 +81,16 @@
    sinon il colle au dernier mot de la MetaLine (pas d'espace entre nœuds JSX adjacents). */
 .pa-fig-lien { display: block; width: fit-content; margin-top: var(--space-2); }
 
+/* Schéma large : défilement dans son cadre, avec un indice tant qu'il reste du contenu à droite. */
+.pa-schema-cadre { position: relative; }
+.pa-schema-indice {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 48px;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;
+  background: linear-gradient(90deg, transparent, var(--surface));
+  color: var(--accent); font-size: 20px; pointer-events: none;
+}
+.pa-schema-indice[hidden] { display: none; }
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .pa-domains { grid-template-columns: 1fr 1fr; }
   .pa-domain + .pa-domain { border-top: 0; border-left: 0; }
@@ -108,6 +118,8 @@
   .pa-herogrid { grid-template-columns: 1fr; gap: 24px; }
   .pa-frame--accueil { width: 160px; }
   .pa-frame--accueil .pa-frame-media { height: 160px; }
+  .pa-diagram-scroll { overflow-x: auto; }
+  .pa-diagram-scroll svg { min-width: 800px; }
 }
 
 /* Cartouche agrandi sur grand écran : les deux blocs suivants ne peuvent jamais s'appliquer
