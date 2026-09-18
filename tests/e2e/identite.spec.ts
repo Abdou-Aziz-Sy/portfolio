@@ -36,6 +36,16 @@ test("le titre de l'accueil ne mentionne pas le blog tant qu'aucun article n'est
   await expect(h1).not.toContainText("ce que j'apprends");
 });
 
+test("le titre de la carte vedette peut se retourner à la ligne", async ({ page }) => {
+  await page.goto("/");
+  const titre = page.locator(".pa-surface .pa-meta-titre").first();
+  await expect(titre).toBeVisible();
+  const whiteSpace = await titre.evaluate((el) => window.getComputedStyle(el).whiteSpace);
+  // .pa-meta > span est en white-space: nowrap par défaut (styles/ajouts.css) ; un titre
+  // de dossier est un texte libre qui doit pouvoir se retourner à la ligne.
+  expect(whiteSpace).toBe("normal");
+});
+
 test("le pied de page annonce la disponibilité, pas un faux statut de service", async ({ page }) => {
   await page.goto("/");
   const pied = page.getByRole("contentinfo");

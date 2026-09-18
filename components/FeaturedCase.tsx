@@ -14,7 +14,14 @@ export function FeaturedCase({ projet }: { projet: Projet }) {
       <div className="pa-head">
         <span className="pa-meta">
           <MetaLine
-            parties={[numeroDossier(projet.dossier), projet.titre, projet.annee, <StatusMeta key="s" statut={projet.statut} />]}
+            parties={[
+              numeroDossier(projet.dossier),
+              <span key="titre" className="pa-meta-titre">
+                {projet.titre}
+              </span>,
+              projet.annee,
+              <StatusMeta key="s" statut={projet.statut} />,
+            ]}
           />
         </span>
         <span className="pa-meta">Étude de cas</span>
