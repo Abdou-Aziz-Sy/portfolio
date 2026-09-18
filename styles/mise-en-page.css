@@ -81,6 +81,12 @@
    sinon il colle au dernier mot de la MetaLine (pas d'espace entre nœuds JSX adjacents). */
 .pa-fig-lien { display: block; width: fit-content; margin-top: var(--space-2); }
 
+/* Texte courant : jamais plus de 68 caractères par ligne, quelle que soit la largeur.
+   .pa-casebody > p a déjà cette même valeur (68ch = var(--prose-max)) dans ajouts.css,
+   importé après ce fichier : pas de conflit, cette règle ajoute les listes et .pa-prose. */
+.pa-casebody > p, .pa-casebody > ul, .pa-casebody > ol,
+.pa-prose > p, .pa-prose > ul, .pa-prose > ol { max-width: var(--prose-max); }
+
 /* Schéma large : défilement dans son cadre, avec un indice tant qu'il reste du contenu à droite. */
 .pa-schema-cadre { position: relative; }
 .pa-schema-indice {
@@ -135,4 +141,15 @@
   .pa-herogrid { grid-template-columns: minmax(0, 1fr) 360px; }
   .pa-frame--accueil { width: 360px; }
   .pa-frame--accueil .pa-frame-media { height: 420px; }
+}
+
+/* Écran de faible hauteur (ex. téléphone à l'horizontale) : l'en-tête collant peut manger
+   une part excessive de l'écran. Écart voulu au brief, qui proposait `position: static` :
+   .pa-menu-panel (styles/ajouts.css) est en position absolute et se place par rapport au
+   premier ancêtre positionné — aujourd'hui .pa-nav (sticky, plan.css:39). En `static`, plus
+   aucun ancêtre ne serait positionné (ni .pa-wrap ni .pa-nav-actions ne le sont), et le
+   panneau se positionnerait par rapport au bloc conteneur initial. `relative` retire le
+   comportement collant sans changer ce bloc conteneur. */
+@media (max-height: 500px) {
+  .pa-nav { position: relative; }
 }

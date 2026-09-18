@@ -170,6 +170,77 @@ test.describe("mise en page fluide", () => {
     ]);
     expect(Math.abs(bandeau - contenu)).toBeLessThanOrEqual(1);
   });
+
+  test("les paragraphes ne dépassent pas 68 caractères par ligne sur grand écran", async ({ page }) => {
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    // Écart au brief (pages testées) : /projets/ugb-link et /a-propos, citées par le brief,
+    // n'ont en réalité aucun ".pa-casebody > p" ni ".pa-prose > p" — tout le corps de
+    // /projets/ugb-link passe par des composants MDX dédiés (<Contexte>, <Liste>,
+    // <DecisionRecord>, <Exploitation>) qui n'utilisent pas ces classes, et /a-propos
+    // (app/a-propos/page.tsx) n'a ni .pa-casebody ni .pa-prose. La garde-fou ci-dessous l'a
+    // démontré (0 paragraphe mesuré) avant cette correction. /projets/gamecupsn et
+    // /projets/plusutra utilisent le composant <Prose> (rendu en ".pa-prose > p") et exposent
+    // donc de vrais paragraphes à mesurer.
+    for (const chemin of ["/projets/gamecupsn", "/projets/plusutra"]) {
+      await page.goto(chemin);
+      const { nbMesures, depasse } = await page.evaluate(() => {
+        const ch = (el: Element) => {
+          const sonde = document.createElement("span");
+          sonde.textContent = "0";
+          sonde.style.cssText = "position:absolute;visibility:hidden;font:inherit";
+          el.appendChild(sonde);
+          const l = sonde.getBoundingClientRect().width;
+          sonde.remove();
+          return l;
+        };
+        const paragraphes = Array.from(document.querySelectorAll(".pa-casebody > p, .pa-prose > p"));
+        return {
+          nbMesures: paragraphes.length,
+          depasse: paragraphes
+            .filter((p) => p.getBoundingClientRect().width > 68 * ch(p) + 2)
+            .map((p) => (p.textContent ?? "").slice(0, 40)),
+        };
+      });
+      // Garde-fou : un sélecteur qui ne trouve aucun paragraphe ferait passer le test à vide.
+      expect(nbMesures, `${chemin} : au moins un paragraphe mesuré`).toBeGreaterThan(0);
+      expect(depasse, chemin).toEqual([]);
+    }
+  });
+
+  test("l'en-tête n'est plus collant sur un écran de faible hauteur", async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 450 });
+    await page.goto("/");
+    const position = await page.locator(".pa-nav").evaluate((el) => getComputedStyle(el).position);
+    // Écart voulu au brief (position: static) : .pa-menu-panel (styles/ajouts.css) est en
+    // position absolute et se place par rapport au premier ancêtre positionné, aujourd'hui
+    // .pa-nav. "relative" retire le collant sans changer ce bloc conteneur — contrairement à
+    // "static", qui l'aurait fait retomber sur le bloc conteneur initial. Dans la mise en page
+    // actuelle (en-tête = premier élément de <body>, sans marge), les deux se sont révélés
+    // visuellement équivalents à l'essai (voir le rapport de tâche) ; "relative" reste choisi
+    // par prudence, pour ne pas dépendre de cette coïncidence de mise en page.
+    expect(position).not.toBe("sticky");
+    expect(position).toBe("relative");
+  });
+
+  test("sur un téléphone à l'horizontale, le panneau du menu mobile touche le bas de l'en-tête", async ({
+    page,
+  }) => {
+    // 667 × 375 : sous 768 px de large (menu mobile actif, styles/ajouts.css) ET sous 500 px
+    // de haut (en-tête non collant, test précédent). Vérifie que le panneau reste collé au
+    // bas de l'en-tête une fois .pa-nav passé en "relative". Un essai ponctuel (non conservé
+    // ici) a montré qu'avec "static" le panneau reste, dans cette mise en page précise, tout
+    // aussi bien placé — voir le rapport de tâche pour le détail de cet essai.
+    await page.setViewportSize({ width: 667, height: 375 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Menu" }).click();
+    const panneau = page.locator(".pa-menu-panel");
+    await expect(panneau).toBeVisible();
+    const [hautPanneau, basEntete] = await Promise.all([
+      panneau.evaluate((el) => el.getBoundingClientRect().top),
+      page.locator(".pa-nav").evaluate((el) => el.getBoundingClientRect().bottom),
+    ]);
+    expect(Math.abs(hautPanneau - basEntete)).toBeLessThanOrEqual(2);
+  });
 });
 
 test.describe("première vue mobile", () => {
