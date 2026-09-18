@@ -34,8 +34,6 @@ body { margin: 0; min-height: 100vh; }
 /* Cartouche du portrait */
 .pa-frame-media { display: block; width: 100%; object-fit: cover; }
 .pa-ph.pa-frame-media { display: flex; }
-.pa-frame--accueil { width: 250px; }
-.pa-frame--accueil .pa-frame-media { height: 290px; }
 .pa-frame--apropos { width: 100%; }
 .pa-frame--apropos .pa-frame-media { height: 420px; }
 .pa-herofig { padding-top: 12px; }
@@ -44,7 +42,6 @@ body { margin: 0; min-height: 100vh; }
 .pa-diagram-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* Page d'accueil */
-.pa-herogrid { display: grid; grid-template-columns: 1fr 250px; gap: 64px; align-items: start; }
 .pa-herometa { margin-top: 48px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line); }
 .pa-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .pa-main { display: flex; flex-direction: column; gap: var(--space-9); padding-top: var(--space-9); padding-bottom: var(--space-9); }
@@ -128,10 +125,7 @@ body { margin: 0; min-height: 100vh; }
   .pa-mark-court { display: inline; }
   .pa-mark-long { display: none; }
   .pa-nav .pa-wrap { gap: var(--space-3); }
-  .pa-herogrid { grid-template-columns: 1fr; gap: 24px; }
   .pa-herofig { padding-top: 0; }
-  .pa-frame--accueil { width: 160px; }
-  .pa-frame--accueil .pa-frame-media { height: 160px; }
   .pa-frame--apropos .pa-frame-media { height: 320px; }
   .pa-frame--accueil .pa-frame-block { grid-template-columns: 1fr; }
   .pa-frame--accueil .pa-frame-block span + span { border-left: 0; border-top: 1px solid var(--line-strong); }

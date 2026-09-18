@@ -62,11 +62,30 @@
 .pa-actions-hero { margin-top: var(--space-6); }
 .pa-facts--hero { display: none; }
 
+/* Déplacé depuis ajouts.css (chantier 2, tâche 5) : ces règles doivent pouvoir être
+   surchargées par les media queries de ce fichier (1023 px, 1440 px, 1920 px) ; dans
+   ajouts.css, importé après, elles l'auraient emporté à spécificité égale. */
+.pa-herogrid { display: grid; grid-template-columns: 1fr 250px; gap: 64px; align-items: start; }
+.pa-frame--accueil { width: 250px; }
+.pa-frame--accueil .pa-frame-media { height: 290px; }
+
+/* Le bandeau Présentation est pleine largeur : son contenu s'aligne sur celui de .pa-wrap. */
+.pa-intro {
+  padding-inline: max(var(--gutter), (100% - var(--content-max)) / 2);
+}
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .pa-domains { grid-template-columns: 1fr 1fr; }
   .pa-domain + .pa-domain { border-top: 0; border-left: 0; }
   .pa-domain:nth-child(2) { border-left: 1px solid var(--line); }
   .pa-domain:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+}
+
+/* Doit précéder le bloc 767 px ci-dessous : à spécificité égale, la règle .pa-herogrid la
+   plus tardive dans le fichier l'emporte sous 767 px. Placé ici pour que la version mobile
+   (bloc suivant) batte celle-ci quand les deux media queries matchent en même temps. */
+@media (max-width: 1023px) {
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
 }
 
 @media (max-width: 767px) {
@@ -78,4 +97,23 @@
   .pa-facts--hero .pa-fact b { font-size: 26px; line-height: 30px; }
   .pa-facts--hero .pa-fact span { margin-top: 2px; font-size: 12px; line-height: 16px; }
   .pa-faits-section { display: none; }
+  /* Déplacé depuis ajouts.css (chantier 2, tâche 5), valeurs inchangées. */
+  .pa-herogrid { grid-template-columns: 1fr; gap: 24px; }
+  .pa-frame--accueil { width: 160px; }
+  .pa-frame--accueil .pa-frame-media { height: 160px; }
+}
+
+/* Cartouche agrandi sur grand écran : les deux blocs suivants ne peuvent jamais s'appliquer
+   en même temps que les blocs mobiles ci-dessus (min-width 1440/1920 px vs max-width 767/1023
+   px), donc aucun conflit d'ordre à gérer avec eux. */
+@media (min-width: 1440px) {
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr) 320px; gap: 96px; }
+  .pa-frame--accueil { width: 320px; }
+  .pa-frame--accueil .pa-frame-media { height: 370px; }
+}
+
+@media (min-width: 1920px) {
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr) 360px; }
+  .pa-frame--accueil { width: 360px; }
+  .pa-frame--accueil .pa-frame-media { height: 420px; }
 }

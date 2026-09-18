@@ -127,6 +127,29 @@ test.describe("mise en page fluide", () => {
       .evaluate((el) => el.getBoundingClientRect().width);
     expect(largeurCarte).toBeLessThanOrEqual(largeurGrille / 4 + 2);
   });
+
+  test("le haut de l'accueil passe sur une colonne sous 1 024 px", async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 1000 });
+    await page.goto("/");
+    expect(await colonnes(page, ".pa-herogrid")).toBe(1);
+  });
+
+  test("le cartouche grandit sur grand écran", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto("/");
+    const largeur = await page.locator(".pa-frame--accueil").evaluate((el) => el.getBoundingClientRect().width);
+    expect(largeur).toBeGreaterThanOrEqual(320);
+  });
+
+  test("le bandeau Présentation s'aligne sur la grille de contenu", async ({ page }) => {
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto("/");
+    const [bandeau, contenu] = await Promise.all([
+      page.locator(".pa-intro > :first-child").evaluate((el) => el.getBoundingClientRect().left),
+      page.locator("main .pa-wrap").first().evaluate((el) => el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft)),
+    ]);
+    expect(Math.abs(bandeau - contenu)).toBeLessThanOrEqual(1);
+  });
 });
 
 test.describe("première vue mobile", () => {
