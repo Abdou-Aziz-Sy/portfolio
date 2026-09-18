@@ -34,12 +34,12 @@ Hors périmètre : refonte des points de rupture, héros mobile, lisibilité des
 
 10. **En-tête mobile** (< 768 px). Le bouton de thème devient une icône soleil/lune, cible de 44 × 44 px, avec un nom accessible explicite (« Thème clair » / « Thème sombre ») et un `title` identique. Le bouton « Me contacter » réapparaît dans l'en-tête. À partir de 768 px, le bouton garde son libellé « Papier / Nuit » et son nom accessible commence par ce libellé (WCAG 2.5.3).
 11. **Cartes de projet.** Le lien « Ouvrir le dossier » est étendu à toute la carte par un pseudo-élément (`::after` en `position: absolute; inset: 0`). Un seul lien par carte pour les technologies d'assistance. Les étiquettes restent non interactives. L'effet de soulèvement au survol est conservé et s'applique aussi à `:focus-within`.
-12. **Menu mobile.** Échap et un clic hors du panneau ferment le menu ; dans les deux cas, le focus revient sur le bouton « Menu ». Un clic sur un lien du panneau ferme le menu sans déplacer le focus sur le bouton.
+12. **Menu mobile.** Échap ferme le menu et rend le focus au bouton « Menu ». Un clic hors du panneau ferme le menu sans déplacer le focus : un clic ailleurs sur la page ne doit pas voler le focus à l'endroit où l'utilisateur vient d'interagir. Un clic sur un lien du panneau ferme le menu sans déplacer le focus sur le bouton non plus.
 13. **URL de production.** `siteUrl()` lève une erreur quand `VERCEL_ENV === "production"` et qu'aucune de `NEXT_PUBLIC_SITE_URL` et `VERCEL_PROJECT_PRODUCTION_URL` n'est définie. Hors production, le repli `http://localhost:3000` est conservé.
 
 ## Tests
 
-- e2e (bureau et mobile selon le cas) : surtitre et nom du logo visibles ; « Me contacter » visible dans l'en-tête mobile ; clic au centre d'une carte → étude de cas ; Échap et clic extérieur ferment le menu et rendent le focus au bouton ; attribut `download` des liens CV ; titre de la 404 ; texte du pied de page ; bouton « Copier » (état « Copié »).
+- e2e (bureau et mobile selon le cas) : surtitre et nom du logo visibles ; « Me contacter » visible dans l'en-tête mobile ; clic au centre d'une carte → étude de cas ; Échap ferme le menu et rend le focus au bouton, un clic extérieur ferme le menu sans déplacer le focus ; attribut `download` des liens CV ; titre de la 404 ; texte du pied de page ; bouton « Copier » (état « Copié »).
 - unitaire : les trois cas de `siteUrl()` (variable explicite, variable Vercel, production sans URL → erreur).
 - Chaîne complète verte : `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`.
 
