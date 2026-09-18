@@ -42,4 +42,25 @@ test.describe("mise en page fluide", () => {
     expect(tailles[1440]).toBeGreaterThan(tailles[375]);
     expect(tailles[1440]).toBeLessThan(tailles[2560]);
   });
+
+  test("le texte courant garde sa hauteur de ligne d'avant la refonte (26 px à 16 px de police)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+
+    await page.goto("/projets");
+    const hauteurCardFoot = await page
+      .locator(".pa-card-foot")
+      .first()
+      .evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
+
+    await page.goto("/a-propos");
+    const hauteurInitiales = await page
+      .locator(".pa-initiales")
+      .first()
+      .evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
+
+    expect(hauteurCardFoot).toBeCloseTo(26, 0);
+    expect(hauteurInitiales).toBeCloseTo(26, 0);
+  });
 });
