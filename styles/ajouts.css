@@ -94,7 +94,7 @@ body { margin: 0; min-height: 100vh; }
 .pa-feature { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
 .pa-feature > * { min-width: 0; }
 .pa-diagram-scroll { max-width: 100%; }
-.pa-dot.is-dispo, .pa-dot.is-accepte { animation: none !important; }
+.pa-dot.is-dispo { animation: none !important; }
 .pa-theme { display: inline-flex; align-items: center; justify-content: center; }
 .pa-theme-icone { display: none; }
 
@@ -112,7 +112,10 @@ body { margin: 0; min-height: 100vh; }
    ci-dessus reste hérité par défaut, ce qui rendrait le titre entier insécable). */
 .pa-meta-titre { white-space: normal; }
 .pa-st-done { color: var(--ink-muted); }
-.pa-dot.is-accepte { background: var(--ok); border-radius: 0; }
+/* Regroupe ici les deux déclarations .pa-dot.is-accepte auparavant dispersées
+   (forme + arrêt de la pulsation, cf. plan.css:287) : la pastille d'une
+   décision acceptée est carrée et stable, distincte visuellement de « en cours ». */
+.pa-dot.is-accepte { background: var(--ok); border-radius: 0; animation: none !important; }
 
 @media (max-width: 1023px) {
   .pa-hero-xl { font-size: 88px; line-height: 92px; }
@@ -153,7 +156,8 @@ body { margin: 0; min-height: 100vh; }
   .pa-cta h2 { font-size: 34px; line-height: 40px; }
   .pa-prose { font-size: 17px; line-height: 28px; }
   .pa-footer-bar { flex-direction: column; }
-  .pa-feature { grid-template-columns: minmax(0, 1fr); }
+  /* .pa-feature en une seule piste est déjà fixé par le bloc ≤ 1023px ci-dessus
+     (il reste hérité en dessous de 767px, pas besoin de le répéter ici). */
   .pa-theme { min-width: 44px; min-height: 44px; padding: 0; }
   .pa-theme-texte { display: none; }
   .pa-theme-icone { display: block; }
