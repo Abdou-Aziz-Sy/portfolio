@@ -129,7 +129,7 @@ body { margin: 0; min-height: 100vh; }
   .pa-mark-long { display: none; }
   .pa-nav .pa-wrap { gap: var(--space-3); }
   .pa-herogrid { grid-template-columns: 1fr; gap: 24px; }
-  .pa-herofig { order: -1; padding-top: 0; }
+  .pa-herofig { padding-top: 0; }
   .pa-frame--accueil { width: 160px; }
   .pa-frame--accueil .pa-frame-media { height: 160px; }
   .pa-frame--apropos .pa-frame-media { height: 320px; }

@@ -119,3 +119,28 @@ test.describe("mise en page fluide", () => {
     expect(largeurCarte).toBeLessThanOrEqual(largeurGrille / 4 + 2);
   });
 });
+
+test.describe("première vue mobile", () => {
+  test.skip(({ isMobile }) => !isMobile, "projet mobile uniquement");
+
+  test("nom, titre, action principale et faits sont visibles sans défiler", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/");
+    const hauteur = 812;
+    for (const cible of [
+      page.getByTestId("surtitre-identite"),
+      page.locator("h1.pa-hero"),
+      page.getByTestId("action-principale"),
+      page.getByTestId("faits-hero"),
+    ]) {
+      const boite = await cible.boundingBox();
+      expect(boite, "élément présent").not.toBeNull();
+      expect(boite!.y + boite!.height).toBeLessThanOrEqual(hauteur);
+    }
+  });
+
+  test("chaque fait n'est exposé qu'une fois", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("definition").filter({ hasText: "260" })).toHaveCount(1);
+  });
+});
