@@ -1,0 +1,15 @@
+/* Système de mise en page fluide (chantier 2).
+   Importé entre plan.css (généré) et ajouts.css : bat plan.css à spécificité égale,
+   perd contre ajouts.css. Règles inconditionnelles d'abord, media queries ensuite. */
+
+:root {
+  --content-max: 1920px;
+  --gutter: clamp(16px, 4vw, 96px);
+  --prose-max: 68ch;
+}
+
+/* Conteneur : le contenu utile atteint 1 920 px ; au-delà, la marge grandit. */
+.pa-wrap {
+  max-width: calc(var(--content-max) + 2 * var(--gutter));
+  padding-inline: var(--gutter);
+}

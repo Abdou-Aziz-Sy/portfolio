@@ -48,10 +48,12 @@ test("les pages ne défilent pas horizontalement", async ({ page }) => {
 
 // Critère de réussite de la spec : aucun défilement horizontal entre 320 et 2560 px,
 // ni à 200 % de zoom sur 1280 px (équivalent à une largeur de rendu de 640 px).
+// Largeurs du chantier 2 (mise en page fluide) ajoutées pour couvrir tous les points
+// de rupture : 320, 375, 640 (zoom 200 % sur 1280), 768, 1024, 1440, 1920, 2560.
 // Un seul projet (chromium) suffit : le test par défaut ci-dessus couvre déjà les
 // deux projets (bureau et mobile) à leur largeur habituelle ; répéter ces largeurs
 // supplémentaires sur « mobile » ne ferait que dupliquer le travail.
-const LARGEURS_CRITERE = [320, 640, 2560];
+const LARGEURS_CRITERE = [320, 375, 640, 768, 1024, 1440, 1920, 2560];
 
 for (const largeur of LARGEURS_CRITERE) {
   test(`les pages ne défilent pas horizontalement à ${largeur}px`, async ({ page }, testInfo) => {
