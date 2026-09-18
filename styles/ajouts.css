@@ -22,9 +22,6 @@ body { margin: 0; min-height: 100vh; }
 .pa-cta-liens { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-4); }
 .pa-copymail { display: inline-flex; align-items: center; gap: var(--space-2); }
 
-/* Grand titre de page (« Projets. », « Blog. ») */
-.pa-hero-xl { font-size: 120px; line-height: 120px; }
-
 /* Navigation : bascule de thème et menu mobile */
 .pa-nav-actions { display: flex; align-items: center; gap: var(--space-3); }
 .pa-mobile-only { display: none; }
@@ -118,7 +115,6 @@ body { margin: 0; min-height: 100vh; }
 .pa-dot.is-accepte { background: var(--ok); border-radius: 0; animation: none !important; }
 
 @media (max-width: 1023px) {
-  .pa-hero-xl { font-size: 88px; line-height: 92px; }
   .pa-casegrid, .pa-articlegrid, .pa-aboutgrid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .pa-toc, .pa-aboutside { position: static; }
   .pa-casegrid > :first-child { padding-top: 32px; }
@@ -132,7 +128,6 @@ body { margin: 0; min-height: 100vh; }
   .pa-mark-court { display: inline; }
   .pa-mark-long { display: none; }
   .pa-nav .pa-wrap { gap: var(--space-3); }
-  .pa-hero-xl { font-size: 64px; line-height: 68px; }
   .pa-herogrid { grid-template-columns: 1fr; gap: 24px; }
   .pa-herofig { order: -1; padding-top: 0; }
   .pa-frame--accueil { width: 160px; }
@@ -144,7 +139,6 @@ body { margin: 0; min-height: 100vh; }
   .pa-diagram-scroll { overflow-x: auto; }
   .pa-diagram-scroll svg { min-width: 760px; }
   .pa-main { gap: var(--space-8); padding-top: var(--space-8); padding-bottom: var(--space-8); }
-  .pa-h1 { font-size: 34px; line-height: 40px; }
   .pa-context, .pa-ops, .pa-gallery { grid-template-columns: 1fr; }
   .pa-secmeta { margin-top: 48px; }
   .pa-metaband { grid-template-columns: 1fr; }
@@ -153,7 +147,6 @@ body { margin: 0; min-height: 100vh; }
   .pa-next { grid-template-columns: 1fr; }
   .pa-next a + a { border-left: 0; border-top: 1px solid var(--line); }
   .pa-timeline li { grid-template-columns: 76px 20px 1fr; gap: var(--space-3); }
-  .pa-cta h2 { font-size: 34px; line-height: 40px; }
   .pa-prose { font-size: 17px; line-height: 28px; }
   .pa-footer-bar { flex-direction: column; }
   /* .pa-feature en une seule piste est déjà fixé par le bloc ≤ 1023px ci-dessus

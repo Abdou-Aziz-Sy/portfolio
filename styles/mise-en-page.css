@@ -13,3 +13,12 @@
   max-width: calc(var(--content-max) + 2 * var(--gutter));
   padding-inline: var(--gutter);
 }
+
+/* Typographie fluide : interpolation linéaire entre 375 px et 2 560 px. */
+.pa-hero    { font-size: clamp(34px, 25.42px + 2.288vw, 84px);  line-height: 1.1; }
+.pa-hero-xl { font-size: clamp(64px, 47.52px + 4.394vw, 160px); line-height: 1; }
+.pa-h1      { font-size: clamp(32px, 26.51px + 1.465vw, 64px);  line-height: 1.12; }
+.pa-h2      { font-size: clamp(24px, 21.25px + 0.732vw, 40px);  line-height: 1.18; }
+.pa-cta h2  { font-size: clamp(34px, 28.85px + 1.373vw, 64px);  line-height: 1.12; }
+.pa-lead    { font-size: clamp(18px, 17.31px + 0.183vw, 22px);  line-height: 1.55; }
+.pa         { font-size: clamp(16px, 15.66px + 0.092vw, 18px);  line-height: 1.6; }

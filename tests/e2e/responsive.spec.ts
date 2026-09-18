@@ -29,4 +29,17 @@ test.describe("mise en page fluide", () => {
     expect(marges[1]).toBeCloseTo(57.6, 0);
     expect(marges[2]).toBe(96);
   });
+
+  test("les titres grandissent avec l'écran", async ({ page }) => {
+    const tailles: Record<number, number> = {};
+    for (const largeur of [375, 1440, 2560]) {
+      await page.setViewportSize({ width: largeur, height: 900 });
+      await page.goto("/");
+      tailles[largeur] = await page.locator("h1.pa-hero").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    }
+    expect(tailles[375]).toBeCloseTo(34, 0);
+    expect(tailles[2560]).toBeCloseTo(84, 0);
+    expect(tailles[1440]).toBeGreaterThan(tailles[375]);
+    expect(tailles[1440]).toBeLessThan(tailles[2560]);
+  });
 });
