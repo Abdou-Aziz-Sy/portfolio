@@ -44,6 +44,19 @@
 .pa-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
 .pa-techs { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
 
+/* .pa-grid-projets (grille de /projets) est FILTRABLE par catégorie : le nombre de
+   cartes visibles varie sans rapport avec la largeur d'écran. Avec auto-fit, un filtre
+   qui ne laisse qu'une ou deux cartes les étirerait sur toute la largeur disponible
+   (une carte seule occuperait ~1 766 px à 1 920 px) au lieu de garder la largeur de
+   colonne habituelle. Cette grille doit donc revenir à auto-fill : les pistes non
+   utilisées restent vides mais gardent leur largeur de colonne, comme des espaces
+   réservés. .pa-grid-projets et .pa-grid ont chacun une seule classe en sélecteur
+   (spécificité égale) : c'est donc l'ordre qui tranche, cette règle doit rester après
+   .pa-grid pour la battre à spécificité égale. */
+.pa-grid-projets {
+  grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 3 * var(--space-5)) / 4)), 1fr));
+}
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .pa-domains { grid-template-columns: 1fr 1fr; }
   .pa-domain + .pa-domain { border-top: 0; border-left: 0; }

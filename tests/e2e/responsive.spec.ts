@@ -104,4 +104,18 @@ test.describe("mise en page fluide", () => {
       .evaluate((el) => el.getBoundingClientRect().right);
     expect(Math.abs(droiteGrille - droiteDerniereCarte)).toBeLessThanOrEqual(2);
   });
+
+  test("une carte filtrée sur /projets garde sa largeur de colonne à 1 920 px", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    // « Infrastructure » ne laisse qu'un seul dossier (UGB Link, cf. tests/e2e/projets.spec.ts).
+    await page.goto("/projets?categorie=infrastructure");
+    const grille = page.locator(".pa-grid-projets");
+    await expect(page.getByTestId("project-card")).toHaveCount(1);
+    const largeurGrille = await grille.evaluate((el) => el.getBoundingClientRect().width);
+    const largeurCarte = await page
+      .getByTestId("project-card")
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().width);
+    expect(largeurCarte).toBeLessThanOrEqual(largeurGrille / 4 + 2);
+  });
 });
