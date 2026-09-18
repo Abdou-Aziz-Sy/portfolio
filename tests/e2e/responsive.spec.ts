@@ -49,6 +49,10 @@ test.describe("mise en page fluide", () => {
     await page.setViewportSize({ width: 375, height: 900 });
 
     await page.goto("/projets");
+    // /projets sert d'abord ProjectGridStatique (fallback du <Suspense>, sans data-testid
+    // "compteur") puis l'hydratation la remplace par ProjectGrid (qui le porte) : attendre ce
+    // repère avant de mesurer évite de lire une valeur prise pendant cet échange de DOM.
+    await expect(page.getByTestId("compteur")).toBeVisible();
     const hauteurCardFoot = await page
       .locator(".pa-card-foot")
       .first()
@@ -76,14 +80,19 @@ test.describe("mise en page fluide", () => {
   }
 
   test("la grille de projets passe à quatre colonnes sur grand écran", async ({ page }) => {
+    // Même repère qu'au test précédent : attendre l'hydratation (data-testid "compteur",
+    // absent du fallback ProjectGridStatique) avant de mesurer la grille.
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto("/projets");
+    await expect(page.getByTestId("compteur")).toBeVisible();
     expect(await colonnes(page, ".pa-grid-projets")).toBe(4);
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto("/projets");
+    await expect(page.getByTestId("compteur")).toBeVisible();
     expect(await colonnes(page, ".pa-grid-projets")).toBe(3);
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto("/projets");
+    await expect(page.getByTestId("compteur")).toBeVisible();
     expect(await colonnes(page, ".pa-grid-projets")).toBe(1);
   });
 
@@ -124,6 +133,12 @@ test.describe("première vue mobile", () => {
   test.skip(({ isMobile }) => !isMobile, "projet mobile uniquement");
 
   test("nom, titre, action principale et faits sont visibles sans défiler", async ({ page }) => {
+    // .pa-rise (styles/plan.css, sous @media (prefers-reduced-motion: no-preference)) anime une
+    // translateY(14px) pendant 0,7 s au chargement : sans neutralisation, une mesure prise juste
+    // après goto() peut tomber en pleine animation et décaler la boîte englobante de quelques
+    // pixels, avec un faux échec possible près de la limite des 812 px. `reduce` désactive la
+    // règle d'animation elle-même (elle ne matche plus la media query), pas seulement sa durée.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
     const hauteur = 812;
