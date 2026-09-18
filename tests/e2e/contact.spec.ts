@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("le bandeau de contact donne l'e-mail, GitHub et un bouton Copier", async ({ page, context, browserName }) => {
+test("le bandeau de contact donne l'e-mail, GitHub et un bouton Copier", async ({ page, context, browserName }, testInfo) => {
   await page.goto("/#contact");
   const bandeau = page.locator("#contact");
   await expect(bandeau).toContainText("abdouazizsy@esp.sn");
@@ -10,10 +10,21 @@ test("le bandeau de contact donne l'e-mail, GitHub et un bouton Copier", async (
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   }
   await bandeau.getByRole("button", { name: /Copier/ }).click();
-  await expect(bandeau.getByRole("button")).toContainText(/Copié|Copie impossible/);
+
+  if (testInfo.project.name === "chromium") {
+    // Permissions presse-papiers accordées : la copie doit réussir, pas juste
+    // « ne pas planter ». Un test qui accepte aussi l'échec ne prouve rien.
+    await expect(bandeau.getByRole("button")).toContainText("Copié");
+    await expect(bandeau.getByRole("status")).toContainText("Adresse copiée");
+  } else {
+    await expect(bandeau.getByRole("button")).toContainText(/Copié|Copie impossible/);
+  }
 });
 
 test("un second clic rapproché prolonge le message de confirmation", async ({ page, context, browserName }) => {
+  // Horloge simulée plutôt que waitForTimeout(...) réels : avance le temps du
+  // navigateur (et donc les setTimeout du composant) sans attendre pour de vrai.
+  await page.clock.install();
   await page.goto("/#contact");
   const bandeau = page.locator("#contact");
 
@@ -25,11 +36,11 @@ test("un second clic rapproché prolonge le message de confirmation", async ({ p
   // correspondrait plus une fois le bouton passé en état de confirmation.
   const bouton = bandeau.getByRole("button");
   await bouton.click();
-  await page.waitForTimeout(1200);
+  await page.clock.runFor(1200);
   await bouton.click();
   // 2,2 s après le premier clic (donc après ses 2 s), mais 1 s après le second
   // clic (donc avant la fin de ses 2 s) : le message doit encore être affiché.
-  await page.waitForTimeout(1000);
+  await page.clock.runFor(1000);
   await expect(bouton).toContainText(/Copié|Copie impossible/);
 });
 
