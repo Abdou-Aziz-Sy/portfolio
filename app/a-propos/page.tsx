@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { site } from "@/content/site";
 import { Button, CvLabel } from "@/components/Button";
+import { Disponibilite } from "@/components/Disponibilite";
 import { DomainColumns } from "@/components/DomainColumn";
 import { Frame } from "@/components/Frame";
 import { numeroteur, SectionHead } from "@/components/SectionHead";
@@ -23,10 +24,7 @@ export default function APropos() {
           <MetaLine
             parties={[
               site.ville,
-              <span className="pa-st-ok" key="dispo">
-                <span className="pa-dot" />
-                {site.disponibilite}
-              </span>,
+              <Disponibilite key="dispo" />,
             ]}
           />
         </span>

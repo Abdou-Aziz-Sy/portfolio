@@ -4,6 +4,7 @@ import { site } from "@/content/site";
 import { getArticles, getProjets } from "@/lib/content";
 import { ArticleList } from "@/components/ArticleList";
 import { Button } from "@/components/Button";
+import { Disponibilite } from "@/components/Disponibilite";
 import { DomainColumns } from "@/components/DomainColumn";
 import { FactStrip } from "@/components/FactStrip";
 import { FeaturedCase } from "@/components/FeaturedCase";
@@ -60,10 +61,7 @@ export default function Accueil() {
               parties={[
                 site.ville,
                 site.diplome,
-                <span className="pa-st-ok" key="dispo">
-                  <span className="pa-dot" />
-                  {site.disponibilite}
-                </span>,
+                <Disponibilite key="dispo" />,
               ]}
             />
           </span>

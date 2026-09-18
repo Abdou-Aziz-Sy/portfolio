@@ -1,4 +1,5 @@
 import { site } from "@/content/site";
+import { Disponibilite } from "@/components/Disponibilite";
 import { TechIcon } from "@/components/TechIcon";
 import { Wordmark } from "@/components/Wordmark";
 
@@ -33,10 +34,7 @@ export function Footer() {
           </ul>
         </div>
         <div className="pa-footer-bar">
-          <span className="is-dispo">
-            <span className="pa-dot is-dispo" />
-            {site.disponibiliteDetail}
-          </span>
+          <Disponibilite texte={site.disponibiliteDetail} />
           <span>Dakar, SN · © 2026</span>
         </div>
       </div>
