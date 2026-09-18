@@ -29,3 +29,17 @@
    valeur en pixels qui est héritée telle quelle — comme avant avec plan.css:5
    (line-height: 26px). */
 .pa         { font-size: clamp(16px, 15.66px + 0.092vw, 18px);  line-height: 1.625em; }
+
+/* Grilles : le nombre de colonnes dépend de la place, borné à 4. */
+.pa-grid {
+  grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 3 * var(--space-5)) / 4)), 1fr));
+}
+.pa-grid--2 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
+.pa-techs { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .pa-domains { grid-template-columns: 1fr 1fr; }
+  .pa-domain + .pa-domain { border-top: 0; border-left: 0; }
+  .pa-domain:nth-child(2) { border-left: 1px solid var(--line); }
+  .pa-domain:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+}

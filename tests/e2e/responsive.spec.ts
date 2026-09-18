@@ -63,4 +63,26 @@ test.describe("mise en page fluide", () => {
     expect(hauteurCardFoot).toBeCloseTo(26, 0);
     expect(hauteurInitiales).toBeCloseTo(26, 0);
   });
+
+  async function colonnes(page: import("@playwright/test").Page, selecteur: string) {
+    return page.locator(selecteur).first().evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  }
+
+  test("la grille de projets passe à quatre colonnes sur grand écran", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto("/projets");
+    expect(await colonnes(page, ".pa-grid-projets")).toBe(4);
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await page.goto("/projets");
+    expect(await colonnes(page, ".pa-grid-projets")).toBe(3);
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/projets");
+    expect(await colonnes(page, ".pa-grid-projets")).toBe(1);
+  });
+
+  test("les domaines passent sur deux colonnes en tablette", async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 1000 });
+    await page.goto("/");
+    expect(await colonnes(page, ".pa-domains")).toBe(2);
+  });
 });
