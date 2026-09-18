@@ -40,15 +40,17 @@ export default function Accueil() {
               <Link className="pa-inlink" href="/projets/ugb-link#architecture">
                 systèmes
               </Link>{" "}
-              <span className="pa-em">avant</span> de les coder, et j&apos;écris sur{" "}
+              <span className="pa-em">avant</span> de les coder
               {articles.length > 0 ? (
-                <Link className="pa-inlink" href="/blog">
-                  ce que j&apos;apprends
-                </Link>
-              ) : (
-                "ce que j'apprends"
-              )}{" "}
-              en chemin.
+                <>
+                  , et j&apos;écris sur{" "}
+                  <Link className="pa-inlink" href="/blog">
+                    ce que j&apos;apprends
+                  </Link>{" "}
+                  en chemin
+                </>
+              ) : null}
+              .
             </h1>
           </div>
           <div className="pa-rise d2 pa-herofig">

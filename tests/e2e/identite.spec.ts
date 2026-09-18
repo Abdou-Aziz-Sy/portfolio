@@ -28,6 +28,14 @@ test("le logo annonce un nom accessible propre, identique au texte visible", asy
   await expect(logo).toHaveAccessibleName(texteVisible);
 });
 
+test("le titre de l'accueil ne mentionne pas le blog tant qu'aucun article n'est publié", async ({ page }) => {
+  await page.goto("/");
+  // Contenu actuel : les trois articles de content/blog/ sont tous publie: false.
+  const h1 = page.locator("h1.pa-hero");
+  await expect(h1).toContainText("avant de les coder.");
+  await expect(h1).not.toContainText("ce que j'apprends");
+});
+
 test("le pied de page annonce la disponibilité, pas un faux statut de service", async ({ page }) => {
   await page.goto("/");
   const pied = page.getByRole("contentinfo");
