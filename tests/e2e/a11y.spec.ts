@@ -54,3 +54,22 @@ test("le cartouche d'initiales est nommé correctement", async ({ page }) => {
   const initiales = page.getByRole("img", { name: /Initiales d'Abdou Aziz Sy/ });
   expect(await initiales.count()).toBeGreaterThan(0);
 });
+
+test("la pastille d'une décision acceptée ne pulse pas (statut stable)", async ({ page }) => {
+  await page.goto("/projets/ugb-link");
+  const nomAnimation = await page
+    .locator(".pa-adr .pa-dot.is-accepte")
+    .first()
+    .evaluate((el) => getComputedStyle(el).animationName);
+  expect(nomAnimation).toBe("none");
+});
+
+test("le titre du dossier ne provoque pas de débordement horizontal à 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/projets/hackathon-mcn");
+  const mesure = await page.evaluate(() => ({
+    defile: document.documentElement.scrollWidth,
+    visible: document.documentElement.clientWidth,
+  }));
+  expect(mesure.defile, `${mesure.defile} > ${mesure.visible}`).toBeLessThanOrEqual(mesure.visible);
+});

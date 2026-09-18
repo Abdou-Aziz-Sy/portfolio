@@ -90,7 +90,7 @@ body { margin: 0; min-height: 100vh; }
 .pa-feature { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
 .pa-feature > * { min-width: 0; }
 .pa-diagram-scroll { max-width: 100%; }
-.pa-dot.is-dispo { animation: none !important; }
+.pa-dot.is-dispo, .pa-dot.is-accepte { animation: none !important; }
 .pa-theme { display: inline-flex; align-items: center; justify-content: center; }
 .pa-theme-icone { display: none; }
 
@@ -102,6 +102,11 @@ body { margin: 0; min-height: 100vh; }
 /* Contraste des séparateurs de métadonnées (WCAG 1.4.1/1.4.3) et statuts non ambigus. */
 .pa-meta .pa-sep { color: var(--ink-faint); }
 .pa-meta > span { white-space: nowrap; }
+/* Un titre de dossier est un texte libre, potentiellement long : contrairement aux
+   segments courts (numéro, année…), il doit pouvoir se retourner à la ligne sur ses
+   propres espaces plutôt que de forcer un débordement horizontal (`.pa-meta > span`
+   ci-dessus reste hérité par défaut, ce qui rendrait le titre entier insécable). */
+.pa-meta-titre { white-space: normal; }
 .pa-st-done { color: var(--ink-muted); }
 .pa-dot.is-accepte { background: var(--ok); border-radius: 0; }
 
