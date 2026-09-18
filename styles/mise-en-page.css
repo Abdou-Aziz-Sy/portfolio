@@ -74,6 +74,13 @@
   padding-inline: max(var(--gutter), (100% - var(--content-max)) / 2);
 }
 
+/* Schéma simplifié de la carte vedette (tâche 6) : tient dans la largeur, pas de défilement. */
+.pa-schema-simple { display: block; width: 100%; max-width: 560px; height: auto; margin-inline: auto; }
+
+/* Lien « Voir le schéma complet » sous la légende de la carte vedette : sur sa propre ligne,
+   sinon il colle au dernier mot de la MetaLine (pas d'espace entre nœuds JSX adjacents). */
+.pa-fig-lien { display: block; width: fit-content; margin-top: var(--space-2); }
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .pa-domains { grid-template-columns: 1fr 1fr; }
   .pa-domain + .pa-domain { border-top: 0; border-left: 0; }

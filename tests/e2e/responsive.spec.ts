@@ -2,6 +2,26 @@ import { expect, test } from "@playwright/test";
 
 export const LARGEURS = [320, 375, 768, 1024, 1440, 1920, 2560];
 
+/** Taille de police réellement rendue d'un texte SVG : taille déclarée × échelle du SVG. */
+async function taillesRendues(svg: import("@playwright/test").Locator, selecteur = "text") {
+  return svg.evaluate((el, sel) => {
+    const s = el as SVGSVGElement;
+    const echelle = s.getBoundingClientRect().width / s.viewBox.baseVal.width;
+    return Array.from(s.querySelectorAll(sel)).map((t) => parseFloat(getComputedStyle(t).fontSize) * echelle);
+  }, selecteur);
+}
+
+test("le schéma de la carte vedette reste lisible (texte d'au moins 11 px)", async ({ page }) => {
+  await page.goto("/");
+  const tailles = await taillesRendues(page.locator(".pa-feature-fig svg").first());
+  expect(tailles.length).toBeGreaterThan(0);
+  expect(Math.min(...tailles)).toBeGreaterThanOrEqual(11);
+  await expect(page.getByRole("link", { name: /Voir le schéma complet/ })).toHaveAttribute(
+    "href",
+    "/projets/ugb-link#architecture",
+  );
+});
+
 test.describe("mise en page fluide", () => {
   test.skip(({ isMobile }) => isMobile, "largeurs pilotées explicitement : projet bureau seulement");
 
