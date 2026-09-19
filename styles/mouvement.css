@@ -156,30 +156,27 @@ html.pa-transition-theme::view-transition-new(root) {
   .pa-dot:not(.is-open):not(.is-done), .d-ok, .pa-timeline li.is-now .pa-rail::after { animation: none; }
 
   /* Construction du schéma au défilement (chantier 3) : les blocs apparaissent, puis les flux se
-     tracent dans l'ordre du trajet d'une requête (data-ordre). Le nom de timeline est posé sur
-     `figure.pa-fig` et `.pa-card-fig` — jamais sur le `svg` lui-même : dans le schéma complet, le
-     `svg` vit dans `.pa-diagram-scroll` (styles/mise-en-page.css), un cadre à `overflow-x: auto`
-     qui deviendrait, si le nom y était posé, le conteneur de défilement de l'axe `block` — or ce
-     cadre ne défile jamais verticalement, la timeline resterait figée à sa valeur de départ.
-     `figure.pa-fig` est à l'extérieur de ce cadre : son conteneur de défilement est la page. Les
-     mini-schémas de cartes (`.pa-card-fig`) ne sont dans aucun cadre défilant, le nom peut donc s'y
-     poser directement. Deux noms distincts (schéma complet / mini-schémas) plutôt qu'un seul :
-     chaque élément qui pose `view-timeline-name` origine sa propre timeline pour son sous-arbre,
-     mais des noms distincts évitent tout risque qu'un mini-schéma capte, par accident, la timeline
-     d'un autre schéma de la même page. */
+     tracent dans l'ordre du trajet d'une requête (data-ordre). Tout s'achève à `entry 100%`,
+     c'est-à-dire dès que le schéma est entièrement visible.
+     Sujet de la timeline : le cadre du schéma (`.pa-schema-cadre`, DiagramScroller), pas la
+     `figure` entière, qui contient aussi la liste des explications (≈ 2 000 px) et repoussait la
+     fin de la construction après la sortie du schéma par le haut de l'écran. Jamais le `svg` : il
+     vit dans `.pa-diagram-scroll` (overflow-x: auto), qui deviendrait le conteneur de défilement
+     de la timeline et ne défile jamais verticalement. Deux noms distincts (schéma complet /
+     mini-schémas) pour qu'un mini-schéma ne capte jamais la timeline d'un autre schéma. */
   @supports (animation-timeline: view()) {
-    figure.pa-fig { view-timeline-name: --schema; view-timeline-axis: block; }
+    figure.pa-fig .pa-schema-cadre { view-timeline-name: --schema; view-timeline-axis: block; }
     .pa-card-fig { view-timeline-name: --schema-mini; view-timeline-axis: block; }
 
     figure.pa-fig [data-noeud] {
       animation: pa-bloc linear both;
       animation-timeline: --schema;
-      animation-range: entry 10% cover 35%;
+      animation-range: entry 0% entry 60%;
     }
     .pa-card-fig .d-box, .pa-card-fig .d-box-acc {
       animation: pa-bloc linear both;
       animation-timeline: --schema-mini;
-      animation-range: entry 10% cover 35%;
+      animation-range: entry 0% entry 60%;
     }
 
     /* Seuls les tracés continus (pathLength="1", tâche 2) reçoivent la timeline de défilement et
@@ -204,18 +201,18 @@ html.pa-transition-theme::view-transition-new(root) {
       stroke-dasharray: 1;
       animation: pa-trace linear both;
       animation-timeline: --schema-mini;
-      animation-range: entry 20% cover 40%;
+      animation-range: entry 30% entry 100%;
     }
 
     /* Une plage par palier de `data-ordre` : les flux d'un même palier (ex. les quatre branches
        API → services) se tracent ensemble, un peu après les blocs, dans l'ordre du trajet d'une
        requête. */
-    figure.pa-fig [data-flux][data-ordre="1"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 25% cover 38%; }
-    figure.pa-fig [data-flux][data-ordre="2"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 29% cover 42%; }
-    figure.pa-fig [data-flux][data-ordre="3"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 33% cover 46%; }
-    figure.pa-fig [data-flux][data-ordre="4"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 37% cover 50%; }
-    figure.pa-fig [data-flux][data-ordre="5"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 41% cover 54%; }
-    figure.pa-fig [data-flux][data-ordre="6"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 45% cover 58%; }
+    figure.pa-fig [data-flux][data-ordre="1"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 38% entry 63%; }
+    figure.pa-fig [data-flux][data-ordre="2"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 46% entry 71%; }
+    figure.pa-fig [data-flux][data-ordre="3"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 54% entry 79%; }
+    figure.pa-fig [data-flux][data-ordre="4"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 62% entry 87%; }
+    figure.pa-fig [data-flux][data-ordre="5"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 70% entry 95%; }
+    figure.pa-fig [data-flux][data-ordre="6"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 75% entry 100%; }
 
     @keyframes pa-bloc { from { opacity: 0.15; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     @keyframes pa-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }

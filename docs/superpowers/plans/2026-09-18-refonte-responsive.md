@@ -1,5 +1,7 @@
 # Chantier 2 — Refonte responsive : plan d'implémentation
 
+> **Statut au 19/09/2026 : exécuté et fusionné dans `main`** (PR #1). Les cases ci-dessous n'ont pas été tenues à jour pendant l'exécution ; l'état réel est dans l'historique Git et dans `docs/superpowers/HANDOFF-2026-09-19.md`.
+
 > **Pour les agents :** SOUS-SKILL REQUIS : utiliser superpowers:subagent-driven-development (recommandé) ou superpowers:executing-plans pour exécuter ce plan tâche par tâche. Les étapes utilisent des cases à cocher (`- [ ]`).
 
 **Goal :** faire exploiter au site toute largeur entre 320 et 2 560 px — contenu fluide jusqu'à 1 920 px, texte borné à 68 caractères, typographie fluide, première vue mobile « action d'abord », schéma simplifié lisible sur l'accueil — sans aucun débordement horizontal.

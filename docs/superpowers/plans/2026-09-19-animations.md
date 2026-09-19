@@ -1,5 +1,7 @@
 # Chantier 3 — Animations utiles : plan d'implémentation
 
+> **Statut au 19/09/2026 : exécuté et fusionné dans `main`** (tâches 1 à 8 : PR #1 ; tâche 9 et correctifs de la revue finale : branche fix/debordement-a-propos). Les cases ci-dessous n'ont pas été tenues à jour pendant l'exécution ; l'état réel est dans l'historique Git et dans `docs/superpowers/HANDOFF-2026-09-19.md`.
+
 > **Pour les agents :** SOUS-SKILL REQUIS : utiliser superpowers:subagent-driven-development (recommandé) ou superpowers:executing-plans pour exécuter ce plan tâche par tâche. Les étapes utilisent des cases à cocher (`- [ ]`).
 
 **Goal :** rendre le site vivant sans le rendre bavard. Six animations, chacune avec une fonction (orientation, mise en évidence, continuité, retour d'action), selon le fil « le plan se dessine, puis on peut le lire » ; plus le nettoyage des animations en boucle existantes.

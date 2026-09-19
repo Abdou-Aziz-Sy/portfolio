@@ -7,20 +7,32 @@ import type { Section } from "@/lib/content";
 export function TableOfContents({ sections }: { sections: Section[] }) {
   const [active, setActive] = useState<string | null>(null);
 
+  // Section en cours : le dernier titre passé au-dessus du tiers haut de l'écran. Recalculé à
+  // chaque défilement (une fois par image) plutôt que par IntersectionObserver, qui ne voit pas
+  // les titres sautés lors d'un défilement rapide ou d'un lien vers un ancre.
   useEffect(() => {
     const titres = sections
       .map((s) => document.getElementById(s.id))
       .filter((el): el is HTMLElement => el !== null);
     if (titres.length === 0) return;
-    const observateur = new IntersectionObserver(
-      (entrees) => {
-        const visible = entrees.find((e) => e.isIntersecting);
-        if (visible) setActive(visible.target.id);
-      },
-      { rootMargin: "-90px 0px -65% 0px" },
-    );
-    titres.forEach((t) => observateur.observe(t));
-    return () => observateur.disconnect();
+    let image = 0;
+    const mettreAJour = () => {
+      image = 0;
+      const seuil = window.innerHeight * 0.35;
+      const passes = titres.filter((t) => t.getBoundingClientRect().top <= seuil);
+      setActive(passes.length > 0 ? passes[passes.length - 1].id : null);
+    };
+    const surDefilement = () => {
+      if (!image) image = requestAnimationFrame(mettreAJour);
+    };
+    surDefilement();
+    window.addEventListener("scroll", surDefilement, { passive: true });
+    window.addEventListener("resize", surDefilement);
+    return () => {
+      cancelAnimationFrame(image);
+      window.removeEventListener("scroll", surDefilement);
+      window.removeEventListener("resize", surDefilement);
+    };
   }, [sections]);
 
   return (

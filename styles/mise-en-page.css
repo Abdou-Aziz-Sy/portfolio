@@ -127,6 +127,16 @@
   .pa-domain:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--line); }
 }
 
+/* Sur /a-propos, les domaines vivent dans la colonne de droite (≈ 510 px à 1 024 px) : trois
+   colonnes n'y tiennent qu'à partir de ≈ 1 064 px. Même disposition 2 + 1 qu'en tablette jusqu'à
+   1 199 px, pour garder de la marge face aux écarts de rendu des polices entre systèmes. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .pa-aboutgrid .pa-domains { grid-template-columns: 1fr 1fr; }
+  .pa-aboutgrid .pa-domain + .pa-domain { border-top: 0; border-left: 0; }
+  .pa-aboutgrid .pa-domain:nth-child(2) { border-left: 1px solid var(--line); }
+  .pa-aboutgrid .pa-domain:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+}
+
 /* Doit précéder le bloc 767 px ci-dessous : à spécificité égale, la règle .pa-herogrid la
    plus tardive dans le fichier l'emporte sous 767 px. Placé ici pour que la version mobile
    (bloc suivant) batte celle-ci quand les deux media queries matchent en même temps. */
