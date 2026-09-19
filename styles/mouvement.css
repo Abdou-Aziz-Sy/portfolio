@@ -42,6 +42,16 @@ svg[data-actif] [data-flux][data-allume] :is(.d-head, .d-head-m) { fill: var(--a
 [data-noeud]:focus-visible > rect, [data-noeud]:focus-visible > .d-db { stroke: var(--accent); stroke-width: 2.5; }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Le titre de carte devient l'en-tête de l'étude (tâche 5) : `<ViewTransition name={titre-…}
+     share="titre" default="none">` (ProjectCard.tsx, app/projets/[slug]/page.tsx) pose la
+     classe commune `titre` sur le groupe de transition partagé — CSS ne permet pas de sélecteur
+     à joker du type `::view-transition-group(titre-*)` sur les NOMS de transition (uniques par
+     paire), d'où cette classe, commune à tous les dossiers, pour régler la durée et l'allure une
+     seule fois. Seule `animation-duration`/`animation-timing-function` sont posées (jamais le
+     raccourci `animation`, qui réinitialiserait `animation-name` et annulerait l'animation par
+     défaut du navigateur — taille/position/fondu enchaîné). */
+  ::view-transition-group(.titre) { animation-duration: 300ms; animation-timing-function: ease-out; }
+
   .pa-explications > div { transition: border-color 0.2s ease, background-color 0.2s ease; }
   [data-noeud] > * { transition: opacity 0.2s ease; }
   [data-flux] :is(.d-flow, .d-line, .d-dash) { transition: stroke 0.2s ease; }

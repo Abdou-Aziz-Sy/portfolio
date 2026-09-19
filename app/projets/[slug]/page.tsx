@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getProjet, getProjets } from "@/lib/content";
 import { composantsMdx } from "@/components/mdx";
@@ -66,9 +67,15 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
             />
           </span>
         </div>
-        <h1 className="pa-hero" style={{ marginTop: 16, maxWidth: "22ch" }}>
-          {projet.accroche}
-        </h1>
+        {/* Autre bout du partage : même nom que le h3 de ProjectCard (tâche 5). Les textes
+            diffèrent (titre du dossier vs accroche) : le fondu enchaîné pendant le déplacement
+            est voulu, c'est le comportement par défaut du navigateur pour un contenu qui change
+            entre l'ancien et le nouvel instantané. */}
+        <ViewTransition name={`titre-${projet.slug}`} share="titre" default="none">
+          <h1 className="pa-hero" style={{ marginTop: 16, maxWidth: "22ch" }}>
+            {projet.accroche}
+          </h1>
+        </ViewTransition>
         <p className="pa-lead pa-muted" style={{ marginTop: 20, maxWidth: "56ch" }}>
           {projet.resume}
         </p>

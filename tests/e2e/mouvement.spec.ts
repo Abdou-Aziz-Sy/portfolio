@@ -136,3 +136,92 @@ test("la timeline de défilement progresse réellement (l'opacité d'un bloc cha
   expect(opacite1).not.toBe(opacite2);
   expect(opacite2).toBe("1");
 });
+
+// Tâche 5 : le titre de la carte UGB Link (h3) devient le titre de l'étude (h1) — transition de
+// vue nommée `titre-ugb-link`, partagée entre `components/ProjectCard.tsx` et
+// `app/projets/[slug]/page.tsx`. Le nom React n'est posé sur l'élément QUE pendant la transition
+// (pas au repos) : lire `getComputedStyle(...).viewTransitionName` après coup ne prouve rien. On
+// instrumente donc `document.startViewTransition` avant tout script de la page (`addInitScript`,
+// survit à la navigation interne au routeur App Router puisqu'il s'agit du même document) : le
+// nombre d'appels prouve qu'une transition de vue a bien été déclenchée par le clic, et la lecture
+// du nom au moment de l'appel (ancienne carte encore dans le DOM) et au moment où `ready` se résout
+// (nouvel en-tête déjà monté, cf. doc React : le nom est posé sur les deux éléments AVANT la mutation
+// du DOM par le navigateur, pour permettre la capture de l'instantané « ancien ») prouve l'égalité.
+type EtatVT = { appels: number; nomAvant: string | null; nomApres: string | null; pret: boolean };
+
+async function instrumenterViewTransition(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __vt: EtatVT };
+    w.__vt = { appels: 0, nomAvant: null, nomApres: null, pret: false };
+    const original = document.startViewTransition?.bind(document);
+    if (!original) return;
+    document.startViewTransition = ((callback: () => void | Promise<void>) => {
+      w.__vt.appels += 1;
+      const carte = document.querySelector('a[href="/projets/ugb-link"]')?.closest("article");
+      const h3 = carte?.querySelector("h3");
+      w.__vt.nomAvant = h3 ? getComputedStyle(h3).viewTransitionName : null;
+      const transition = original(callback);
+      transition.ready
+        .then(() => {
+          const h1 = document.querySelector("h1.pa-hero");
+          w.__vt.nomApres = h1 ? getComputedStyle(h1).viewTransitionName : null;
+        })
+        .catch(() => {})
+        .finally(() => {
+          w.__vt.pret = true;
+        });
+      return transition;
+    }) as typeof document.startViewTransition;
+  });
+}
+
+for (const reduit of [false, true]) {
+  test(`la carte UGB Link devient l'en-tête de l'étude (transition de vue nommée) — mouvement ${reduit ? "réduit" : "normal"}`, async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+    if (reduit) await page.emulateMedia({ reducedMotion: "reduce" });
+    const erreursConsole: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") erreursConsole.push(msg.text());
+    });
+    page.on("pageerror", (err) => erreursConsole.push(String(err)));
+    await instrumenterViewTransition(page);
+    await page.goto("/projets");
+    const carte = page.locator('a[href="/projets/ugb-link"]').first();
+    await carte.click();
+    await expect(page).toHaveURL(/\/projets\/ugb-link$/);
+    // La promesse `ready` (résolue une fois le nouvel en-tête monté ET l'instantané pris) se
+    // règle après le changement d'URL — l'attendre explicitement plutôt que de lire l'état tout
+    // de suite, sans quoi la lecture de `nomApres` est parfois prise de vitesse (constaté en
+    // exécution parallèle : `nomApres` encore `null`).
+    await page.waitForFunction(() => (window as unknown as { __vt: EtatVT }).__vt.pret);
+    const vt = await page.evaluate(() => (window as unknown as { __vt: EtatVT }).__vt);
+    expect(vt.appels).toBeGreaterThan(0);
+    expect(vt.nomAvant).toBe("titre-ugb-link");
+    expect(vt.nomAvant).not.toBe("none");
+    expect(vt.nomApres).toBe(vt.nomAvant);
+    expect(erreursConsole).toEqual([]);
+  });
+}
+
+// Régression : le remplacement du repli statique de la grille (`ProjectGridStatique`) par la
+// grille réelle (`ProjectGrid`) à l'hydratation de /projets porte, dans les deux rendus, le même
+// nom de transition sur le titre UGB Link (permis : un seul rendu est affiché à la fois). Ce
+// remplacement ne doit pas déclencher de transition de vue parasite au chargement de la page
+// (`default="none"` sur le `<ViewTransition>` du titre : seule la navigation qui apparie
+// explicitement le nom entre la carte et l'en-tête doit animer).
+test("aucune transition de vue parasite au remplacement du repli par la grille réelle sur /projets", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await instrumenterViewTransition(page);
+  await page.goto("/projets");
+  await page.waitForLoadState("networkidle");
+  const appels = await page.evaluate(
+    () => (window as unknown as { __vt: { appels: number } }).__vt.appels,
+  );
+  expect(appels).toBe(0);
+});
