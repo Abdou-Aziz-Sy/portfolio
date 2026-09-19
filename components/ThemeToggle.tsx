@@ -1,10 +1,18 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, type MouseEvent } from "react";
+import { flushSync } from "react-dom";
 
 type Theme = "dark" | "light";
 
 const abonnes = new Set<() => void>();
+
+// Classe posée sur `<html>` UNIQUEMENT pendant la transition de vue de la bascule de thème
+// (voir styles/mouvement.css) : elle restreint aux JavaScript-driven la neutralisation du fondu
+// par défaut de `::view-transition-old(root)`/`::view-transition-new(root)`, sans toucher au
+// fondu de page géré par React lors d'une navigation (ex. carte → étude, tâche 5), qui cible le
+// même pseudo-élément `root` en dehors de toute bascule de thème.
+const CLASSE_TRANSITION_THEME = "pa-transition-theme";
 
 function lireTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
@@ -18,8 +26,7 @@ function sAbonner(rappel: () => void) {
 export function ThemeToggle() {
   const theme = useSyncExternalStore<Theme>(sAbonner, lireTheme, () => "dark");
 
-  function basculer() {
-    const suivant: Theme = theme === "dark" ? "light" : "dark";
+  function ecrireTheme(suivant: Theme) {
     document.documentElement.dataset.theme = suivant;
     try {
       localStorage.setItem("theme", suivant);
@@ -27,6 +34,55 @@ export function ThemeToggle() {
       // Stockage indisponible : le thème s'applique pour la visite en cours.
     }
     abonnes.forEach((rappel) => rappel());
+  }
+
+  function basculer(evenement: MouseEvent<HTMLButtonElement>) {
+    const suivant: Theme = theme === "dark" ? "light" : "dark";
+    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Sans prise en charge de l'API ou mouvement réduit : bascule instantanée (comportement
+    // d'origine). Le mouvement réduit est vérifié au moment du clic, pas une fois pour toutes :
+    // l'utilisateur peut changer ce réglage système entre deux bascules.
+    if (!document.startViewTransition || reduit) {
+      ecrireTheme(suivant);
+      return;
+    }
+
+    // Centre du bouton cliqué et rayon jusqu'au coin le plus éloigné de l'écran : calculés avant
+    // le déclenchement de la transition, la position du bouton ne change pas pendant celle-ci.
+    const rect = evenement.currentTarget.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const rayon = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+    document.documentElement.classList.add(CLASSE_TRANSITION_THEME);
+
+    const transition = document.startViewTransition(() => {
+      // `flushSync` : la capture de l'instantané « après » a lieu à la fin de ce rappel. L'écriture
+      // de `data-theme` sur le document est synchrone et donc déjà visible, mais le libellé et
+      // l'icône du bouton dépendent d'un rendu React déclenché par la notification des abonnés
+      // (useSyncExternalStore) — sans `flushSync`, ce rendu serait différé après la capture, et
+      // l'instantané « après » montrerait encore l'ancien libellé.
+      flushSync(() => {
+        ecrireTheme(suivant);
+      });
+    });
+
+    transition.ready
+      .then(() => {
+        document.documentElement.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${rayon}px at ${x}px ${y}px)`] },
+          { duration: 450, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" },
+        );
+      })
+      .catch(() => {
+        // `ready` peut être rejetée (ex. transition annulée par le navigateur) : le thème est déjà
+        // appliqué, seul le cercle n'aura pas joué.
+      });
+
+    transition.finished.finally(() => {
+      document.documentElement.classList.remove(CLASSE_TRANSITION_THEME);
+    });
   }
 
   const texteVisible = theme === "dark" ? "Papier" : "Nuit";

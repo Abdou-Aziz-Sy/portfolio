@@ -41,6 +41,29 @@ svg[data-actif] [data-flux][data-allume] :is(.d-head, .d-head-m) { fill: var(--a
    n'est pas un rectangle). */
 [data-noeud]:focus-visible > rect, [data-noeud]:focus-visible > .d-db { stroke: var(--accent); stroke-width: 2.5; }
 
+/* Bascule de thème en cercle (tâche 7) : le fondu croisé par défaut de `::view-transition-old(root)`/
+   `::view-transition-new(root)` est remplacé par le cercle animé en JavaScript (`element.animate()`
+   sur `document.documentElement`, `pseudoElement: "::view-transition-new(root)"`, ThemeToggle.tsx).
+   `mix-blend-mode: normal` : la valeur par défaut du navigateur (`plus-lighter`) sert à combiner
+   ancien et nouveau instantané pendant un fondu croisé — sans intérêt ici puisque le nouveau
+   instantané est révélé par un cache (`clip-path`), pas mélangé à l'ancien ; conservée elle
+   produirait des couleurs fausses là où le cercle recouvre encore l'ancien thème.
+
+   Restreint à `html.pa-transition-theme` (classe posée par ThemeToggle.tsx pendant
+   `document.startViewTransition`, retirée à `transition.finished`) plutôt qu'à `root` sans condition :
+   `document.startViewTransition` manuel (bascule de thème) et les Transitions React (tâches 5 et 6)
+   ciblent le même pseudo-élément `root` du même document. Une règle inconditionnelle sur
+   `::view-transition-old(root)`/`-new(root)` couperait donc AUSSI le fondu de page par défaut d'une
+   navigation gérée par React (ex. carte → étude, tâche 5, qui n'entoure aucun élément explicite pour
+   `root` et retombe sur ce fondu natif) — vérifié : sans cette classe, la navigation carte → étude
+   perdait son fondu de page en même temps que le thème gagnait le sien. La classe limite donc la
+   règle aux seules transitions déclenchées par ThemeToggle.tsx. */
+html.pa-transition-theme::view-transition-old(root),
+html.pa-transition-theme::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   /* Le titre de carte devient l'en-tête de l'étude (tâche 5) : `<ViewTransition name={titre-…}
      share="titre" default="none">` (ProjectCard.tsx, app/projets/[slug]/page.tsx) — `default`
