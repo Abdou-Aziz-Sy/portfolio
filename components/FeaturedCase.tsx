@@ -1,6 +1,7 @@
+import Link from "next/link";
 import type { Projet } from "@/lib/content";
 import { Button } from "@/components/Button";
-import { UgbLinkDiagram } from "@/components/diagrams/UgbLinkDiagram";
+import { UgbLinkDiagramSimple } from "@/components/diagrams/UgbLinkDiagramSimple";
 import { MiniDiagram } from "@/components/diagrams/MiniDiagram";
 import { numeroDossier } from "@/components/ProjectCard";
 import { MetaLine, StatusMeta } from "@/components/StatusMeta";
@@ -14,7 +15,14 @@ export function FeaturedCase({ projet }: { projet: Projet }) {
       <div className="pa-head">
         <span className="pa-meta">
           <MetaLine
-            parties={[numeroDossier(projet.dossier), projet.titre, projet.annee, <StatusMeta key="s" statut={projet.statut} />]}
+            parties={[
+              numeroDossier(projet.dossier),
+              <span key="titre" className="pa-meta-titre">
+                {projet.titre}
+              </span>,
+              projet.annee,
+              <StatusMeta key="s" statut={projet.statut} />,
+            ]}
           />
         </span>
         <span className="pa-meta">Étude de cas</span>
@@ -33,14 +41,17 @@ export function FeaturedCase({ projet }: { projet: Projet }) {
         </div>
         <figure className="pa-feature-fig pa-fig">
           {avecSchemaComplet ? (
-            <div className="pa-diagram-scroll" tabIndex={0} role="region" aria-label="Schéma du système, défilable">
-              <UgbLinkDiagram />
-            </div>
+            <UgbLinkDiagramSimple />
           ) : (
             <MiniDiagram boites={projet.miniSchema} label={`Schéma de ${projet.titre}`} />
           )}
           <figcaption className="pa-meta">
             <MetaLine parties={["Fig. 01", "Système en production", "une VM, conteneurs Docker"]} />
+            {avecSchemaComplet ? (
+              <Link className="pa-link pa-fig-lien" href={`/projets/${projet.slug}#architecture`}>
+                Voir le schéma complet →
+              </Link>
+            ) : null}
           </figcaption>
         </figure>
       </div>

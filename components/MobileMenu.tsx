@@ -1,27 +1,42 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { NavLinks, type LienNav } from "@/components/NavLinks";
 
 export function MobileMenu({ liens }: { liens: LienNav[] }) {
   const [ouvert, setOuvert] = useState(false);
   const id = useId();
+  const boutonRef = useRef<HTMLButtonElement>(null);
+  const conteneurRef = useRef<HTMLDivElement>(null);
+
+  const fermerEtRendreFocus = useCallback(() => {
+    setOuvert(false);
+    boutonRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!ouvert) return;
     const surTouche = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOuvert(false);
+      if (e.key === "Escape") fermerEtRendreFocus();
+    };
+    const surClic = (e: PointerEvent) => {
+      if (!conteneurRef.current?.contains(e.target as Node)) setOuvert(false);
     };
     window.addEventListener("keydown", surTouche);
-    return () => window.removeEventListener("keydown", surTouche);
-  }, [ouvert]);
+    document.addEventListener("pointerdown", surClic);
+    return () => {
+      window.removeEventListener("keydown", surTouche);
+      document.removeEventListener("pointerdown", surClic);
+    };
+  }, [ouvert, fermerEtRendreFocus]);
 
   const fermer = () => setOuvert(false);
 
   return (
-    <div className="pa-mobile-only">
+    <div className="pa-mobile-only" ref={conteneurRef}>
       <button
         type="button"
+        ref={boutonRef}
         className="pa-menu"
         aria-expanded={ouvert}
         aria-controls={id}

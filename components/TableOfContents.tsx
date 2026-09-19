@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { site } from "@/content/site";
 import type { Section } from "@/lib/content";
 
 export function TableOfContents({ sections }: { sections: Section[] }) {
@@ -28,7 +29,7 @@ export function TableOfContents({ sections }: { sections: Section[] }) {
       <ol>
         {sections.map((s) => (
           <li key={s.id}>
-            <a href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}>
+            <a href={`#${s.id}`} aria-current={active === s.id ? "location" : undefined}>
               <span>{s.numero}</span>
               {s.titre}
             </a>
@@ -36,7 +37,7 @@ export function TableOfContents({ sections }: { sections: Section[] }) {
         ))}
       </ol>
       <div style={{ marginTop: 28 }}>
-        <a className="pa-btn pa-btn--secondary pa-btn--sm" href="/cv.pdf" download>
+        <a className="pa-btn pa-btn--secondary pa-btn--sm" href={site.cv.href} download={site.cv.fichier}>
           Télécharger le CV
         </a>
       </div>

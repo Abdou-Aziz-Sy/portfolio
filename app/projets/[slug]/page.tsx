@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getProjet, getProjets } from "@/lib/content";
 import { composantsMdx } from "@/components/mdx";
 import { numeroDossier } from "@/components/ProjectCard";
 import { MetaLine, StatusMeta } from "@/components/StatusMeta";
+import { ProgressionLecture } from "@/components/ProgressionLecture";
 import { TableOfContents } from "@/components/TableOfContents";
 import { statutLabel } from "@/lib/schemas";
 
@@ -45,6 +47,7 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
 
   return (
     <>
+      <ProgressionLecture />
       <header className="pa-wrap" style={{ paddingTop: 56, paddingBottom: 56 }}>
         <span className="pa-meta">
           <Link href="/projets" style={{ textDecoration: "none" }}>
@@ -55,13 +58,26 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
         <div style={{ marginTop: 20 }}>
           <span className="pa-meta">
             <MetaLine
-              parties={[numeroDossier(projet.dossier), projet.titre, projet.annee, <StatusMeta key="s" statut={projet.statut} />]}
+              parties={[
+                numeroDossier(projet.dossier),
+                <span key="titre" className="pa-meta-titre">
+                  {projet.titre}
+                </span>,
+                projet.annee,
+                <StatusMeta key="s" statut={projet.statut} />,
+              ]}
             />
           </span>
         </div>
-        <h1 className="pa-hero" style={{ marginTop: 16, maxWidth: "22ch" }}>
-          {projet.accroche}
-        </h1>
+        {/* Autre bout du partage : même nom que le h3 de ProjectCard (tâche 5). Les textes
+            diffèrent (titre du dossier vs accroche) : le fondu enchaîné pendant le déplacement
+            est voulu, c'est le comportement par défaut du navigateur pour un contenu qui change
+            entre l'ancien et le nouvel instantané. */}
+        <ViewTransition name={`titre-${projet.slug}`} share="titre" default="none">
+          <h1 className="pa-hero" style={{ marginTop: 16, maxWidth: "22ch" }}>
+            {projet.accroche}
+          </h1>
+        </ViewTransition>
         <p className="pa-lead pa-muted" style={{ marginTop: 20, maxWidth: "56ch" }}>
           {projet.resume}
         </p>
@@ -70,7 +86,18 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
             <div key={ligne.terme}>
               <dt>{ligne.terme}</dt>
               {ligne.statut ? (
-                <dd style={{ color: projet.statut === "en-production" ? "var(--ok)" : "var(--accent)", fontWeight: 600 }}>
+                <dd
+                  className={projet.statut === "termine" ? "pa-st-done" : undefined}
+                  style={{
+                    color:
+                      projet.statut === "en-production"
+                        ? "var(--ok)"
+                        : projet.statut === "en-cours"
+                          ? "var(--accent)"
+                          : undefined,
+                    fontWeight: 600,
+                  }}
+                >
                   <StatusMeta statut={projet.statut} />
                 </dd>
               ) : (

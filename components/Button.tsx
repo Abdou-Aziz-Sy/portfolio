@@ -6,12 +6,22 @@ type Props = {
   variant?: "primary" | "secondary";
   size?: "sm";
   arrow?: boolean;
-  download?: boolean;
+  download?: boolean | string;
   className?: string;
+  "data-testid"?: string;
   children: ReactNode;
 };
 
-export function Button({ href, variant = "primary", size, arrow, download, className, children }: Props) {
+export function Button({
+  href,
+  variant = "primary",
+  size,
+  arrow,
+  download,
+  className,
+  "data-testid": dataTestId,
+  children,
+}: Props) {
   const classes = ["pa-btn", `pa-btn--${variant}`, size ? `pa-btn--${size}` : "", className ?? ""]
     .filter(Boolean)
     .join(" ");
@@ -25,16 +35,21 @@ export function Button({ href, variant = "primary", size, arrow, download, class
       ) : null}
     </>
   );
-  const horsRouteur = /^(mailto:|https?:|#)/.test(href) || download;
+  const horsRouteur = /^(mailto:|https?:|#)/.test(href) || (download !== undefined && download !== false);
   if (horsRouteur) {
     return (
-      <a className={classes} href={href} download={download || undefined}>
+      <a
+        className={classes}
+        href={href}
+        download={typeof download === "string" ? download : download || undefined}
+        data-testid={dataTestId}
+      >
         {contenu}
       </a>
     );
   }
   return (
-    <Link className={classes} href={href}>
+    <Link className={classes} href={href} data-testid={dataTestId}>
       {contenu}
     </Link>
   );

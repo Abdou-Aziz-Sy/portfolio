@@ -3,7 +3,7 @@ import { Children, isValidElement, type ReactNode } from "react";
 import type { Section } from "@/lib/content";
 import { slugifier } from "@/lib/slug";
 import { DecisionRecord } from "@/components/DecisionRecord";
-import { UgbLinkDiagram } from "@/components/diagrams/UgbLinkDiagram";
+import { SchemaExplorable } from "@/components/diagrams/SchemaExplorable";
 import { FluxAvant } from "@/components/StatusLines";
 
 /** Met en gras les passages entre ** dans un texte court (listes du frontmatter MDX). */
@@ -48,7 +48,10 @@ function Liste({ prefixe, items }: { prefixe?: string; items: string[] }) {
 function Contexte({ flux, children }: { flux: [string, string][]; children: ReactNode }) {
   return (
     <div className="pa-context">
-      <div>{children}</div>
+      {/* Classe dédiée (plutôt qu'un sélecteur structurel .pa-context > div) : le paragraphe
+          de contexte est un vrai texte courant, ciblé par styles/ajouts.css (taille, hauteur
+          de ligne) et styles/mise-en-page.css (largeur bornée à 68 caractères). */}
+      <div className="pa-context-texte">{children}</div>
       <FluxAvant flux={flux} />
     </div>
   );
@@ -61,9 +64,7 @@ function Prose({ children }: { children: ReactNode }) {
 function SchemaUgbLink({ numero }: { numero: string }) {
   return (
     <figure className="pa-surface pa-fig" style={{ padding: 24 }}>
-      <div className="pa-diagram-scroll" tabIndex={0} role="region" aria-label="Schéma d'architecture, défilable">
-        <UgbLinkDiagram />
-      </div>
+      <SchemaExplorable />
       <figcaption className="pa-small" style={{ marginTop: 16 }}>
         <span className="pa-meta">Fig. {numero}</span>&nbsp; Nginx, installé sur la machine virtuelle, sert le front
         React et relaie <code>/api</code> vers Express ; les services tournent en conteneurs Docker. GitHub Actions

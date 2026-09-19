@@ -3,7 +3,8 @@ import Link from "next/link";
 import { site } from "@/content/site";
 import { getArticles, getProjets } from "@/lib/content";
 import { ArticleList } from "@/components/ArticleList";
-import { Button } from "@/components/Button";
+import { Button, CvLabel } from "@/components/Button";
+import { Disponibilite } from "@/components/Disponibilite";
 import { DomainColumns } from "@/components/DomainColumn";
 import { FactStrip } from "@/components/FactStrip";
 import { FeaturedCase } from "@/components/FeaturedCase";
@@ -24,11 +25,14 @@ export default function Accueil() {
 
   return (
     <>
-      <section className="pa-wrap" style={{ paddingTop: 88, paddingBottom: 96 }}>
+      <section className="pa-wrap pa-accueil-haut">
         <div className="pa-herogrid">
           <div className="pa-rise">
+            <span className="pa-meta" data-testid="surtitre-identite">
+              {site.nom} <span className="pa-sep">·</span> {site.metier}
+            </span>
             <h1 className="pa-hero">
-              Ingénieur logiciel à Dakar. Je construis des{" "}
+              <span className="pa-hero-intro">Ingénieur logiciel à Dakar. </span>Je construis des{" "}
               <Link className="pa-inlink" href="/projets?categorie=backend">
                 backends
               </Link>{" "}
@@ -36,16 +40,33 @@ export default function Accueil() {
               <Link className="pa-inlink" href="/projets/ugb-link#architecture">
                 systèmes
               </Link>{" "}
-              <span className="pa-em">avant</span> de les coder, et j&apos;écris sur{" "}
+              <span className="pa-em">avant</span> de les coder
               {articles.length > 0 ? (
-                <Link className="pa-inlink" href="/blog">
-                  ce que j&apos;apprends
-                </Link>
-              ) : (
-                "ce que j'apprends"
-              )}{" "}
-              en chemin.
+                <>
+                  , et j&apos;écris sur{" "}
+                  <Link className="pa-inlink" href="/blog">
+                    ce que j&apos;apprends
+                  </Link>{" "}
+                  en chemin
+                </>
+              ) : null}
+              .
             </h1>
+            <div className="pa-actions pa-actions-hero">
+              {vedette ? (
+                <Button href={`/projets/${vedette.slug}`} arrow data-testid="action-principale">
+                  Voir l&apos;étude de cas {vedette.titre}
+                </Button>
+              ) : (
+                <Button href="/projets" arrow data-testid="action-principale">
+                  Voir les projets
+                </Button>
+              )}
+              <Button href={site.cv.href} variant="secondary" download={site.cv.fichier}>
+                <CvLabel />
+              </Button>
+            </div>
+            <FactStrip faits={site.faits} variante="compacte" />
           </div>
           <div className="pa-rise d2 pa-herofig">
             <Frame feuille="01" variante="accueil" />
@@ -57,23 +78,10 @@ export default function Accueil() {
               parties={[
                 site.ville,
                 site.diplome,
-                <span className="pa-st-ok" key="dispo">
-                  <span className="pa-dot" />
-                  {site.disponibilite}
-                </span>,
+                <Disponibilite key="dispo" />,
               ]}
             />
           </span>
-          <div className="pa-actions">
-            {vedette ? (
-              <Button href={`/projets/${vedette.slug}`} arrow>
-                Voir l&apos;étude de cas {vedette.titre}
-              </Button>
-            ) : null}
-            <Button href="#contact" variant="secondary">
-              Me contacter
-            </Button>
-          </div>
         </div>
       </section>
 
@@ -98,7 +106,7 @@ export default function Accueil() {
           </p>
         </section>
 
-        <section aria-label="Faits">
+        <section aria-label="Faits" className="pa-faits-section">
           <FactStrip faits={site.faits} />
         </section>
 

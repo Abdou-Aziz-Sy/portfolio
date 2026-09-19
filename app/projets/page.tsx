@@ -29,6 +29,7 @@ export default function PageProjets() {
         </p>
       </section>
       <div className="pa-wrap" style={{ paddingBottom: 120 }}>
+        <h2 className="pa-sr">Tous les dossiers</h2>
         <Suspense fallback={<ProjectGridStatique cartes={cartes} />}>
           <ProjectGrid cartes={cartes} />
         </Suspense>

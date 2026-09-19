@@ -8,13 +8,19 @@ body { margin: 0; min-height: 100vh; }
 .pa-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .pa-initiales { font-size: 64px; font-weight: 800; letter-spacing: -0.04em; color: var(--ink-faint); }
 .pa-skip:focus { left: 8px; }
+.pa-mark { display: inline-flex; align-items: baseline; }
+/* Un seul des deux spans est rendu à la fois (`display: none`, pas un clip
+   visuel) : c'est ce qui garde le nom accessible propre — seul le span
+   effectivement rendu contribue au nom du lien, sans concaténation des deux
+   variantes (WCAG 2.5.3). */
+.pa-mark-court { display: none; }
+.pa-mark-long { white-space: nowrap; }
 
 /* Bandeau de contact */
 .pa-cta-actions { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
 .pa-btn--center { justify-content: center; }
-
-/* Grand titre de page (« Projets. », « Blog. ») */
-.pa-hero-xl { font-size: 120px; line-height: 120px; }
+.pa-cta-liens { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-4); }
+.pa-copymail { display: inline-flex; align-items: center; gap: var(--space-2); }
 
 /* Navigation : bascule de thème et menu mobile */
 .pa-nav-actions { display: flex; align-items: center; gap: var(--space-3); }
@@ -28,8 +34,6 @@ body { margin: 0; min-height: 100vh; }
 /* Cartouche du portrait */
 .pa-frame-media { display: block; width: 100%; object-fit: cover; }
 .pa-ph.pa-frame-media { display: flex; }
-.pa-frame--accueil { width: 250px; }
-.pa-frame--accueil .pa-frame-media { height: 290px; }
 .pa-frame--apropos { width: 100%; }
 .pa-frame--apropos .pa-frame-media { height: 420px; }
 .pa-herofig { padding-top: 12px; }
@@ -37,8 +41,17 @@ body { margin: 0; min-height: 100vh; }
 /* Schéma défilable sur petit écran */
 .pa-diagram-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
+/* Liste d'explications du schéma explorable (chantier 3, tâche 4) : une entrée par bloc,
+   toujours visible sous le schéma (y compris sans JavaScript). Largeur bornée par
+   --prose-max (styles/mise-en-page.css) : une seule source pour la largeur de lecture.
+   La mise en avant de l'entrée active (bordure + fond, jamais la couleur seule) est un ÉTAT
+   d'interaction : elle vit dans styles/mouvement.css, avec l'estompage du schéma. */
+.pa-explications { max-width: var(--prose-max); margin: 20px 0 0; display: flex; flex-direction: column; gap: 2px; }
+.pa-explications > div { padding: 10px 12px; border-left: 2px solid transparent; border-radius: var(--radius-1); }
+.pa-explications dt { font: 600 14px/20px var(--font-sans); color: var(--ink); }
+.pa-explications dd { margin: 2px 0 0; font-size: 14px; line-height: 21px; color: var(--ink-muted); }
+
 /* Page d'accueil */
-.pa-herogrid { display: grid; grid-template-columns: 1fr 250px; gap: 64px; align-items: start; }
 .pa-herometa { margin-top: 48px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line); }
 .pa-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .pa-main { display: flex; flex-direction: column; gap: var(--space-9); padding-top: var(--space-9); padding-bottom: var(--space-9); }
@@ -50,14 +63,20 @@ body { margin: 0; min-height: 100vh; }
 .pa-tabs button:disabled { cursor: default; opacity: 1; }
 
 /* Étude de cas */
-.pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; border-top: 1px solid var(--line); }
+/* Mise en page (grille, points de rupture) dans styles/mise-en-page.css : ce fichier ne garde
+   que l'apparence. */
+.pa-casegrid { border-top: 1px solid var(--line); }
 .pa-casebody { display: flex; flex-direction: column; padding-bottom: 96px; min-width: 0; }
 .pa-secmeta { display: block; margin-top: 72px; }
 .pa-casebody h2.pa-h2 { margin: 8px 0 24px; scroll-margin-top: 110px; }
 .pa-casebody > .pa-adr + .pa-adr { margin-top: 24px; }
-.pa-casebody > p { font-size: 18px; line-height: 30px; margin: 0 0 16px; max-width: 68ch; }
+/* max-width borné par --prose-max (styles/mise-en-page.css), pas ici : une seule source pour
+   la largeur de lecture. */
+.pa-casebody > p { font-size: 18px; line-height: 30px; margin: 0 0 16px; }
 .pa-context { display: grid; grid-template-columns: 3fr 2fr; gap: 32px; align-items: start; }
-.pa-context > p { font-size: 18px; line-height: 30px; }
+/* Le paragraphe de <Contexte> (components/mdx.tsx) est `.pa-context > .pa-context-texte > p` :
+   `.pa-context > p` ne le cible pas, son second enfant étant <FluxAvant>, une <div> sans <p>. */
+.pa-context-texte > p { font-size: 18px; line-height: 30px; }
 .pa-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .pa-ops > div { padding: 20px 24px; }
 .pa-gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
@@ -66,7 +85,7 @@ body { margin: 0; min-height: 100vh; }
 .pa-prose ul, .pa-prose ol { margin: 0; padding-left: 22px; }
 
 /* Article */
-.pa-articlegrid { display: grid; grid-template-columns: 200px minmax(0, var(--measure)) 1fr; gap: 48px; padding-top: 64px; padding-bottom: 120px; }
+.pa-articlegrid { padding-top: 64px; padding-bottom: 120px; }
 .pa-prose .pa-secmeta { margin-top: 20px; }
 .pa-prose .pa-secmeta + h2.pa-h2 { margin-top: -14px; scroll-margin-top: 110px; }
 .pa-prose > p { margin: 0; }
@@ -76,12 +95,39 @@ body { margin: 0; min-height: 100vh; }
 .pa-articlebar { margin: 28px 0 36px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 
 /* À propos */
-.pa-aboutgrid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 72px; align-items: start; padding-top: 88px; padding-bottom: 96px; }
+.pa-aboutgrid { padding-top: 88px; padding-bottom: 96px; }
 .pa-aboutside { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 100px; }
 
+.pa-theme { display: inline-flex; align-items: center; justify-content: center; }
+.pa-theme-icone { display: none; }
+
+/* Lien étendu : toute la carte est cliquable, sans ajouter de second lien. */
+.pa-card--lien { position: relative; }
+.pa-card-cible::after { content: ""; position: absolute; inset: 0; }
+.pa-card--lien:focus-within { border-color: var(--accent); transform: translateY(-3px); }
+
+/* Contraste des séparateurs de métadonnées (WCAG 1.4.1/1.4.3) et statuts non ambigus. */
+.pa-meta .pa-sep { color: var(--ink-faint); }
+.pa-meta > span { white-space: nowrap; }
+/* Pied de carte de projet (.pa-card-foot, display: flex) : à l'étroit, sans cette règle, le lien
+   « Ouvrir le dossier → » cède la place à la mention de gauche et sa flèche seule passe à la
+   ligne, avec un soulignement qui s'étend alors sur toute la largeur du lien. Le lien reste donc
+   insécable ; c'est la mention de gauche (.pa-card-foot .pa-meta) qui absorbe le manque de place
+   en repassant à la ligne. */
+.pa-card-foot .pa-link { white-space: nowrap; }
+.pa-card-foot .pa-meta { white-space: normal; }
+/* Un titre de dossier est un texte libre, potentiellement long : contrairement aux
+   segments courts (numéro, année…), il doit pouvoir se retourner à la ligne sur ses
+   propres espaces plutôt que de forcer un débordement horizontal (`.pa-meta > span`
+   ci-dessus reste hérité par défaut, ce qui rendrait le titre entier insécable). */
+.pa-meta-titre { white-space: normal; }
+.pa-st-done { color: var(--ink-muted); }
+/* Regroupe ici les deux déclarations .pa-dot.is-accepte auparavant dispersées
+   (forme + arrêt de la pulsation, cf. plan.css:287) : la pastille d'une
+   décision acceptée est carrée et stable, distincte visuellement de « en cours ». */
+.pa-dot.is-accepte { background: var(--ok); border-radius: 0; }
+
 @media (max-width: 1023px) {
-  .pa-hero-xl { font-size: 88px; line-height: 92px; }
-  .pa-casegrid, .pa-articlegrid, .pa-aboutgrid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .pa-toc, .pa-aboutside { position: static; }
   .pa-casegrid > :first-child { padding-top: 32px; }
   .pa-aboutside { max-width: 420px; }
@@ -90,20 +136,15 @@ body { margin: 0; min-height: 100vh; }
 @media (max-width: 767px) {
   .pa-desktop-only { display: none; }
   .pa-mobile-only { display: inline-flex; }
+  .pa-mark-court { display: inline; }
+  .pa-mark-long { display: none; }
   .pa-nav .pa-wrap { gap: var(--space-3); }
-  .pa-hero-xl { font-size: 64px; line-height: 68px; }
-  .pa-herogrid { grid-template-columns: 1fr; gap: 24px; }
-  .pa-herofig { order: -1; padding-top: 0; }
-  .pa-frame--accueil { width: 160px; }
-  .pa-frame--accueil .pa-frame-media { height: 160px; }
+  .pa-herofig { padding-top: 0; }
   .pa-frame--apropos .pa-frame-media { height: 320px; }
   .pa-frame--accueil .pa-frame-block { grid-template-columns: 1fr; }
   .pa-frame--accueil .pa-frame-block span + span { border-left: 0; border-top: 1px solid var(--line-strong); }
   .pa-frame--accueil .pa-initiales { font-size: 40px; }
-  .pa-diagram-scroll { overflow-x: auto; }
-  .pa-diagram-scroll svg { min-width: 760px; }
   .pa-main { gap: var(--space-8); padding-top: var(--space-8); padding-bottom: var(--space-8); }
-  .pa-h1 { font-size: 34px; line-height: 40px; }
   .pa-context, .pa-ops, .pa-gallery { grid-template-columns: 1fr; }
   .pa-secmeta { margin-top: 48px; }
   .pa-metaband { grid-template-columns: 1fr; }
@@ -112,9 +153,14 @@ body { margin: 0; min-height: 100vh; }
   .pa-next { grid-template-columns: 1fr; }
   .pa-next a + a { border-left: 0; border-top: 1px solid var(--line); }
   .pa-timeline li { grid-template-columns: 76px 20px 1fr; gap: var(--space-3); }
-  .pa-cta h2 { font-size: 34px; line-height: 40px; }
   .pa-prose { font-size: 17px; line-height: 28px; }
   .pa-footer-bar { flex-direction: column; }
+  .pa-theme { min-width: 44px; min-height: 44px; padding: 0; }
+  .pa-theme-texte { display: none; }
+  .pa-theme-icone { display: block; }
+  .pa-nav-actions { gap: var(--space-2); }
+  .pa-nav-actions .pa-btn--sm { padding: 10px 12px; }
+  .pa-nav-actions .pa-arr { display: none; }
 }
 
 /* Apparition : l'en-tête part d'un état déjà lisible (jamais invisible), ce qui garde le titre candidat au LCP. */

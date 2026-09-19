@@ -1,0 +1,228 @@
+/* Mouvement (chantier 3). Importé en DERNIER : l'emporte à spécificité égale sur plan.css,
+   mise-en-page.css et ajouts.css. Règles : aucune boucle infinie ; seules opacity, transform,
+   clip-path et stroke-dashoffset sont animées ; tout est coupé sous prefers-reduced-motion. */
+
+/* Schéma explorable (tâche 4) : allumage/estompage au survol ou à la sélection clavier,
+   posé par SchemaExplorable sur le DOM (data-actif sur le svg, data-allume sur les groupes
+   concernés). Règles INCONDITIONNELLES — l'allumé/estompé est de l'information (quel bloc
+   est actif, quels flux et blocs lui sont reliés), pas du mouvement : il s'applique donc
+   aussi sous mouvement réduit, seule la transition ci-dessous en dépend.
+
+   Ciblé sur les ENFANTS des blocs (`[data-noeud] > *`), jamais sur le `g[data-noeud]`
+   lui-même : ce dernier porte déjà l'animation de construction au défilement (`pa-bloc`,
+   plus bas), qui anime aussi `opacity` en `fill: both` — une animation active l'emporte
+   toujours sur une déclaration normale portant sur le même élément, quelle que soit sa
+   spécificité. En ciblant l'enfant plutôt que le `g`, l'estompage se compose avec cette
+   animation au lieu d'entrer en conflit avec elle (opacité effective = celle du `g`, déjà
+   résolue à 1 une fois l'apparition jouée, multipliée par celle de l'enfant).
+   Même logique pour la couleur des tracés continus (`pathLength="1"`, tâche 2) : seul leur
+   `stroke-dashoffset` est animé (`pa-trace`, plus bas) — changer `stroke` reste donc libre.
+
+   Correction (ronde 1) — les flux non reliés au bloc actif sont eux aussi estompés (couleur
+   neutre `--ink-faint`, la même que leur teinte structurelle par défaut sur `.d-line`/
+   `.d-dash`) plutôt que laissés à leur apparence par défaut : certains tracés « réels »
+   (`.d-flow`, ex. `github-deploiement`) sont bleu accent par défaut (`styles/plan.css`), donc
+   indiscernables d'un flux allumé si on ne les repeint pas explicitement en neutre quand un
+   bloc est actif et qu'ils n'y sont pas reliés. Même raisonnement pour les pointes de flèche
+   (`polygon.d-head`/`d-head-m`, dont c'est `fill`, pas `stroke`, qui porte la couleur) :
+   sans cette règle, la pointe d'un tronc allumé (ex. `api-bus`) restait `--ink-faint` alors
+   que son trait passait en accent — décalage visible sur `.work/c3t4-api.png` (ronde 1). */
+.pa-explications > div[aria-current="true"] { border-left-color: var(--accent); background: var(--accent-soft); }
+svg[data-actif] [data-noeud] > * { opacity: 0.35; }
+svg[data-actif] [data-noeud][data-allume] > * { opacity: 1; }
+svg[data-actif] [data-flux] :is(.d-flow, .d-line, .d-dash) { stroke: var(--ink-faint); }
+svg[data-actif] [data-flux][data-allume] :is(.d-flow, .d-line, .d-dash) { stroke: var(--accent); }
+svg[data-actif] [data-flux] :is(.d-head, .d-head-m) { fill: var(--ink-faint); }
+svg[data-actif] [data-flux][data-allume] :is(.d-head, .d-head-m) { fill: var(--accent); }
+
+/* Focus clavier visible sur un groupe SVG (tâche 4) : un `outline` sur un `g` ne s'affiche
+   pas de façon fiable selon les moteurs — on accentue donc plutôt le tracé de son premier
+   enfant peint (`rect` pour la plupart des blocs, `.d-db` pour PostgreSQL, dont la forme
+   n'est pas un rectangle). */
+[data-noeud]:focus-visible > rect, [data-noeud]:focus-visible > .d-db { stroke: var(--accent); stroke-width: 2.5; }
+
+/* Progression de lecture (tâche 8) : fine barre collée en haut de la fenêtre (ProgressionLecture.tsx,
+   études de cas et articles), qui grandit avec le défilement de la page grâce à
+   `animation-timeline: scroll()` — sans aucun JavaScript. Règle inconditionnelle posant l'état de
+   repos (`display: none`, `scaleX(0)`) : la barre ne s'affiche que là où le mouvement ET la prise
+   en charge du navigateur sont réunis (bloc `@supports` ci-dessous) ; ailleurs, elle n'apporte rien
+   (`aria-hidden`, cf. composant) et ne doit pas laisser un simple filet immobile à l'écran.
+   `z-index: 6` : au-dessus de l'en-tête collant (`.pa-nav`, `z-index: 5`, styles/plan.css) puisque
+   la barre lui est visuellement superposée (collée au bord supérieur de la fenêtre, 3px sur la
+   bordure haute de l'en-tête) — vérifié sur capture (.work/c3t8-milieu.png) que cela ne masque
+   aucun élément utile de l'en-tête. */
+.pa-progression {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  z-index: 6;
+}
+
+/* Bascule de thème en cercle (tâche 7) : le fondu croisé par défaut de `::view-transition-old(root)`/
+   `::view-transition-new(root)` est remplacé par le cercle animé en JavaScript (`element.animate()`
+   sur `document.documentElement`, `pseudoElement: "::view-transition-new(root)"`, ThemeToggle.tsx).
+   `mix-blend-mode: normal` : la valeur par défaut du navigateur (`plus-lighter`) sert à combiner
+   ancien et nouveau instantané pendant un fondu croisé — sans intérêt ici puisque le nouveau
+   instantané est révélé par un cache (`clip-path`), pas mélangé à l'ancien ; conservée elle
+   produirait des couleurs fausses là où le cercle recouvre encore l'ancien thème.
+
+   Restreint à `html.pa-transition-theme` (classe posée par ThemeToggle.tsx pendant
+   `document.startViewTransition`, retirée à `transition.finished`) plutôt qu'à `root` sans condition :
+   `document.startViewTransition` manuel (bascule de thème) et les Transitions React (tâches 5 et 6)
+   ciblent le même pseudo-élément `root` du même document. Une règle inconditionnelle sur
+   `::view-transition-old(root)`/`-new(root)` couperait donc AUSSI le fondu de page par défaut d'une
+   navigation gérée par React (ex. carte → étude, tâche 5, qui n'entoure aucun élément explicite pour
+   `root` et retombe sur ce fondu natif) — vérifié : sans cette classe, la navigation carte → étude
+   perdait son fondu de page en même temps que le thème gagnait le sien. La classe limite donc la
+   règle aux seules transitions déclenchées par ThemeToggle.tsx. */
+html.pa-transition-theme::view-transition-old(root),
+html.pa-transition-theme::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Le titre de carte devient l'en-tête de l'étude (tâche 5) : `<ViewTransition name={titre-…}
+     share="titre" default="none">` (ProjectCard.tsx, app/projets/[slug]/page.tsx) — `default`
+     régit le cas où ce titre PERSISTE (ni monté ni démonté) pendant une transition sans rapport
+     avec son appariement carte→étude, ex. un changement de filtre sur /projets (voir le test dédié
+     dans tests/e2e/mouvement.spec.ts) ; `share="titre"` pose la classe commune `titre` sur le
+     groupe de transition partagé — CSS ne permet pas de sélecteur à joker du type
+     `::view-transition-group(titre-*)` sur les NOMS de transition (uniques par paire), d'où cette
+     classe, commune à tous les dossiers, pour régler la durée et l'allure une seule fois. Seule
+     `animation-duration`/`animation-timing-function` sont posées (jamais le raccourci `animation`,
+     qui réinitialiserait `animation-name` et annulerait l'animation par défaut du navigateur —
+     taille/position/fondu enchaîné). */
+  ::view-transition-group(.titre) { animation-duration: 300ms; animation-timing-function: ease-out; }
+
+  /* Les filtres réorganisent la grille (tâche 6) : `<ViewTransition name={carte-…} enter={…}
+     exit={…} update={…} default="none">` sur l'enveloppe de chaque carte (ProjectGrid.tsx) — une
+     seule classe `carte`, posée pour les trois cas (persistance, sortie, entrée) UNIQUEMENT
+     pendant un changement de filtre (`transitionTypes: ["filtre-projets"]`, jamais pendant une
+     navigation carte → étude, cf. le commentaire de ProjectGrid.tsx et le test dédié dans
+     tests/e2e/mouvement.spec.ts). Comme pour `.titre`, seules `animation-duration` et
+     `animation-timing-function` sont posées (jamais le raccourci `animation`) : les trois
+     pseudo-éléments gardent ainsi l'animation par défaut du navigateur — `::view-transition-group`
+     interpole taille/position (les cartes conservées qui glissent), `::view-transition-old`/`-new`
+     le fondu par défaut (`opacity`, sortie/entrée) — chacun n'existant que quand il a un sens
+     (ancien seul = sortie, nouveau seul = entrée, les deux = mise à jour de position). */
+  ::view-transition-group(.carte) { animation-duration: 200ms; animation-timing-function: ease-out; }
+  ::view-transition-old(.carte) { animation-duration: 200ms; animation-timing-function: ease-out; }
+  ::view-transition-new(.carte) { animation-duration: 200ms; animation-timing-function: ease-out; }
+
+  .pa-explications > div { transition: border-color 0.2s ease, background-color 0.2s ease; }
+  [data-noeud] > * { transition: opacity 0.2s ease; }
+  [data-flux] :is(.d-flow, .d-line, .d-dash) { transition: stroke 0.2s ease; }
+  [data-flux] :is(.d-head, .d-head-m) { transition: fill 0.2s ease; }
+
+  /* Sommaire vivant (tâche 8) : le lien de la section visible passe à `aria-current="location"`
+     (TableOfContents.tsx, IntersectionObserver) — plan.css:224-226 fixe déjà les couleurs de
+     repos et d'état actif, ciblé ici sans le modifier pour n'ajouter que la transition (changement
+     d'état, propriétés de couleur autorisées). */
+  .pa-toc a { transition: color 0.2s ease, border-left-color 0.2s ease; }
+
+  /* Progression de lecture (tâche 8) : seule combinaison qui active la barre définie plus haut
+     (règle inconditionnelle, hors media/@supports) — mouvement non réduit ET moteur capable de
+     `animation-timeline: scroll()`. La déclaration `animation-timeline` doit venir APRÈS le
+     raccourci `animation` : ce dernier la réinitialise à `auto` (découverte de la tâche 3), donc la
+     poser avant serait aussitôt écrasée. */
+  @supports (animation-timeline: scroll()) {
+    .pa-progression {
+      display: block;
+      animation: pa-progression linear both;
+      animation-timeline: scroll(root);
+    }
+    @keyframes pa-progression { to { transform: scaleX(1); } }
+  }
+
+  /* Paquets sur les flux : trois passages puis arrêt ; le paquet s'efface à l'arrivée. */
+  .d-packet { animation: pa-paquet 2.8s linear 3 both; }
+  .pa-card .d-packet { animation-duration: 2.2s; }
+  @keyframes pa-paquet {
+    0% { stroke-dashoffset: 100; opacity: 1; }
+    90% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+  /* Flux asynchrones : trois avancées de tirets puis arrêt. */
+  .d-flow[stroke-dasharray], .d-dash { animation-iteration-count: 3; }
+  /* Pastilles et voyants : état statique (la pulsation ne portait aucune information).
+     Mêmes sélecteurs que plan.css pour l'emporter par l'ordre, sans !important. */
+  .pa-dot:not(.is-open):not(.is-done), .d-ok, .pa-timeline li.is-now .pa-rail::after { animation: none; }
+
+  /* Construction du schéma au défilement (chantier 3) : les blocs apparaissent, puis les flux se
+     tracent dans l'ordre du trajet d'une requête (data-ordre). Le nom de timeline est posé sur
+     `figure.pa-fig` et `.pa-card-fig` — jamais sur le `svg` lui-même : dans le schéma complet, le
+     `svg` vit dans `.pa-diagram-scroll` (styles/mise-en-page.css), un cadre à `overflow-x: auto`
+     qui deviendrait, si le nom y était posé, le conteneur de défilement de l'axe `block` — or ce
+     cadre ne défile jamais verticalement, la timeline resterait figée à sa valeur de départ.
+     `figure.pa-fig` est à l'extérieur de ce cadre : son conteneur de défilement est la page. Les
+     mini-schémas de cartes (`.pa-card-fig`) ne sont dans aucun cadre défilant, le nom peut donc s'y
+     poser directement. Deux noms distincts (schéma complet / mini-schémas) plutôt qu'un seul :
+     chaque élément qui pose `view-timeline-name` origine sa propre timeline pour son sous-arbre,
+     mais des noms distincts évitent tout risque qu'un mini-schéma capte, par accident, la timeline
+     d'un autre schéma de la même page. */
+  @supports (animation-timeline: view()) {
+    figure.pa-fig { view-timeline-name: --schema; view-timeline-axis: block; }
+    .pa-card-fig { view-timeline-name: --schema-mini; view-timeline-axis: block; }
+
+    figure.pa-fig [data-noeud] {
+      animation: pa-bloc linear both;
+      animation-timeline: --schema;
+      animation-range: entry 10% cover 35%;
+    }
+    .pa-card-fig .d-box, .pa-card-fig .d-box-acc {
+      animation: pa-bloc linear both;
+      animation-timeline: --schema-mini;
+      animation-range: entry 10% cover 35%;
+    }
+
+    /* Seuls les tracés continus (pathLength="1", tâche 2) reçoivent la timeline de défilement et
+       l'animation de tracé : le flux SSE (api-navigateur) porte son propre stroke-dasharray en
+       attribut, et les `.d-dash` reçoivent leurs tirets par la classe (plan.css:144) — ni l'un ni
+       l'autre n'a de pathLength et ne doit être tracé ici. Sélecteur d'attribut plutôt que
+       `:not([stroke-dasharray])` : ce dernier ne verrait pas les tirets posés en CSS sur `.d-dash`.
+       Pas de règle plus large posant `animation-timeline` sur TOUS les `.d-flow`/`.d-line` d'un
+       groupe [data-flux] (y compris ceux sans pathLength) : le flux SSE a sa propre animation en
+       temps réel (`pa-march`, plan.css) et cette règle plus spécifique, appliquée après, la
+       ferait basculer sur la timeline de défilement — figée hors défilement, elle ne rejouerait
+       plus (cf. tests/e2e/mouvement.spec.ts, test dédié à ce flux).
+       La déclaration `animation-timeline` doit venir APRÈS le raccourci `animation` : ce dernier
+       réinitialise `animation-timeline` à `auto` (il en fait partie), donc la poser avant serait
+       aussitôt écrasée. */
+    figure.pa-fig [data-flux] :is(.d-flow, .d-line)[pathLength="1"] {
+      stroke-dasharray: 1;
+      animation: pa-trace linear both;
+      animation-timeline: --schema;
+    }
+    .pa-card-fig .d-flow[pathLength="1"] {
+      stroke-dasharray: 1;
+      animation: pa-trace linear both;
+      animation-timeline: --schema-mini;
+      animation-range: entry 20% cover 40%;
+    }
+
+    /* Une plage par palier de `data-ordre` : les flux d'un même palier (ex. les quatre branches
+       API → services) se tracent ensemble, un peu après les blocs, dans l'ordre du trajet d'une
+       requête. */
+    figure.pa-fig [data-flux][data-ordre="1"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 25% cover 38%; }
+    figure.pa-fig [data-flux][data-ordre="2"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 29% cover 42%; }
+    figure.pa-fig [data-flux][data-ordre="3"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 33% cover 46%; }
+    figure.pa-fig [data-flux][data-ordre="4"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 37% cover 50%; }
+    figure.pa-fig [data-flux][data-ordre="5"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 41% cover 54%; }
+    figure.pa-fig [data-flux][data-ordre="6"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 45% cover 58%; }
+
+    @keyframes pa-bloc { from { opacity: 0.15; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes pa-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

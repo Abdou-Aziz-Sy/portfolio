@@ -19,7 +19,7 @@ export function Frame({ feuille, variante }: { feuille: string; variante: "accue
           sizes="(max-width: 767px) 160px, 360px"
         />
       ) : (
-        <div className="pa-ph pa-frame-media" role="img" aria-label={`Initiales de ${site.nom}`}>
+        <div className="pa-ph pa-frame-media" role="img" aria-label={`Initiales d'${site.nom}`}>
           <span className="pa-initiales" aria-hidden="true">
             {site.initiales}
           </span>

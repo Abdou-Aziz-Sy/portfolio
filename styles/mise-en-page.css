@@ -1,0 +1,201 @@
+/* Système de mise en page fluide (chantier 2).
+   Importé entre plan.css (généré) et ajouts.css : bat plan.css à spécificité égale,
+   perd contre ajouts.css. Règles inconditionnelles d'abord, media queries ensuite. */
+
+:root {
+  --content-max: 1920px;
+  --gutter: clamp(16px, 4vw, 96px);
+  --prose-max: 68ch;
+}
+
+/* Conteneur : le contenu utile atteint 1 920 px ; au-delà, la marge grandit. */
+.pa-wrap {
+  max-width: calc(var(--content-max) + 2 * var(--gutter));
+  padding-inline: var(--gutter);
+}
+
+/* Typographie fluide : interpolation linéaire entre 375 px et 2 560 px. */
+.pa-hero    { font-size: clamp(34px, 25.42px + 2.288vw, 84px);  line-height: 1.1; }
+.pa-hero-xl { font-size: clamp(64px, 47.52px + 4.394vw, 160px); line-height: 1; }
+.pa-h1      { font-size: clamp(32px, 26.51px + 1.465vw, 64px);  line-height: 1.12; }
+.pa-h2      { font-size: clamp(24px, 21.25px + 0.732vw, 40px);  line-height: 1.18; }
+.pa-cta h2  { font-size: clamp(34px, 28.85px + 1.373vw, 64px);  line-height: 1.12; }
+.pa-lead    { font-size: clamp(18px, 17.31px + 0.183vw, 22px);  line-height: 1.55; }
+/* line-height en em (pas sans unité) : .pa est posé sur <body>, donc hérité par tous
+   les descendants qui ne fixent pas leur propre line-height. Une valeur sans unité
+   serait héritée comme un RATIO, recalculé sur le font-size de chaque descendant
+   (ex. .pa-initiales à 64px passerait à 102,4px de hauteur de ligne). Une valeur en
+   em se calcule ici, sur .pa (≈26px à 16px de police, ≈29px à 18px), et c'est cette
+   valeur en pixels qui est héritée telle quelle — comme avant avec plan.css:5
+   (line-height: 26px). */
+.pa         { font-size: clamp(16px, 15.66px + 0.092vw, 18px);  line-height: 1.625em; }
+
+/* Grilles : le nombre de colonnes dépend de la place, borné à 4.
+   auto-fit (pas auto-fill) : le nombre d'éléments peut être inférieur au nombre de
+   pistes que la largeur permettrait (ex. « Autres dossiers » avec 3 cartes sur 4 pistes
+   possibles à 1 920 px). Avec auto-fill, la piste surnuméraire resterait vide mais
+   garderait sa part de 1fr, laissant un trou à droite au lieu de rendre cet espace aux
+   pistes occupées. auto-fit réduit les pistes vides à 0 px, ce qui a le même effet que
+   auto-fill dès que le nombre d'éléments atteint ou dépasse le nombre maximal de pistes
+   (le calcul du nombre maximal de colonnes est inchangé). */
+.pa-grid {
+  grid-template-columns: repeat(auto-fit, minmax(max(min(100%, 280px), calc((100% - 3 * var(--space-5)) / 4)), 1fr));
+}
+.pa-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+/* Bornée à 4 colonnes comme .pa-grid : .pa-techs (plan.css:256) n'a pas d'écart entre pistes. */
+.pa-techs { grid-template-columns: repeat(auto-fit, minmax(max(min(100%, 210px), calc(100% / 4)), 1fr)); }
+
+/* .pa-grid-projets (grille de /projets) est FILTRABLE par catégorie : le nombre de
+   cartes visibles varie sans rapport avec la largeur d'écran. Avec auto-fit, un filtre
+   qui ne laisse qu'une ou deux cartes les étirerait sur toute la largeur disponible
+   (une carte seule occuperait ~1 766 px à 1 920 px) au lieu de garder la largeur de
+   colonne habituelle. Cette grille doit donc revenir à auto-fill : les pistes non
+   utilisées restent vides mais gardent leur largeur de colonne, comme des espaces
+   réservés. .pa-grid-projets et .pa-grid ont chacun une seule classe en sélecteur
+   (spécificité égale) : c'est donc l'ordre qui tranche, cette règle doit rester après
+   .pa-grid pour la battre à spécificité égale. */
+.pa-grid-projets {
+  grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 3 * var(--space-5)) / 4)), 1fr));
+}
+
+/* Haut de l'accueil */
+.pa-accueil-haut { padding-block: clamp(32px, 4vw + 16px, 120px) clamp(40px, 4vw + 24px, 120px); }
+.pa-actions-hero { margin-top: var(--space-6); }
+.pa-facts--hero { display: none; }
+
+/* Déplacé depuis ajouts.css : ces règles doivent pouvoir être surchargées par les media
+   queries de ce fichier (1023 px, 1440 px, 1920 px) ; dans ajouts.css, importé après, elles
+   l'auraient emporté à spécificité égale. */
+.pa-herogrid { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 64px; align-items: start; }
+.pa-frame--accueil { width: 250px; }
+.pa-frame--accueil .pa-frame-media { height: 290px; }
+
+/* Le bandeau Présentation est pleine largeur : son contenu s'aligne sur celui de .pa-wrap. */
+.pa-intro {
+  padding-inline: max(var(--gutter), (100% - var(--content-max)) / 2);
+}
+
+/* Schéma simplifié de la carte vedette (tâche 6) : tient dans la largeur, pas de défilement. */
+.pa-schema-simple { display: block; width: 100%; max-width: 560px; height: auto; margin-inline: auto; }
+
+/* Lien « Voir le schéma complet » sous la légende de la carte vedette : sur sa propre ligne,
+   sinon il colle au dernier mot de la MetaLine (pas d'espace entre nœuds JSX adjacents). */
+.pa-fig-lien { display: block; width: fit-content; margin-top: var(--space-2); }
+
+/* Texte courant : jamais plus de 68 caractères par ligne, quelle que soit la largeur.
+   .pa-casebody > p et .pa-prose > p portent déjà cette borne ailleurs (68ch = var(--prose-max)) ;
+   les sélecteurs suivants couvrent le reste du texte courant réel des pages secondaires, que sa
+   structure HTML ne fait pas apparaître comme un simple <p> direct : le paragraphe de <Contexte>
+   (.pa-context-texte > p, components/mdx.tsx), les réponses des fiches de décision (.pa-adr dd,
+   components/DecisionRecord.tsx), le texte d'exploitation (.pa-ops p) et le détail de chaque
+   étape de la frise d'/a-propos (.pa-what p). */
+.pa-casebody > p, .pa-casebody > ul, .pa-casebody > ol,
+.pa-prose > p, .pa-prose > ul, .pa-prose > ol,
+.pa-context-texte > p, .pa-ops p, .pa-adr dd, .pa-what p, .pa-ex { max-width: var(--prose-max); }
+
+/* Schéma large : défilement dans son cadre, avec un indice tant qu'il reste du contenu à droite.
+   Inconditionnel (pas seulement sous 767px) : DiagramScroller mesure le débordement réel
+   (scrollWidth vs clientWidth) et n'active le focus/l'indice que si le cadre est effectivement
+   plus étroit que 800px, quelle que soit la largeur d'écran — une colonne de tablette ou de
+   petit ordinateur peut être plus étroite que le mobile large. */
+.pa-schema-cadre { position: relative; }
+.pa-diagram-scroll { overflow-x: auto; max-width: 100%; }
+.pa-diagram-scroll svg { min-width: 800px; }
+.pa-schema-indice {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 48px;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;
+  background: linear-gradient(90deg, transparent, var(--surface));
+  color: var(--accent); font-size: 20px; pointer-events: none;
+}
+.pa-schema-indice[hidden] { display: none; }
+
+/* Grilles et points de rupture des pages (regroupés ici depuis ajouts.css, qui ne garde que
+   l'apparence de ces composants) : étude de cas, à propos, article, carte vedette. */
+.pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; }
+.pa-articlegrid { display: grid; grid-template-columns: 200px minmax(0, var(--measure)) 1fr; gap: 48px; }
+.pa-aboutgrid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 72px; align-items: start; }
+/* Une grille dont une piste contient un schéma large doit pouvoir rétrécir : sans
+   minmax(0, …), la piste prend la largeur minimale du contenu (760 px) et élargit toute la
+   page. */
+.pa-feature { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+.pa-feature > * { min-width: 0; }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .pa-domains { grid-template-columns: 1fr 1fr; }
+  .pa-domain + .pa-domain { border-top: 0; border-left: 0; }
+  .pa-domain:nth-child(2) { border-left: 1px solid var(--line); }
+  .pa-domain:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+}
+
+/* Doit précéder le bloc 767 px ci-dessous : à spécificité égale, la règle .pa-herogrid la
+   plus tardive dans le fichier l'emporte sous 767 px. Placé ici pour que la version mobile
+   (bloc suivant) batte celle-ci quand les deux media queries matchent en même temps. */
+@media (max-width: 1023px) {
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  .pa-casegrid, .pa-articlegrid, .pa-aboutgrid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .pa-feature { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .pa-hero-intro { display: none; }
+  .pa-actions-hero { margin-top: var(--space-5); }
+  .pa-facts--hero { display: grid; grid-template-columns: 1fr 1fr; margin-top: var(--space-5); border-top: 1px solid var(--line-strong); }
+  .pa-facts--hero .pa-fact { padding: var(--space-3) var(--space-3) var(--space-3) 0; }
+  /* Le sélecteur .pa-fact + .pa-fact (plan.css) pose une bordure et un retrait à gauche sur
+     tous les faits sauf le premier ; en grille 2 colonnes, seuls les faits pairs (colonne de
+     droite) doivent garder ce retrait — les impairs (colonne de gauche) restent déjà sans
+     bordure grâce à .pa-fact:nth-child(odd) (plan.css, même point de rupture). Sans cette
+     règle, le retrait à gauche posé ci-dessus (0) s'applique aussi aux faits pairs et leur
+     texte touche le trait de séparation. */
+  .pa-facts--hero .pa-fact:nth-child(even) { padding-left: var(--space-3); }
+  .pa-facts--hero .pa-fact b { font-size: 26px; line-height: 30px; }
+  .pa-facts--hero .pa-fact span { margin-top: 2px; font-size: 12px; line-height: 16px; }
+  .pa-faits-section { display: none; }
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .pa-frame--accueil { width: 160px; }
+  .pa-frame--accueil .pa-frame-media { height: 160px; }
+  .pa-techs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pa-tech, .pa-tech > div { min-width: 0; }
+}
+
+/* En dessous de 480px, le cadre utile du schéma simplifié de la carte vedette (.pa-feature-fig,
+   en une seule colonne) devient trop étroit pour que ses sous-libellés (.d-s) restent lisibles :
+   le padding du cadre lui prend une part croissante d'un espace déjà réduit. Le réduire agrandit
+   d'autant la mise à l'échelle du schéma, sans toucher aux proportions internes du SVG. */
+@media (max-width: 479px) {
+  .pa-feature-fig { padding: 0; }
+}
+
+/* Cartouche agrandi sur grand écran : les deux blocs suivants ne peuvent jamais s'appliquer
+   en même temps que les blocs mobiles ci-dessus (min-width 1440/1920 px vs max-width 767/1023
+   px), donc aucun conflit d'ordre à gérer avec eux. */
+@media (min-width: 1440px) {
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr) 320px; gap: 96px; }
+  .pa-frame--accueil { width: 320px; }
+  .pa-frame--accueil .pa-frame-media { height: 370px; }
+  /* Spec §B : cartouche ET schéma de la carte vedette agrandis proportionnellement à partir de
+     1440px. Sans alignement à gauche, un schéma plus large que 560px resterait centré par
+     margin-inline: auto (règle inconditionnelle ci-dessus) alors que sa légende, elle, reste
+     alignée à gauche du cadre : les deux bords gauches divergeraient. */
+  .pa-schema-simple { max-width: 760px; margin-inline: 0; }
+}
+
+@media (min-width: 1920px) {
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr) 360px; }
+  .pa-frame--accueil { width: 360px; }
+  .pa-frame--accueil .pa-frame-media { height: 420px; }
+}
+
+/* Écran de faible hauteur (ex. téléphone à l'horizontale) : l'en-tête collant peut manger
+   une part excessive de l'écran. `relative` (plutôt que `static`) retire le comportement
+   collant sans changer le bloc conteneur du panneau du menu mobile : .pa-menu-panel
+   (styles/ajouts.css), en position absolute, se place par rapport au premier ancêtre
+   positionné — .pa-nav (sticky en temps normal, plan.css:39). En `static`, plus aucun
+   ancêtre ne serait positionné (ni .pa-wrap ni .pa-nav-actions ne le sont), et le panneau se
+   positionnerait par rapport au bloc conteneur initial. */
+@media (max-height: 500px) {
+  .pa-nav { position: relative; }
+  /* L'en-tête n'étant plus collant ici, réserver un espace de défilement pour elle
+     (html { scroll-padding-top }, styles/ajouts.css) n'a plus lieu d'être. */
+  html { scroll-padding-top: 0; }
+}
