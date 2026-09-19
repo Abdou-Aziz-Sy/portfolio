@@ -20,13 +20,28 @@ test("le thème sombre s'applique par défaut, bascule et reste mémorisé", asy
 // `clip-path`, animé via `element.animate()` sur le pseudo-élément `::view-transition-new(root)`
 // — voir ThemeToggle.tsx). N'a de sens que sous Chromium (API expérimentale) ; Firefox/WebKit
 // gardent la bascule instantanée, déjà couverte par le test précédent sur tous les navigateurs.
-// `expect.poll` plutôt qu'une lecture immédiate après le clic : l'animation démarre après la
-// résolution de `transition.ready` (asynchrone), pas de façon synchrone au clic.
+// L'animation est enregistrée à sa CRÉATION (interception d'`Element.animate`), pas relue dans
+// `document.getAnimations()` après coup : l'animation démarre après la résolution asynchrone de
+// `transition.ready` et ne dure que 450 ms, si bien qu'une lecture en deux temps (attendre son
+// apparition, puis lire ses propriétés) échouait dès que la transition se terminait entre les deux.
 test("le clic sur le bouton de thème anime un cercle sur ::view-transition-new(root), puis applique le thème", async ({
   page,
   browserName,
 }) => {
   test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await page.addInitScript(() => {
+    const w = window as unknown as { __animations: { pseudo: string; proprietes: string[] }[] };
+    w.__animations = [];
+    const original = Element.prototype.animate;
+    Element.prototype.animate = function (images, options) {
+      const animation = original.call(this, images, options);
+      w.__animations.push({
+        pseudo: (typeof options === "object" && options?.pseudoElement) || "",
+        proprietes: Object.keys((images as Record<string, unknown>) ?? {}),
+      });
+      return animation;
+    };
+  });
   await page.goto("/");
   const racine = page.locator("html");
   await expect(racine).toHaveAttribute("data-theme", "dark");
@@ -35,24 +50,13 @@ test("le clic sur le bouton de thème anime un cercle sur ::view-transition-new(
 
   await expect
     .poll(() =>
-      page.evaluate(
-        () =>
-          document
-            .getAnimations()
-            .filter(
-              (a) => a.effect instanceof KeyframeEffect && a.effect.pseudoElement === "::view-transition-new(root)",
-            ).length,
+      page.evaluate(() =>
+        (window as unknown as { __animations: { pseudo: string; proprietes: string[] }[] }).__animations
+          .filter((a) => a.pseudo === "::view-transition-new(root)")
+          .flatMap((a) => a.proprietes),
       ),
     )
-    .toBeGreaterThan(0);
-
-  const proprietesAnimees = await page.evaluate(() =>
-    document
-      .getAnimations()
-      .filter((a) => a.effect instanceof KeyframeEffect && a.effect.pseudoElement === "::view-transition-new(root)")
-      .flatMap((a) => (a.effect as KeyframeEffect).getKeyframes().flatMap((image) => Object.keys(image))),
-  );
-  expect(proprietesAnimees).toContain("clipPath");
+    .toContain("clipPath");
 
   await expect(racine).toHaveAttribute("data-theme", "light");
 });
