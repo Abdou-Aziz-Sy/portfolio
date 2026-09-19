@@ -454,17 +454,42 @@ test("sous mouvement réduit, un changement de filtre ne lance aucune animation 
   browserName,
 }) => {
   test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  // Lecture au moment où la transition démarre (`ready`), seul instant où ses animations existent
+  // à coup sûr : lue après le changement d'URL, la transition était parfois déjà démontée (Edge,
+  // le test passait même sans la règle) et parfois encore là avec des animations de durée nulle
+  // (Chromium 153 en CI, le test échouait avec la règle). On exige qu'aucune ne DURE.
+  await page.addInitScript(() => {
+    const w = window as unknown as { __vtDurees: { pseudo: string; duree: number }[] | null };
+    w.__vtDurees = null;
+    const original = document.startViewTransition?.bind(document);
+    if (!original) return;
+    document.startViewTransition = ((arg: Parameters<typeof original>[0]) => {
+      const transition = original(arg);
+      transition.ready.then(
+        () => {
+          w.__vtDurees = document
+            .getAnimations()
+            .filter((a) => a.effect instanceof KeyframeEffect && a.effect.pseudoElement?.startsWith("::view-transition"))
+            .map((a) => ({
+              pseudo: (a.effect as KeyframeEffect).pseudoElement ?? "",
+              duree: Number(a.effect?.getComputedTiming().activeDuration ?? 0),
+            }));
+        },
+        () => {
+          w.__vtDurees = [];
+        },
+      );
+      return transition;
+    }) as typeof document.startViewTransition;
+  });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/projets");
   await page.getByRole("button", { name: "Backend" }).click();
   await expect(page).toHaveURL(/categorie=backend/);
-  const animationsVT = await page.evaluate(() =>
-    document
-      .getAnimations()
-      .filter((a) => a.effect instanceof KeyframeEffect && a.effect.pseudoElement?.startsWith("::view-transition"))
-      .map((a) => ({ pseudo: (a.effect as KeyframeEffect).pseudoElement, playState: a.playState, duree: a.effect?.getComputedTiming().activeDuration })),
-  );
-  expect(animationsVT).toEqual([]);
+  const lire = () => page.evaluate(() => (window as unknown as { __vtDurees: { pseudo: string; duree: number }[] | null }).__vtDurees);
+  await expect.poll(lire).not.toBeNull();
+  const durees = (await lire()) ?? [];
+  expect(durees.filter((a) => a.duree > 0)).toEqual([]);
 });
 
 // Tâche 9, test reporté de la tâche 8 : la barre de progression de lecture (ProgressionLecture.tsx)
