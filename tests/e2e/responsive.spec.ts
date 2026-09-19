@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
-
-export const LARGEURS = [320, 375, 768, 1024, 1440, 1920, 2560];
+import { site } from "../../content/site";
 
 /** Taille de police réellement rendue d'un texte SVG : taille déclarée × échelle du SVG. */
 async function taillesRendues(svg: import("@playwright/test").Locator, selecteur = "text") {
@@ -20,6 +19,16 @@ test("le schéma de la carte vedette reste lisible (texte d'au moins 11 px)", as
     "href",
     "/projets/ugb-link#architecture",
   );
+});
+
+test("le schéma de la carte vedette reste lisible dès 320 px", async ({ page }) => {
+  // Cadre le plus étroit de la fourchette couverte (320 à 2560 px) : le point le plus
+  // exigeant pour les sous-libellés (.d-s) du schéma simplifié.
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto("/");
+  const tailles = await taillesRendues(page.locator(".pa-feature-fig svg").first());
+  expect(tailles.length).toBeGreaterThan(0);
+  expect(Math.min(...tailles)).toBeGreaterThanOrEqual(11);
 });
 
 test.describe("mise en page fluide", () => {
@@ -161,6 +170,44 @@ test.describe("mise en page fluide", () => {
     expect(largeur).toBeGreaterThanOrEqual(320);
   });
 
+  test("le schéma de la carte vedette est agrandi et aligné avec sa légende à partir de 1 440 px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto("/");
+    const schema = page.locator(".pa-schema-simple").first();
+    const legende = page.locator(".pa-feature-fig figcaption").first();
+    const [largeurSchema, bordSchema, bordLegende] = await Promise.all([
+      schema.evaluate((el) => el.getBoundingClientRect().width),
+      schema.evaluate((el) => el.getBoundingClientRect().left),
+      legende.evaluate((el) => el.getBoundingClientRect().left),
+    ]);
+    expect(largeurSchema).toBeGreaterThan(560);
+    expect(Math.abs(bordSchema - bordLegende)).toBeLessThanOrEqual(1);
+  });
+
+  test("la grille Stack (.pa-techs) est bornée à quatre colonnes sur grand écran", async ({ page }) => {
+    for (const largeur of [1920, 2560]) {
+      await page.setViewportSize({ width: largeur, height: 1080 });
+      await page.goto("/a-propos");
+      expect(await colonnes(page, ".pa-techs")).toBeLessThanOrEqual(4);
+    }
+  });
+
+  test("les mini-schémas des cartes de projet restent lisibles (texte d'au moins 11 px)", async ({ page }) => {
+    for (const largeur of [320, 1024, 1920]) {
+      await page.setViewportSize({ width: largeur, height: 1000 });
+      await page.goto("/projets");
+      await expect(page.getByTestId("compteur")).toBeVisible();
+      const svgs = await page.locator(".pa-card-fig svg").all();
+      expect(svgs.length).toBeGreaterThan(0);
+      for (const svg of svgs) {
+        const tailles = await taillesRendues(svg);
+        expect(Math.min(...tailles), `${largeur}px`).toBeGreaterThanOrEqual(11);
+      }
+    }
+  });
+
   test("le bandeau Présentation s'aligne sur la grille de contenu", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 1440 });
     await page.goto("/");
@@ -171,17 +218,29 @@ test.describe("mise en page fluide", () => {
     expect(Math.abs(bandeau - contenu)).toBeLessThanOrEqual(1);
   });
 
+  test("le texte des faits pairs de la première vue mobile ne touche pas le trait de séparation", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+    await page.goto("/");
+    const fait2 = page.locator(".pa-facts--hero .pa-fact").nth(1);
+    const [bordFait, bordTexte] = await Promise.all([
+      fait2.evaluate((el) => el.getBoundingClientRect().left),
+      fait2.locator("dd").evaluate((el) => el.getBoundingClientRect().left),
+    ]);
+    expect(bordTexte - bordFait).toBeGreaterThanOrEqual(8);
+  });
+
   test("les paragraphes ne dépassent pas 68 caractères par ligne sur grand écran", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 1440 });
-    // Écart au brief corrigé (ronde de correction 1) : /projets/ugb-link et /a-propos, citées
-    // par le brief, n'ont ni ".pa-casebody > p" ni ".pa-prose > p" — mais elles portent bien
-    // du texte courant réel ailleurs, qu'il fallait borner plutôt que déplacer le test :
+    // /projets/ugb-link et /a-propos portent du texte courant réel qui n'apparaît pas comme un
+    // simple ".pa-casebody > p" ou ".pa-prose > p" dans le DOM (cf. mise-en-page.css) :
     // - /projets/ugb-link : le paragraphe de <Contexte> (.pa-context-texte > p,
     //   components/mdx.tsx), les réponses des fiches de décision (.pa-adr dd,
     //   components/DecisionRecord.tsx) et le texte d'exploitation (.pa-ops p).
     // - /a-propos : le détail de chaque étape de la frise (.pa-what p,
     //   app/a-propos/page.tsx).
-    // /projets/gamecupsn reste en plus, pour couvrir ".pa-prose > p" (composant <Prose>).
+    // /projets/gamecupsn couvre en plus ".pa-prose > p" (composant <Prose>).
     for (const chemin of ["/projets/ugb-link", "/a-propos", "/projets/gamecupsn"]) {
       await page.goto(chemin);
       const { nbMesures, depasse } = await page.evaluate(() => {
@@ -216,16 +275,9 @@ test.describe("mise en page fluide", () => {
     await page.setViewportSize({ width: 900, height: 450 });
     await page.goto("/");
     const position = await page.locator(".pa-nav").evaluate((el) => getComputedStyle(el).position);
-    // Écart voulu au brief (position: static) : .pa-menu-panel (styles/ajouts.css) est en
-    // position absolute et se place par rapport au premier ancêtre positionné, aujourd'hui
-    // .pa-nav. "relative" retire le collant sans changer ce bloc conteneur — contrairement à
-    // "static", qui l'aurait fait retomber sur le bloc conteneur initial. Dans la mise en page
-    // actuelle (en-tête = premier élément de <body>, sans marge), les deux se sont révélés
-    // visuellement équivalents à l'essai (voir le rapport de tâche) ; "relative" reste choisi
-    // par prudence, pour ne pas dépendre de cette coïncidence de mise en page. On ne fige pas
-    // la valeur exacte ("relative") ici, pour ne pas figer ce détail d'implémentation : seul
-    // le retrait du collant est un comportement observable à garantir ; l'alignement du
-    // panneau, lui, est vérifié explicitement par le test suivant.
+    // On ne fige pas la valeur exacte ("relative") ici : seul le retrait du collant est un
+    // comportement observable à garantir. L'alignement du panneau du menu mobile, qui dépend
+    // de ce choix précis, est vérifié explicitement par le test suivant.
     expect(position).not.toBe("sticky");
   });
 
@@ -234,9 +286,7 @@ test.describe("mise en page fluide", () => {
   }) => {
     // 667 × 375 : sous 768 px de large (menu mobile actif, styles/ajouts.css) ET sous 500 px
     // de haut (en-tête non collant, test précédent). Vérifie que le panneau reste collé au
-    // bas de l'en-tête une fois .pa-nav passé en "relative". Un essai ponctuel (non conservé
-    // ici) a montré qu'avec "static" le panneau reste, dans cette mise en page précise, tout
-    // aussi bien placé — voir le rapport de tâche pour le détail de cet essai.
+    // bas de l'en-tête une fois .pa-nav passé en "relative".
     await page.setViewportSize({ width: 667, height: 375 });
     await page.goto("/");
     await page.getByRole("button", { name: "Menu" }).click();
@@ -274,11 +324,17 @@ test.describe("première vue mobile", () => {
       expect(boite!.y + boite!.height).toBeLessThanOrEqual(hauteur);
     }
   });
+});
 
-  test("chaque fait n'est exposé qu'une fois", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.getByRole("definition").filter({ hasText: "260" })).toHaveCount(1);
-  });
+test("chaque fait n'est exposé qu'une fois, quelle que soit la largeur", async ({ page }) => {
+  // Les variantes « compacte » (hero) et « bandeau » de FactStrip rendent toutes deux la liste
+  // complète de site.faits dans le DOM ; seule la CSS (display: none) en masque une par largeur
+  // d'écran — d'où l'intérêt de vérifier ici TOUS les faits, sur les deux projets (bureau et
+  // mobile), plutôt qu'un seul fait sur un seul projet.
+  await page.goto("/");
+  for (const fait of site.faits) {
+    await expect(page.getByRole("definition").filter({ hasText: fait.libelle })).toHaveCount(1);
+  }
 });
 
 test.describe("schéma complet de l'étude de cas", () => {
@@ -303,5 +359,28 @@ test.describe("schéma complet de l'étude de cas", () => {
     await expect(cadre).toHaveAttribute("data-deborde", "false");
     await expect(cadre).not.toHaveAttribute("tabindex", "0");
     await expect(page.getByTestId("indice-defilement")).toBeHidden();
+  });
+
+  test.describe("lisible aussi en tablette et sur petit ordinateur", () => {
+    test.skip(({ isMobile }) => isMobile, "largeurs pilotées explicitement : projet bureau seulement");
+
+    for (const largeur of [768, 1024, 1440]) {
+      test(`les libellés restent lisibles et le débordement suit la largeur réelle du cadre, à ${largeur}px`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width: largeur, height: 900 });
+        await page.goto("/projets/ugb-link#architecture");
+        const cadre = page.getByTestId("schema-defilant");
+        // Le cadre garde une largeur minimale lisible (min-width sur le SVG, inconditionnel) et
+        // défile dans son cadre dès que la colonne qui le contient est plus étroite que cette
+        // largeur minimale ; au-delà, il tient sans défiler. On mesure la largeur réelle du
+        // cadre plutôt que de la déduire de la largeur de viewport, pour ne pas dupliquer le
+        // calcul de la mise en page (gouttière, colonne latérale…) dans le test.
+        const largeurCadre = await cadre.evaluate((el) => el.clientWidth);
+        await expect(cadre).toHaveAttribute("data-deborde", largeurCadre < 800 ? "true" : "false");
+        const tailles = await taillesRendues(cadre.locator("svg").first(), ".d-t");
+        expect(Math.min(...tailles)).toBeGreaterThanOrEqual(11);
+      });
+    }
   });
 });
