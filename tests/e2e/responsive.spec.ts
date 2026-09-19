@@ -440,3 +440,39 @@ test.describe("schéma complet de l'étude de cas", () => {
     }
   });
 });
+
+// Le test de défilement horizontal (liens.spec.ts) ne voit un débordement que s'il dépasse la
+// marge latérale de la page : sous Windows, la grille « Domaines » d'/a-propos dépassait sa
+// colonne de 35 px sans rien signaler, et seul le rendu Linux de la CI l'a fait sortir de l'écran.
+// Ce test compare chaque enfant de grille ou de flex à son propre conteneur. Les cadres qui
+// défilent (overflow ≠ visible) et l'intérieur des SVG sont exclus : leur contenu peut légitimement
+// être plus large qu'eux.
+test.describe("aucun bloc ne sort de son conteneur", () => {
+  test.skip(({ isMobile }) => isMobile, "largeurs pilotées explicitement : projet bureau seulement");
+
+  for (const largeur of [375, 768, 1024, 1040, 1063, 1280, 1440]) {
+    test(`à ${largeur}px`, async ({ page }) => {
+      await page.setViewportSize({ width: largeur, height: 900 });
+      for (const chemin of ["/", "/projets", "/projets/ugb-link", "/a-propos"]) {
+        await page.goto(chemin);
+        await page.evaluate(() => document.fonts.ready);
+        const sorties = await page.evaluate(() =>
+          Array.from(document.querySelectorAll("main *"))
+            .filter((el) => !el.closest("svg"))
+            .flatMap((conteneur) => {
+              const s = getComputedStyle(conteneur);
+              if (!/(grid|flex)$/.test(s.display) || s.overflowX !== "visible") return [];
+              const bord = conteneur.getBoundingClientRect().right;
+              return Array.from(conteneur.children)
+                .filter((enfant) => enfant.getBoundingClientRect().right > bord + 1)
+                .map((enfant) => {
+                  const nom = (e: Element) => `${e.tagName.toLowerCase()}.${String(e.className).split(" ")[0]}`;
+                  return `${nom(enfant)} dépasse ${nom(conteneur)} de ${Math.round(enfant.getBoundingClientRect().right - bord)} px`;
+                });
+            }),
+        );
+        expect(sorties, `${chemin} à ${largeur}px`).toEqual([]);
+      }
+    });
+  }
+});

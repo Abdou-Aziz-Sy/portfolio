@@ -37,6 +37,12 @@ body { margin: 0; min-height: 100vh; }
 .pa-frame--apropos { width: 100%; }
 .pa-frame--apropos .pa-frame-media { height: 420px; }
 .pa-herofig { padding-top: 12px; }
+/* Légende du cartouche : dans le cadre de 250 px (160 px sur mobile), « FEUILLE 01 » dépassait
+   de 2 à 4 px. Marges intérieures réduites pour que le texte tienne, et points de suspension
+   plutôt qu'un débordement si une police s'affiche plus large ailleurs. */
+.pa-frame-block { grid-template-columns: minmax(0, 1fr) auto; }
+.pa-frame-block span { overflow: hidden; text-overflow: ellipsis; }
+.pa-frame--accueil .pa-frame-block span { padding-inline: 8px; }
 
 /* Schéma défilable sur petit écran */
 .pa-diagram-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -141,7 +147,7 @@ body { margin: 0; min-height: 100vh; }
   .pa-nav .pa-wrap { gap: var(--space-3); }
   .pa-herofig { padding-top: 0; }
   .pa-frame--apropos .pa-frame-media { height: 320px; }
-  .pa-frame--accueil .pa-frame-block { grid-template-columns: 1fr; }
+  .pa-frame--accueil .pa-frame-block { grid-template-columns: minmax(0, 1fr); }
   .pa-frame--accueil .pa-frame-block span + span { border-left: 0; border-top: 1px solid var(--line-strong); }
   .pa-frame--accueil .pa-initiales { font-size: 40px; }
   .pa-main { gap: var(--space-8); padding-top: var(--space-8); padding-bottom: var(--space-8); }
