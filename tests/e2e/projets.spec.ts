@@ -83,3 +83,23 @@ test("une étude de cas mène au dossier suivant et son sommaire pointe vers ses
   await page.getByRole("link", { name: /Dossier suivant/ }).click();
   await expect(page).toHaveURL(/\/projets\/plusutra$/);
 });
+
+// Zod ne sert qu'à valider le contenu au build. Importé par un composant client (via
+// lib/schemas.ts), il partait au navigateur : ≈ 86 Kio compressés, entièrement inutilisés.
+test("la validation du contenu (Zod) n'est pas envoyée au navigateur", async ({ page, request }) => {
+  for (const chemin of ["/", "/projets"]) {
+    await page.goto(chemin);
+    await page.waitForLoadState("networkidle");
+    const scripts = await page.evaluate(() =>
+      performance
+        .getEntriesByType("resource")
+        .map((e) => e.name)
+        .filter((n) => n.endsWith(".js")),
+    );
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const url of scripts) {
+      const code = await (await request.get(url)).text();
+      expect(code.includes("Invalid input to safeExtend"), `${chemin} charge Zod : ${url}`).toBe(false);
+    }
+  }
+});

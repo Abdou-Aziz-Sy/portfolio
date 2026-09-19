@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ViewTransition, type ReactNode } from "react";
 import { filtrerProjets, lireCategorie } from "@/lib/filters";
-import { categories, categorieLabel, type Categorie } from "@/lib/schemas";
+import { categories, categorieLabel, type Categorie } from "@/lib/categories";
 
 type Carte = { slug: string; categories: readonly string[]; carte: ReactNode };
 
