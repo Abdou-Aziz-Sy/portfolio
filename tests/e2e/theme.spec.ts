@@ -174,3 +174,25 @@ test("une bascule de thème sur /projets ne fait pas animer les groupes de trans
   );
   expect(pseudosCartesOuTitres).toEqual([]);
 });
+
+// Ronde de correction 2 : la persistance du choix dans `localStorage` doit être SYNCHRONE au
+// clic, jamais différée dans le rappel (asynchrone) de `document.startViewTransition` — un clic
+// suivi d'un rechargement ou d'une fermeture immédiate de la page ne doit jamais perdre le choix.
+// Rechargement IMMÉDIAT après le clic, sans aucune attente intermédiaire (ni `expect`, ni
+// `waitForTimeout`) : c'est précisément l'absence d'attente qui expose la fenêtre de perte si le
+// rappel n'a pas encore eu l'occasion de s'exécuter au moment de la navigation. Mouvement autorisé
+// (pas d'`emulateMedia`) pour que la transition de vue soit réellement empruntée.
+test("le choix de thème survit à un rechargement immédiat après le clic (mouvement autorisé)", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await page.goto("/");
+  const racine = page.locator("html");
+  await expect(racine).toHaveAttribute("data-theme", "dark");
+
+  await page.getByTestId("theme-toggle").click();
+  await page.reload();
+
+  await expect(racine).toHaveAttribute("data-theme", "light");
+});

@@ -33,13 +33,27 @@ function sAbonner(rappel: () => void) {
 export function ThemeToggle() {
   const theme = useSyncExternalStore<Theme>(sAbonner, lireTheme, () => "dark");
 
-  function ecrireTheme(suivant: Theme) {
-    document.documentElement.dataset.theme = suivant;
+  // Persistance dans `localStorage`, séparée de l'application visuelle du thème (ci-dessous) :
+  // ronde de correction 2 — cette écriture doit rester SYNCHRONE au clic, quel que soit le chemin
+  // emprunté ensuite (avec ou sans transition de vue). Avec transition, elle est appelée AVANT
+  // `document.startViewTransition`, jamais dans son rappel de mise à jour (exécuté de façon
+  // asynchrone par le navigateur, après la capture de l'instantané « avant ») : un clic suivi d'un
+  // rechargement ou d'une fermeture immédiate de la page perdrait sinon le choix, le rappel
+  // n'ayant pas encore eu l'occasion de s'exécuter au moment de la navigation (constaté avant ce
+  // correctif : voir le test dédié dans tests/e2e/theme.spec.ts et le rapport de tâche).
+  function persisterTheme(suivant: Theme) {
     try {
       localStorage.setItem("theme", suivant);
     } catch {
       // Stockage indisponible : le thème s'applique pour la visite en cours.
     }
+  }
+
+  // Application visuelle du thème : DOIT, elle, différer entre l'instantané « avant » et
+  // l'instantané « après » d'une transition de vue (voir `basculer`) — c'est ce qui rend le
+  // changement observable par le navigateur, à l'inverse de `persisterTheme` ci-dessus.
+  function appliquerTheme(suivant: Theme) {
+    document.documentElement.dataset.theme = suivant;
     abonnes.forEach((rappel) => rappel());
   }
 
@@ -47,11 +61,14 @@ export function ThemeToggle() {
     const suivant: Theme = theme === "dark" ? "light" : "dark";
     const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // Toujours en premier, avant tout embranchement : voir le commentaire de `persisterTheme`.
+    persisterTheme(suivant);
+
     // Sans prise en charge de l'API ou mouvement réduit : bascule instantanée (comportement
     // d'origine). Le mouvement réduit est vérifié au moment du clic, pas une fois pour toutes :
     // l'utilisateur peut changer ce réglage système entre deux bascules.
     if (!document.startViewTransition || reduit) {
-      ecrireTheme(suivant);
+      appliquerTheme(suivant);
       return;
     }
 
@@ -69,9 +86,10 @@ export function ThemeToggle() {
       // de `data-theme` sur le document est synchrone et donc déjà visible, mais le libellé et
       // l'icône du bouton dépendent d'un rendu React déclenché par la notification des abonnés
       // (useSyncExternalStore) — sans `flushSync`, ce rendu serait différé après la capture, et
-      // l'instantané « après » montrerait encore l'ancien libellé.
+      // l'instantané « après » montrerait encore l'ancien libellé. `persisterTheme` n'a PAS sa
+      // place ici : déjà appelée plus haut, de façon synchrone au clic (voir son commentaire).
       flushSync(() => {
-        ecrireTheme(suivant);
+        appliquerTheme(suivant);
       });
     });
     transitionThemeCourante = transition;

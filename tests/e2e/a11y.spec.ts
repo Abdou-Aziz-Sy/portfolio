@@ -40,18 +40,10 @@ test.describe("contraste des séparateurs de métadonnées", () => {
   test("atteint 4,5:1 en thème clair", async ({ page }) => {
     await page.goto("/projets");
     await page.getByTestId("theme-toggle").click();
-    const racine = page.locator("html");
-    // Depuis la tâche 7, la bascule passe par `document.startViewTransition` : le rappel qui écrit
-    // `data-theme` ET `localStorage` s'exécute de façon asynchrone (après la capture par le
-    // navigateur de l'instantané « avant »), pas de façon synchrone au clic. Attendre ici que
-    // l'attribut ait changé avant de recharger évite une course avec ce rappel : un rechargement
-    // immédiat pouvait l'interrompre avant l'écriture dans `localStorage`, et le rechargement
-    // retombait alors sur l'ancien thème (constaté : échec intermittent avant cet ajout).
-    await expect(racine).toHaveAttribute("data-theme", "light");
-    // Un rechargement laisse ensuite le temps à la transition de fond (`.pa-card`) de se
+    // Un rechargement laisse le temps à la transition de fond (`.pa-card`) de se
     // terminer avant la mesure, au lieu de lire une couleur intermédiaire.
     await page.reload();
-    await expect(racine).toHaveAttribute("data-theme", "light");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     const couleurs = await contrasteSeparateur(page);
     expect(contraste(lire(couleurs.texte), lire(couleurs.fond))).toBeGreaterThanOrEqual(4.5);
   });
