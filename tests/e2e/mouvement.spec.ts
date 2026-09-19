@@ -206,13 +206,19 @@ for (const reduit of [false, true]) {
   });
 }
 
-// Régression : le remplacement du repli statique de la grille (`ProjectGridStatique`) par la
+// Garde-fou de non-régression (PAS une preuve du rôle de `default="none"` — voir le test suivant
+// pour celle-ci) : le remplacement du repli statique de la grille (`ProjectGridStatique`) par la
 // grille réelle (`ProjectGrid`) à l'hydratation de /projets porte, dans les deux rendus, le même
-// nom de transition sur le titre UGB Link (permis : un seul rendu est affiché à la fois). Ce
-// remplacement ne doit pas déclencher de transition de vue parasite au chargement de la page
-// (`default="none"` sur le `<ViewTransition>` du titre : seule la navigation qui apparie
-// explicitement le nom entre la carte et l'en-tête doit animer).
-test("aucune transition de vue parasite au remplacement du repli par la grille réelle sur /projets", async ({
+// nom de transition sur le titre UGB Link (permis : un seul rendu est affiché à la fois). Vérifié
+// que ce test passe QUE `default="none"` soit posé ou non sur le `<ViewTransition>` du titre : la
+// protection observée ici ne vient donc pas de cette prop. Cause la plus probable (non prouvée
+// dans le code, seulement par élimination) : ce remplacement a lieu pendant l'hydratation
+// initiale, avant que le titre ne participe à une véritable Transition React côté client — hors
+// de ce cadre, React n'appelle pas `document.startViewTransition` du tout (0 appel constaté),
+// quelle que soit la configuration du `<ViewTransition>`. Le test reste utile comme garde-fou :
+// si ce remplacement se mettait un jour à déclencher une transition de vue (parasite, visible),
+// il le détecterait.
+test("le remplacement du repli par la grille réelle à l'hydratation de /projets ne déclenche aucune transition de vue", async ({
   page,
   browserName,
 }) => {
@@ -224,4 +230,51 @@ test("aucune transition de vue parasite au remplacement du repli par la grille r
     () => (window as unknown as { __vt: { appels: number } }).__vt.appels,
   );
   expect(appels).toBe(0);
+});
+
+// Preuve du rôle réel de `default="none"` : un changement de filtre sur /projets (clic sur l'onglet
+// « Backend », qui reste compatible avec UGB Link — categories: [backend, infrastructure, ia] dans
+// content/projets/ugb-link.mdx — sa carte n'est donc ni démontée ni remontée, seulement réordonnée/
+// conservée) passe par `router.replace` (components/ProjectGrid.tsx), une Transition React côté
+// client, SANS RAPPORT avec l'appariement carte→étude. Le titre partagé PERSISTE pendant cette
+// transition (ni monté ni démonté) : selon la doc React, un `<ViewTransition>` nommé qui persiste
+// ainsi reçoit par défaut un fondu enchaîné à chaque transition de la page, sauf `default="none"`.
+//
+// Vérifié manuellement (retrait temporaire de `default="none"` sur les deux `<ViewTransition>`,
+// rétabli ensuite) :
+//   - AVEC `default="none"` (code livré) : `document.startViewTransition` n'est même PAS appelé
+//     pour ce changement de filtre (0 appel) — react semble reconnaître qu'aucun `<ViewTransition>`
+//     de la page ne participerait, et n'invoque donc pas l'API du navigateur. Protection encore
+//     plus forte qu'un simple nom "none".
+//   - SANS `default="none"` : `document.startViewTransition` EST appelé, et le nom capturé au
+//     moment de l'appel est "titre-ugb-link" (pas "none") — le titre partagé aurait donc animé sur
+//     un simple changement de filtre, sans aucun rapport avec la navigation carte→étude.
+// D'où l'assertion ci-dessous : quel que soit le nombre d'appels observés, le nom "titre-ugb-link"
+// ne doit JAMAIS apparaître dans les noms capturés pendant ce changement de filtre.
+test("un changement de filtre sur /projets (transition sans rapport) ne fait pas animer le titre partagé", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await page.addInitScript(() => {
+    const w = window as unknown as { __vtFiltre: { appels: number; noms: string[] } };
+    w.__vtFiltre = { appels: 0, noms: [] };
+    const original = document.startViewTransition?.bind(document);
+    if (!original) return;
+    document.startViewTransition = ((callback: () => void | Promise<void>) => {
+      w.__vtFiltre.appels += 1;
+      const h3 = document.querySelector('a[href="/projets/ugb-link"]')?.closest("article")?.querySelector("h3");
+      w.__vtFiltre.noms.push(h3 ? getComputedStyle(h3).viewTransitionName : "(introuvable)");
+      return original(callback);
+    }) as typeof document.startViewTransition;
+  });
+  await page.goto("/projets");
+  await page.getByRole("button", { name: "Backend" }).click();
+  await expect(page).toHaveURL(/categorie=backend/);
+  // La carte UGB Link doit toujours être là (categorie backend) : le filtre ne l'a pas démontée.
+  await expect(page.locator('a[href="/projets/ugb-link"]')).toBeVisible();
+  const etat = await page.evaluate(
+    () => (window as unknown as { __vtFiltre: { appels: number; noms: string[] } }).__vtFiltre,
+  );
+  expect(etat.noms).not.toContain("titre-ugb-link");
 });
