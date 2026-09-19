@@ -32,6 +32,14 @@
 4. **Schéma explorable.** Un bloc sélectionnable est une bascule : `role="button"` + `aria-pressed`. En mode explorable, le `<svg>` passe de `role="img"` à `role="group"` (un `role="img"` rendrait ses enfants inaccessibles).
 5. **Élément partagé carte → étude.** Le titre de la carte (`h3`, `projet.titre`) se transforme en titre principal de l'étude de cas (`h1`, `projet.accroche`) : textes différents, donc fondu enchaîné pendant le déplacement. Le mini-schéma n'a pas d'équivalent dans l'en-tête de l'étude ; il ne reçoit pas de nom partagé.
 
+## Points d'attention issus de la revue finale du chantier 2
+
+1. **Deux définitions de `@keyframes pa-rise`** (`plan.css:295` et `ajouts.css`, la seconde gagne). Ne pas réutiliser `.pa-rise` pour les animations au défilement : créer des noms neufs dans `mouvement.css`.
+2. **`transform` déjà animé sur les cartes** (`.pa-card:hover`, `.pa-card--lien:focus-within`, transition de 0,25 s). Toute animation d'entrée d'une carte porte sur l'enveloppe (`.pa-grid-projets > div`) ou utilise la propriété `translate`, jamais `transform` de la carte elle-même.
+3. **Grille de `/projets` remplacée à l'hydratation** (repli `ProjectGridStatique` du `<Suspense>` → `ProjectGrid`). Un `<ViewTransition>` animerait ce remplacement comme une entrée : poser les mêmes noms `carte-<slug>` sur les deux rendus et désactiver l'animation d'apparition (`enter`/`exit`) au premier affichage (tâche 6).
+4. **Tests de mise en page exposés au mouvement.** Dès la tâche 1, `tests/e2e/responsive.spec.ts` et les autres tests qui mesurent des positions passent `test.use({ reducedMotion: "reduce" })` en tête de fichier ; `tests/e2e/mouvement.spec.ts`, lui, garde le mouvement.
+5. **Cercle de thème et en-tête collant** (`z-index: 5`) : vérifier sur capture que l'en-tête n'apparaît pas au-dessus de la capture animée ; au besoin, donner un `view-transition-name` à l'en-tête (tâche 7).
+
 ## Fichiers
 
 - Créer : `styles/mouvement.css`, `components/diagrams/SchemaExplorable.tsx`, `components/ProgressionLecture.tsx`, `tests/e2e/mouvement.spec.ts`.
@@ -133,6 +141,8 @@ Attendu : ÉCHEC du premier test (`pa-packet`, `pa-march`, `pa-pulse`, `pa-blink
 }
 ```
 
+En tête de `tests/e2e/responsive.spec.ts` (et de tout fichier de test qui mesure des positions ou des tailles), ajouter `test.use({ reducedMotion: "reduce" });` pour isoler ces tests des animations à venir ; retirer alors les `emulateMedia({ reducedMotion: "reduce" })` locaux devenus redondants.
+
 Dans `styles/ajouts.css`, retirer `animation: none !important;` des règles `.pa-dot.is-dispo` et `.pa-dot.is-accepte` (désormais couvertes par `mouvement.css`), en gardant leurs autres déclarations. Vérifier ensuite par le test que ces pastilles restent immobiles (test existant de `tests/e2e/identite.spec.ts` et de `tests/e2e/a11y.spec.ts`).
 
 - [ ] **Step 4: Relancer et vérifier le succès**
@@ -144,7 +154,7 @@ pnpm test:e2e tests/e2e/mouvement.spec.ts tests/e2e/identite.spec.ts tests/e2e/a
 - [ ] **Step 5: Commit**
 
 ```bash
-git add styles/mouvement.css app/globals.css styles/ajouts.css tests/e2e/mouvement.spec.ts
+git add styles/mouvement.css app/globals.css styles/ajouts.css tests/e2e/mouvement.spec.ts tests/e2e/responsive.spec.ts
 git commit -m "feat(mouvement): fichier dédié, fin des animations en boucle, garde-fous du mouvement réduit"
 ```
 
@@ -344,7 +354,7 @@ Textes d'explication (à reprendre tels quels ; ils ne s'appuient que sur le sch
 
 - [ ] **Step 1: Test qui échoue** : chaque enveloppe de carte de `ProjectGrid` a un `view-transition-name` calculé unique (`carte-<slug>`) ; après un filtre, le compteur `aria-live` annonce le bon nombre et l'URL porte `?categorie=` (comportement existant inchangé).
 
-- [ ] **Step 2: Implémenter** : envelopper chaque `<div key={c.slug}>` dans `<ViewTransition name={`carte-${c.slug}`}>` ; `router.replace` étant une transition dans Next, l'animation s'active seule (le vérifier dans la documentation lue à la tâche 5). Durée 200 ms. Ne pas toucher `ProjectGridStatique`.
+- [ ] **Step 2: Implémenter** : envelopper chaque `<div key={c.slug}>` dans `<ViewTransition name={`carte-${c.slug}`}>`, dans `ProjectGrid` ET dans `ProjectGridStatique` (mêmes noms, pour que le remplacement du repli à l'hydratation ne soit pas animé comme une entrée) ; désactiver l'animation d'apparition au premier affichage (props `enter` / `exit` de `<ViewTransition>` selon la documentation lue à la tâche 5). `router.replace` étant une transition dans Next, l'animation de réorganisation s'active seule (le vérifier). Durée 200 ms. Ajouter un test : au chargement de `/projets` (Chromium), aucune animation de transition de vue n'est lancée.
 
 - [ ] **Step 3: Succès vérifié**, suite complète, **commit** : `feat(mouvement): les filtres réorganisent la grille en douceur`.
 
