@@ -428,3 +428,52 @@ test("le sommaire annonce la section visible via aria-current=\"location\"", asy
   await expect(lienActif).toHaveAttribute("aria-current", "location");
   await expect(lienActif).toHaveText(/Architecture/);
 });
+
+// Tâche 9, test reporté de la tâche 6 : la règle commune « tout est coupé sous
+// prefers-reduced-motion » (styles/mouvement.css, règle générale en fin de fichier — pas une règle
+// propre aux cartes) neutralise `::view-transition-group(*)`, `::view-transition-old(*)` et
+// `::view-transition-new(*)` par `animation: none !important`, quel que soit le nom porté. Ce test
+// ne porte donc pas sur l'appel de `document.startViewTransition` (react peut toujours l'invoquer :
+// voir les tests plus haut sur `__vtCartes.appels`) mais sur le résultat concret : aucune animation
+// dont l'effet cible un pseudo-élément `::view-transition-*` ne doit apparaître dans
+// `document.getAnimations()` juste après le clic sur un filtre.
+//
+// `await expect(page).toHaveURL(...)` avant la lecture, PAS un simple enchaînement clic→lecture :
+// vérifié par expérimentation (commentant temporairement la règle CSS ci-dessus, jamais committé)
+// qu'une lecture immédiatement après `click()` renvoie systématiquement un tableau vide qu'importe
+// que la règle soit présente ou non — `router.replace` déclenche `document.startViewTransition` de
+// façon asynchrone (après le retour de `click()`), donc lire trop tôt ne prouve rien : ce n'est pas
+// une lecture « avant que l'animation ait eu lieu », mais une lecture « avant que la transition
+// n'ait même commencé ». Attendre le changement d'URL est la première preuve observable que
+// `router.replace` — donc la transition — a bien été traité : à ce moment, avec la règle retirée,
+// `document.getAnimations()` contient bien des `::view-transition-group/-old(carte-…)`,
+// `::view-transition-old(root)` etc. (constaté à plusieurs reprises) ; avec la règle en place
+// (code livré), le tableau est vide. Le test échoue donc bien sans la règle, et passe avec.
+test("sous mouvement réduit, un changement de filtre ne lance aucune animation de transition de vue sur les cartes", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/projets");
+  await page.getByRole("button", { name: "Backend" }).click();
+  await expect(page).toHaveURL(/categorie=backend/);
+  const animationsVT = await page.evaluate(() =>
+    document
+      .getAnimations()
+      .filter((a) => a.effect instanceof KeyframeEffect && a.effect.pseudoElement?.startsWith("::view-transition"))
+      .map((a) => ({ pseudo: (a.effect as KeyframeEffect).pseudoElement, playState: a.playState })),
+  );
+  expect(animationsVT).toEqual([]);
+});
+
+// Tâche 9, test reporté de la tâche 8 : la barre de progression de lecture (ProgressionLecture.tsx)
+// n'est montée que sur les pages d'étude de cas (app/projets/[slug]/page.tsx, app/blog/[slug]/page.tsx)
+// — jamais sur l'accueil, la liste des projets ou la page « à propos », qui n'ont pas de longue
+// lecture linéaire à mesurer.
+test("la barre de progression est absente en dehors des pages de lecture longue", async ({ page }) => {
+  for (const chemin of ["/", "/projets", "/a-propos"]) {
+    await page.goto(chemin);
+    await expect(page.getByTestId("progression")).toHaveCount(0);
+  }
+});
