@@ -109,6 +109,17 @@
 }
 .pa-schema-indice[hidden] { display: none; }
 
+/* Grilles et points de rupture des pages (regroupés ici depuis ajouts.css, qui ne garde que
+   l'apparence de ces composants) : étude de cas, à propos, article, carte vedette. */
+.pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; }
+.pa-articlegrid { display: grid; grid-template-columns: 200px minmax(0, var(--measure)) 1fr; gap: 48px; }
+.pa-aboutgrid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 72px; align-items: start; }
+/* Une grille dont une piste contient un schéma large doit pouvoir rétrécir : sans
+   minmax(0, …), la piste prend la largeur minimale du contenu (760 px) et élargit toute la
+   page. */
+.pa-feature { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+.pa-feature > * { min-width: 0; }
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .pa-domains { grid-template-columns: 1fr 1fr; }
   .pa-domain + .pa-domain { border-top: 0; border-left: 0; }
@@ -121,6 +132,8 @@
    (bloc suivant) batte celle-ci quand les deux media queries matchent en même temps. */
 @media (max-width: 1023px) {
   .pa-herogrid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  .pa-casegrid, .pa-articlegrid, .pa-aboutgrid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .pa-feature { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 767px) {
@@ -141,6 +154,8 @@
   .pa-herogrid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .pa-frame--accueil { width: 160px; }
   .pa-frame--accueil .pa-frame-media { height: 160px; }
+  .pa-techs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pa-tech, .pa-tech > div { min-width: 0; }
 }
 
 /* En dessous de 480px, le cadre utile du schéma simplifié de la carte vedette (.pa-feature-fig,

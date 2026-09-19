@@ -53,7 +53,9 @@ body { margin: 0; min-height: 100vh; }
 .pa-tabs button:disabled { cursor: default; opacity: 1; }
 
 /* Étude de cas */
-.pa-casegrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; border-top: 1px solid var(--line); }
+/* Mise en page (grille, points de rupture) dans styles/mise-en-page.css : ce fichier ne garde
+   que l'apparence. */
+.pa-casegrid { border-top: 1px solid var(--line); }
 .pa-casebody { display: flex; flex-direction: column; padding-bottom: 96px; min-width: 0; }
 .pa-secmeta { display: block; margin-top: 72px; }
 .pa-casebody h2.pa-h2 { margin: 8px 0 24px; scroll-margin-top: 110px; }
@@ -73,7 +75,7 @@ body { margin: 0; min-height: 100vh; }
 .pa-prose ul, .pa-prose ol { margin: 0; padding-left: 22px; }
 
 /* Article */
-.pa-articlegrid { display: grid; grid-template-columns: 200px minmax(0, var(--measure)) 1fr; gap: 48px; padding-top: 64px; padding-bottom: 120px; }
+.pa-articlegrid { padding-top: 64px; padding-bottom: 120px; }
 .pa-prose .pa-secmeta { margin-top: 20px; }
 .pa-prose .pa-secmeta + h2.pa-h2 { margin-top: -14px; scroll-margin-top: 110px; }
 .pa-prose > p { margin: 0; }
@@ -83,15 +85,9 @@ body { margin: 0; min-height: 100vh; }
 .pa-articlebar { margin: 28px 0 36px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 
 /* À propos */
-.pa-aboutgrid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 72px; align-items: start; padding-top: 88px; padding-bottom: 96px; }
+.pa-aboutgrid { padding-top: 88px; padding-bottom: 96px; }
 .pa-aboutside { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 100px; }
 
-/* Une grille dont une piste contient un schéma large doit pouvoir rétrécir :
-   sans minmax(0, …), la piste prend la largeur minimale du contenu (760 px)
-   et élargit toute la page. */
-.pa-feature { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
-.pa-feature > * { min-width: 0; }
-.pa-diagram-scroll { max-width: 100%; }
 .pa-dot.is-dispo { animation: none !important; }
 .pa-theme { display: inline-flex; align-items: center; justify-content: center; }
 .pa-theme-icone { display: none; }
@@ -116,11 +112,9 @@ body { margin: 0; min-height: 100vh; }
 .pa-dot.is-accepte { background: var(--ok); border-radius: 0; animation: none !important; }
 
 @media (max-width: 1023px) {
-  .pa-casegrid, .pa-articlegrid, .pa-aboutgrid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .pa-toc, .pa-aboutside { position: static; }
   .pa-casegrid > :first-child { padding-top: 32px; }
   .pa-aboutside { max-width: 420px; }
-  .pa-feature { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 767px) {
@@ -145,20 +139,12 @@ body { margin: 0; min-height: 100vh; }
   .pa-timeline li { grid-template-columns: 76px 20px 1fr; gap: var(--space-3); }
   .pa-prose { font-size: 17px; line-height: 28px; }
   .pa-footer-bar { flex-direction: column; }
-  /* .pa-feature en une seule piste est déjà fixé par le bloc ≤ 1023px ci-dessus
-     (il reste hérité en dessous de 767px, pas besoin de le répéter ici). */
   .pa-theme { min-width: 44px; min-height: 44px; padding: 0; }
   .pa-theme-texte { display: none; }
   .pa-theme-icone { display: block; }
   .pa-nav-actions { gap: var(--space-2); }
   .pa-nav-actions .pa-btn--sm { padding: 10px 12px; }
   .pa-nav-actions .pa-arr { display: none; }
-  /* Sous 767 px, la piste minimale de 210 px de .pa-techs (plan.css) dépasse la
-     largeur disponible (ex. 320 px) : la grille déborde. Comme pour .pa-feature,
-     minmax(0, …) plus min-width: 0 sur les items laisse le contenu (icône + texte)
-     rétrécir et le texte se retourner à la ligne plutôt que forcer la page à défiler. */
-  .pa-techs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .pa-tech, .pa-tech > div { min-width: 0; }
 }
 
 /* Apparition : l'en-tête part d'un état déjà lisible (jamais invisible), ce qui garde le titre candidat au LCP. */
