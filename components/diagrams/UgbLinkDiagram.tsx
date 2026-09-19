@@ -58,16 +58,6 @@ export const SEGMENTS_UGB: readonly SegmentUgb[] = [
 ];
 
 /**
- * Attributs `data-flux`/`data-ordre`/`data-relie` d'un groupe de flux, lus depuis
- * `SEGMENTS_UGB` : garantit que le rendu et l'export ne peuvent pas diverger.
- */
-function flux(id: string) {
-  const segment = SEGMENTS_UGB.find((s) => s.id === id);
-  if (!segment) throw new Error(`segment UGB inconnu : ${id}`);
-  return { "data-flux": segment.id, "data-ordre": segment.ordre, "data-relie": segment.relie.join(" ") };
-}
-
-/**
  * Textes d'explication du schéma (tâche 4), un par bloc, dans l'ordre de `NOEUDS_UGB`.
  * Repris tels quels du tableau de spécification : vérifiés contre le schéma complet et
  * l'étude de cas (`content/projets/ugb-link.mdx`). `titre` sert aussi de nom accessible
@@ -135,20 +125,11 @@ export function idExplicationUgb(id: NoeudUgb) {
 }
 
 /**
- * Attributs d'accessibilité posés sur un `g[data-noeud]` en mode explorable : bascule de
- * bouton (état initial non pressé, la sélection réelle est appliquée après montage par
- * `SchemaExplorable`, ce qui garde un rendu serveur identique au premier rendu client) et
- * lien vers son explication dans la liste `<dl>`.
+ * Identifiant de la consigne clavier du mode explorable (tâche 4, ronde de correction 1),
+ * liée au `svg` par `aria-describedby` ; le texte visible correspondant vit dans
+ * `SchemaExplorable`, sous le schéma.
  */
-function proprietesNoeud(id: NoeudUgb) {
-  return {
-    tabIndex: 0,
-    role: "button" as const,
-    "aria-pressed": false,
-    "aria-label": EXPLICATIONS_UGB[id].titre,
-    "aria-describedby": idExplicationUgb(id),
-  };
-}
+export const ID_CONSIGNE_UGB = "ugb-consigne-clavier";
 
 /** Branches du tronc `api-bus`, listées dans l'ordre vertical (y croissant) du tracé. */
 const BRANCHES_API = [
@@ -164,13 +145,76 @@ const BRANCHES_API = [
  * le modèle de langage tourne dans le conteneur `ollama` ; l'OCR tourne dans l'API.
  *
  * `explorable` (tâche 4) : pose la charpente d'accessibilité du mode explorable (rôle de
- * groupe plutôt que d'image, blocs focalisables et nommés) sans porter lui-même l'état
- * d'interaction — `SchemaExplorable` l'applique après montage, pour garder un rendu serveur
- * complet et identique au premier rendu client (aucune hydratation divergente).
+ * groupe plutôt que d'image, blocs focalisables et nommés). État entièrement DÉCLARATIF
+ * (ronde de correction 1) : `actif` (bloc survolé ou sélectionné), `selection` (bascule
+ * persistante) et `focalise` (tabindex itinérant — un seul bloc dans l'ordre de tabulation à
+ * la fois) sont des props ordinaires, jamais du DOM manipulé après montage — ce composant n'a
+ * donc aucun hook et reste utilisable côté serveur, y compris quand `explorable` est vrai.
+ * `SchemaExplorable` porte l'état React et se contente de le passer ici ; sans JavaScript (ou
+ * avant hydratation), `actif`/`selection` valent `null`, `focalise` vaut `undefined` (premier
+ * bloc) : rien n'est allumé ni estompé, le rendu reste celui, inerte, du schéma statique.
  */
-export function UgbLinkDiagram({ explorable = false }: { explorable?: boolean } = {}) {
+export function UgbLinkDiagram({
+  explorable = false,
+  actif = null,
+  selection = null,
+  focalise,
+}: {
+  explorable?: boolean;
+  /** Bloc dont les flux et voisins doivent s'allumer (sélection sinon survol). */
+  actif?: NoeudUgb | null;
+  /** Bloc dont la sélection est persistante (bascule par Entrée/Espace/clic). */
+  selection?: NoeudUgb | null;
+  /** Bloc qui porte l'arrêt de tabulation unique ; par défaut le premier de `NOEUDS_UGB`. */
+  focalise?: NoeudUgb;
+} = {}) {
+  const blocFocalisable = focalise ?? NOEUDS_UGB[0];
+
+  // Un segment est allumé si sa liste `relie` contient le bloc actif (troncs partagés
+  // compris, ex. api-bus) ; les blocs allumés sont l'union de ces listes — qui contient
+  // toujours le bloc actif lui-même, en plus de ses voisins.
+  const segmentsAllumes = explorable && actif ? SEGMENTS_UGB.filter((s) => s.relie.includes(actif)) : [];
+  const idsSegmentsAllumes = new Set(segmentsAllumes.map((s) => s.id));
+  const blocsAllumes = new Set(segmentsAllumes.flatMap((s) => s.relie));
+
+  /**
+   * Attributs `data-flux`/`data-ordre`/`data-relie`/`data-allume` d'un groupe de flux, lus
+   * depuis `SEGMENTS_UGB` : garantit que le rendu et l'export ne peuvent pas diverger.
+   */
+  function flux(id: string) {
+    const segment = SEGMENTS_UGB.find((s) => s.id === id);
+    if (!segment) throw new Error(`segment UGB inconnu : ${id}`);
+    return {
+      "data-flux": segment.id,
+      "data-ordre": segment.ordre,
+      "data-relie": segment.relie.join(" "),
+      ...(idsSegmentsAllumes.has(id) ? { "data-allume": "true" } : {}),
+    };
+  }
+
+  /**
+   * Attributs d'un bloc en mode explorable : tabindex itinérant (0 pour `blocFocalisable`,
+   * -1 pour les autres — un seul arrêt de tabulation dans tout le schéma), bascule de bouton,
+   * allumage, et lien vers son explication dans la liste `<dl>`.
+   */
+  function proprietesNoeud(id: NoeudUgb) {
+    return {
+      tabIndex: blocFocalisable === id ? 0 : -1,
+      role: "button" as const,
+      "aria-pressed": selection === id,
+      "aria-label": EXPLICATIONS_UGB[id].titre,
+      "aria-describedby": idExplicationUgb(id),
+      ...(blocsAllumes.has(id) ? { "data-allume": "true" } : {}),
+    };
+  }
+
   return (
-    <svg viewBox="0 0 980 482" role={explorable ? "group" : "img"} aria-labelledby="ugb-schema-titre">
+    <svg
+      viewBox="0 0 980 482"
+      role={explorable ? "group" : "img"}
+      aria-labelledby="ugb-schema-titre"
+      {...(explorable ? { "data-actif": actif ?? undefined, "aria-describedby": ID_CONSIGNE_UGB } : {})}
+    >
       <title id="ugb-schema-titre">
         Schéma du système UGB Link : le navigateur passe par Nginx, installé sur la machine virtuelle, qui sert le
         front React et relaie l&apos;API Express. Dans Docker Compose, l&apos;API s&apos;appuie sur PostgreSQL, Redis,
