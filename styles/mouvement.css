@@ -1,0 +1,24 @@
+/* Mouvement (chantier 3). Importé en DERNIER : l'emporte à spécificité égale sur plan.css,
+   mise-en-page.css et ajouts.css. Règles : aucune boucle infinie ; seules opacity, transform,
+   clip-path et stroke-dashoffset sont animées ; tout est coupé sous prefers-reduced-motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Paquets sur les flux : trois passages puis arrêt ; le paquet s'efface à l'arrivée. */
+  .d-packet { animation: pa-paquet 2.8s linear 3 both; }
+  .pa-card .d-packet { animation-duration: 2.2s; }
+  @keyframes pa-paquet {
+    0% { stroke-dashoffset: 100; opacity: 1; }
+    90% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+  /* Flux asynchrones : trois avancées de tirets puis arrêt. */
+  .d-flow[stroke-dasharray], .d-dash { animation-iteration-count: 3; }
+  /* Pastilles et voyants : état statique (la pulsation ne portait aucune information).
+     Mêmes sélecteurs que plan.css pour l'emporter par l'ordre, sans !important. */
+  .pa-dot:not(.is-open):not(.is-done), .d-ok, .pa-timeline li.is-now .pa-rail::after { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

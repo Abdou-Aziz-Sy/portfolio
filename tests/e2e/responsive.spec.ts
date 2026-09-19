@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { site } from "../../content/site";
 
+// Ce fichier ne mesure que des positions et des tailles (boîtes, colonnes, polices) : le
+// mouvement (styles/mouvement.css) ne doit jamais décaler une mesure prise juste après goto().
+test.use({ reducedMotion: "reduce" });
+
 /** Taille de police réellement rendue d'un texte SVG : taille déclarée × échelle du SVG. */
 async function taillesRendues(svg: import("@playwright/test").Locator, selecteur = "text") {
   return svg.evaluate((el, sel) => {
@@ -359,9 +363,9 @@ test.describe("première vue mobile", () => {
     // .pa-rise (styles/plan.css, sous @media (prefers-reduced-motion: no-preference)) anime une
     // translateY(14px) pendant 0,7 s au chargement : sans neutralisation, une mesure prise juste
     // après goto() peut tomber en pleine animation et décaler la boîte englobante de quelques
-    // pixels, avec un faux échec possible près de la limite des 812 px. `reduce` désactive la
-    // règle d'animation elle-même (elle ne matche plus la media query), pas seulement sa durée.
-    await page.emulateMedia({ reducedMotion: "reduce" });
+    // pixels, avec un faux échec possible près de la limite des 812 px. Le mouvement réduit
+    // (test.use en tête de fichier) désactive la règle d'animation elle-même, pas seulement sa
+    // durée.
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
     const hauteur = 812;

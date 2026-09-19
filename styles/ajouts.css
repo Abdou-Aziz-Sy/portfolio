@@ -88,7 +88,6 @@ body { margin: 0; min-height: 100vh; }
 .pa-aboutgrid { padding-top: 88px; padding-bottom: 96px; }
 .pa-aboutside { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 100px; }
 
-.pa-dot.is-dispo { animation: none !important; }
 .pa-theme { display: inline-flex; align-items: center; justify-content: center; }
 .pa-theme-icone { display: none; }
 
@@ -116,7 +115,7 @@ body { margin: 0; min-height: 100vh; }
 /* Regroupe ici les deux déclarations .pa-dot.is-accepte auparavant dispersées
    (forme + arrêt de la pulsation, cf. plan.css:287) : la pastille d'une
    décision acceptée est carrée et stable, distincte visuellement de « en cours ». */
-.pa-dot.is-accepte { background: var(--ok); border-radius: 0; animation: none !important; }
+.pa-dot.is-accepte { background: var(--ok); border-radius: 0; }
 
 @media (max-width: 1023px) {
   .pa-toc, .pa-aboutside { position: static; }
