@@ -2,7 +2,37 @@
    mise-en-page.css et ajouts.css. Règles : aucune boucle infinie ; seules opacity, transform,
    clip-path et stroke-dashoffset sont animées ; tout est coupé sous prefers-reduced-motion. */
 
+/* Schéma explorable (tâche 4) : allumage/estompage au survol ou à la sélection clavier,
+   posé par SchemaExplorable sur le DOM (data-actif sur le svg, data-allume sur les groupes
+   concernés). Règles INCONDITIONNELLES — l'allumé/estompé est de l'information (quel bloc
+   est actif, quels flux et blocs lui sont reliés), pas du mouvement : il s'applique donc
+   aussi sous mouvement réduit, seule la transition ci-dessous en dépend.
+
+   Ciblé sur les ENFANTS des blocs (`[data-noeud] > *`), jamais sur le `g[data-noeud]`
+   lui-même : ce dernier porte déjà l'animation de construction au défilement (`pa-bloc`,
+   plus bas), qui anime aussi `opacity` en `fill: both` — une animation active l'emporte
+   toujours sur une déclaration normale portant sur le même élément, quelle que soit sa
+   spécificité. En ciblant l'enfant plutôt que le `g`, l'estompage se compose avec cette
+   animation au lieu d'entrer en conflit avec elle (opacité effective = celle du `g`, déjà
+   résolue à 1 une fois l'apparition jouée, multipliée par celle de l'enfant).
+   Même logique pour la couleur des tracés continus (`pathLength="1"`, tâche 2) : seul leur
+   `stroke-dashoffset` est animé (`pa-trace`, plus bas) — changer `stroke` reste donc libre. */
+.pa-explications > div[aria-current="true"] { border-left-color: var(--accent); background: var(--accent-soft); }
+svg[data-actif] [data-noeud] > * { opacity: 0.35; }
+svg[data-actif] [data-noeud][data-allume] > * { opacity: 1; }
+svg[data-actif] [data-flux][data-allume] :is(.d-flow, .d-line, .d-dash) { stroke: var(--accent); }
+
+/* Focus clavier visible sur un groupe SVG (tâche 4) : un `outline` sur un `g` ne s'affiche
+   pas de façon fiable selon les moteurs — on accentue donc plutôt le tracé de son premier
+   enfant peint (`rect` pour la plupart des blocs, `.d-db` pour PostgreSQL, dont la forme
+   n'est pas un rectangle). */
+[data-noeud]:focus-visible > rect, [data-noeud]:focus-visible > .d-db { stroke: var(--accent); stroke-width: 2.5; }
+
 @media (prefers-reduced-motion: no-preference) {
+  .pa-explications > div { transition: border-color 0.2s ease, background-color 0.2s ease; }
+  [data-noeud] > * { transition: opacity 0.2s ease; }
+  [data-flux] :is(.d-flow, .d-line, .d-dash) { transition: stroke 0.2s ease; }
+
   /* Paquets sur les flux : trois passages puis arrêt ; le paquet s'efface à l'arrivée. */
   .d-packet { animation: pa-paquet 2.8s linear 3 both; }
   .pa-card .d-packet { animation-duration: 2.2s; }

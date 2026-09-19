@@ -67,6 +67,89 @@ function flux(id: string) {
   return { "data-flux": segment.id, "data-ordre": segment.ordre, "data-relie": segment.relie.join(" ") };
 }
 
+/**
+ * Textes d'explication du schéma (tâche 4), un par bloc, dans l'ordre de `NOEUDS_UGB`.
+ * Repris tels quels du tableau de spécification : vérifiés contre le schéma complet et
+ * l'étude de cas (`content/projets/ugb-link.mdx`). `titre` sert aussi de nom accessible
+ * (`aria-label`) au bloc correspondant en mode explorable.
+ */
+export const EXPLICATIONS_UGB: Record<NoeudUgb, { titre: string; texte: string }> = {
+  navigateur: {
+    titre: "Navigateur",
+    texte:
+      "Les agents utilisent l'application dans leur navigateur ; les changements leur arrivent en direct, sans recharger la page.",
+  },
+  github: {
+    titre: "GitHub Actions",
+    texte: "Construit l'application, la déploie par SSH, puis vérifie que le site public répond.",
+  },
+  nginx: {
+    titre: "Nginx",
+    texte:
+      "Installé sur la machine virtuelle, hors de Docker : il sert le front et relaie /api vers Express. La mise en mémoire tampon est désactivée pour les flux en direct.",
+  },
+  front: {
+    titre: "Front React",
+    texte: "L'interface, compilée en fichiers statiques et servie par Nginx.",
+  },
+  api: {
+    titre: "API Express",
+    texte:
+      "Les routes, les rôles et l'OCR des documents scannés. Un bus d'événements en mémoire pousse chaque message aux seuls utilisateurs concernés.",
+  },
+  postgresql: {
+    titre: "PostgreSQL",
+    texte: "Les données des huit processus.",
+  },
+  redis: {
+    titre: "Redis",
+    texte: "Le cache et les files d'attente.",
+  },
+  minio: {
+    titre: "MinIO",
+    texte: "Le stockage des documents.",
+  },
+  ollama: {
+    titre: "Ollama",
+    texte:
+      "Un petit modèle de langage dans son propre conteneur : il lit le document d'un appel à candidature et répond en JSON pour pré-remplir le formulaire.",
+  },
+  sauvegarde: {
+    titre: "Sauvegarde",
+    texte: "Une sauvegarde nocturne de la base et des documents.",
+  },
+  deploiement: {
+    titre: "Déploiement",
+    texte: "La mise à jour des conteneurs sur la machine virtuelle.",
+  },
+  stockage: {
+    titre: "Stockage distant",
+    texte:
+      "Les sauvegardes partent hors site ; un exercice de restauration automatisé les restaure dans un environnement isolé et en contrôle le contenu.",
+  },
+};
+
+/** Identifiant stable de l'entrée `<dd>` de la liste d'explications correspondant à un bloc. */
+export function idExplicationUgb(id: NoeudUgb) {
+  return `ugb-explication-${id}`;
+}
+
+/**
+ * Attributs d'accessibilité posés sur un `g[data-noeud]` en mode explorable : bascule de
+ * bouton (état initial non pressé, la sélection réelle est appliquée après montage par
+ * `SchemaExplorable`, ce qui garde un rendu serveur identique au premier rendu client) et
+ * lien vers son explication dans la liste `<dl>`.
+ */
+function proprietesNoeud(id: NoeudUgb) {
+  return {
+    tabIndex: 0,
+    role: "button" as const,
+    "aria-pressed": false,
+    "aria-label": EXPLICATIONS_UGB[id].titre,
+    "aria-describedby": idExplicationUgb(id),
+  };
+}
+
 /** Branches du tronc `api-bus`, listées dans l'ordre vertical (y croissant) du tracé. */
 const BRANCHES_API = [
   { y: 76, vers: "postgresql" },
@@ -79,10 +162,15 @@ const BRANCHES_API = [
  * Schéma du système UGB Link, repris de la maquette et corrigé :
  * Nginx est installé sur la machine virtuelle, hors de Docker Compose ;
  * le modèle de langage tourne dans le conteneur `ollama` ; l'OCR tourne dans l'API.
+ *
+ * `explorable` (tâche 4) : pose la charpente d'accessibilité du mode explorable (rôle de
+ * groupe plutôt que d'image, blocs focalisables et nommés) sans porter lui-même l'état
+ * d'interaction — `SchemaExplorable` l'applique après montage, pour garder un rendu serveur
+ * complet et identique au premier rendu client (aucune hydratation divergente).
  */
-export function UgbLinkDiagram() {
+export function UgbLinkDiagram({ explorable = false }: { explorable?: boolean } = {}) {
   return (
-    <svg viewBox="0 0 980 482" role="img" aria-labelledby="ugb-schema-titre">
+    <svg viewBox="0 0 980 482" role={explorable ? "group" : "img"} aria-labelledby="ugb-schema-titre">
       <title id="ugb-schema-titre">
         Schéma du système UGB Link : le navigateur passe par Nginx, installé sur la machine virtuelle, qui sert le
         front React et relaie l&apos;API Express. Dans Docker Compose, l&apos;API s&apos;appuie sur PostgreSQL, Redis,
@@ -109,7 +197,7 @@ export function UgbLinkDiagram() {
         HORS SITE
       </text>
 
-      <g data-noeud="navigateur">
+      <g data-noeud="navigateur" {...(explorable ? proprietesNoeud("navigateur") : {})}>
         <rect className="d-box" x="16" y="160" width="160" height="52" />
         <text className="d-t" x="28" y="184">
           Navigateur
@@ -119,7 +207,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-noeud="github">
+      <g data-noeud="github" {...(explorable ? proprietesNoeud("github") : {})}>
         <rect className="d-box" x="16" y="340" width="160" height="52" />
         <text className="d-t" x="28" y="364">
           GitHub Actions
@@ -130,7 +218,7 @@ export function UgbLinkDiagram() {
         <Logo nom="githubactions" x={152} y={348} />
       </g>
 
-      <g data-noeud="nginx">
+      <g data-noeud="nginx" {...(explorable ? proprietesNoeud("nginx") : {})}>
         <rect className="d-box" x="226" y="160" width="130" height="52" />
         <circle className="d-ok" cx="240" cy="180" r="3" />
         <text className="d-t" x="250" y="184">
@@ -145,7 +233,7 @@ export function UgbLinkDiagram() {
         <Logo nom="nginx" x={332} y={168} />
       </g>
 
-      <g data-noeud="front">
+      <g data-noeud="front" {...(explorable ? proprietesNoeud("front") : {})}>
         <rect className="d-box" x="416" y="64" width="160" height="52" />
         <circle className="d-ok" cx="430" cy="84" r="3" />
         <text className="d-t" x="440" y="88">
@@ -157,7 +245,7 @@ export function UgbLinkDiagram() {
         <Logo nom="react" x={552} y={72} />
       </g>
 
-      <g data-noeud="api">
+      <g data-noeud="api" {...(explorable ? proprietesNoeud("api") : {})}>
         <rect className="d-box-acc" x="416" y="256" width="160" height="52" />
         <circle className="d-ok" cx="430" cy="276" r="3" />
         <text className="d-t" x="440" y="280">
@@ -172,7 +260,7 @@ export function UgbLinkDiagram() {
         <Logo nom="nodedotjs" x={552} y={264} />
       </g>
 
-      <g data-noeud="postgresql">
+      <g data-noeud="postgresql" {...(explorable ? proprietesNoeud("postgresql") : {})}>
         <path className="d-db" d="M650 54 A73.0 6 0 0 1 796 54 V98 A73.0 6 0 0 1 650 98 Z" />
         <path className="d-line" pathLength={1} d="M650 54 A73.0 6 0 0 0 796 54" />
         <text className="d-t" x="662" y="78">
@@ -187,7 +275,7 @@ export function UgbLinkDiagram() {
         <Logo nom="postgresql" x={772} y={62} />
       </g>
 
-      <g data-noeud="redis">
+      <g data-noeud="redis" {...(explorable ? proprietesNoeud("redis") : {})}>
         <rect className="d-box" x="650" y="124" width="146" height="48" />
         <circle className="d-ok" cx="664" cy="142" r="3" />
         <text className="d-t" x="674" y="146">
@@ -202,7 +290,7 @@ export function UgbLinkDiagram() {
         <Logo nom="redis" x={772} y={132} />
       </g>
 
-      <g data-noeud="minio">
+      <g data-noeud="minio" {...(explorable ? proprietesNoeud("minio") : {})}>
         <rect className="d-box" x="650" y="192" width="146" height="48" />
         <circle className="d-ok" cx="664" cy="210" r="3" />
         <text className="d-t" x="674" y="214">
@@ -217,7 +305,7 @@ export function UgbLinkDiagram() {
         <Logo nom="minio" x={772} y={200} />
       </g>
 
-      <g data-noeud="ollama">
+      <g data-noeud="ollama" {...(explorable ? proprietesNoeud("ollama") : {})}>
         <rect className="d-box" x="650" y="260" width="146" height="48" />
         <circle className="d-ok" cx="664" cy="278" r="3" />
         <text className="d-t" x="674" y="282">
@@ -232,7 +320,7 @@ export function UgbLinkDiagram() {
         <Logo nom="ollama" x={772} y={268} />
       </g>
 
-      <g data-noeud="sauvegarde">
+      <g data-noeud="sauvegarde" {...(explorable ? proprietesNoeud("sauvegarde") : {})}>
         <rect className="d-box" x="650" y="360" width="146" height="48" />
         <text className="d-t" x="662" y="382">
           Sauvegarde
@@ -242,7 +330,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-noeud="deploiement">
+      <g data-noeud="deploiement" {...(explorable ? proprietesNoeud("deploiement") : {})}>
         <rect className="d-box" x="226" y="360" width="130" height="48" />
         <text className="d-t" x="238" y="382">
           Déploiement
@@ -252,7 +340,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-noeud="stockage">
+      <g data-noeud="stockage" {...(explorable ? proprietesNoeud("stockage") : {})}>
         <rect className="d-box" x="838" y="360" width="126" height="48" />
         <text className="d-t" x="850" y="382">
           Stockage

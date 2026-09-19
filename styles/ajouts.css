@@ -41,6 +41,16 @@ body { margin: 0; min-height: 100vh; }
 /* Schéma défilable sur petit écran */
 .pa-diagram-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
+/* Liste d'explications du schéma explorable (chantier 3, tâche 4) : une entrée par bloc,
+   toujours visible sous le schéma (y compris sans JavaScript). Largeur bornée par
+   --prose-max (styles/mise-en-page.css) : une seule source pour la largeur de lecture.
+   La mise en avant de l'entrée active (bordure + fond, jamais la couleur seule) est un ÉTAT
+   d'interaction : elle vit dans styles/mouvement.css, avec l'estompage du schéma. */
+.pa-explications { max-width: var(--prose-max); margin: 20px 0 0; display: flex; flex-direction: column; gap: 2px; }
+.pa-explications > div { padding: 10px 12px; border-left: 2px solid transparent; border-radius: var(--radius-1); }
+.pa-explications dt { font: 600 14px/20px var(--font-sans); color: var(--ink); }
+.pa-explications dd { margin: 2px 0 0; font-size: 14px; line-height: 21px; color: var(--ink-muted); }
+
 /* Page d'accueil */
 .pa-herometa { margin-top: 48px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line); }
 .pa-actions { display: flex; flex-wrap: wrap; gap: 12px; }
