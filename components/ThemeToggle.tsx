@@ -14,6 +14,13 @@ const abonnes = new Set<() => void>();
 // même pseudo-élément `root` en dehors de toute bascule de thème.
 const CLASSE_TRANSITION_THEME = "pa-transition-theme";
 
+// Référence à la transition de vue de thème EN COURS (module-level, pas un `useRef` : un seul
+// bouton de thème existe dans l'arbre, mais document.startViewTransition est de toute façon une
+// notion globale au document — deux instances du composant partageraient la même transition du
+// navigateur). Sert à distinguer, dans le rappel de `finished` (voir `basculer`), la transition
+// qui se termine réellement de celle qu'un clic ultérieur a fait annuler.
+let transitionThemeCourante: ViewTransition | null = null;
+
 function lireTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
@@ -67,21 +74,33 @@ export function ThemeToggle() {
         ecrireTheme(suivant);
       });
     });
+    transitionThemeCourante = transition;
 
-    transition.ready
-      .then(() => {
+    // Gestionnaire de rejet passé en second argument de `.then()`, jamais en `.catch()` séparé :
+    // ce dernier rattraperait AUSSI une exception levée par le premier gestionnaire lui-même (ex.
+    // un rejet de `animate()`), la faisant disparaître silencieusement. Ici, seul un rejet de
+    // `transition.ready` (ex. transition annulée par le navigateur, cf. plus bas) est concerné —
+    // le thème est de toute façon déjà appliqué, seul le cercle n'aura pas joué ; toute autre
+    // erreur doit remonter normalement.
+    transition.ready.then(
+      () => {
         document.documentElement.animate(
           { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${rayon}px at ${x}px ${y}px)`] },
           { duration: 450, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" },
         );
-      })
-      .catch(() => {
-        // `ready` peut être rejetée (ex. transition annulée par le navigateur) : le thème est déjà
-        // appliqué, seul le cercle n'aura pas joué.
-      });
+      },
+      () => {},
+    );
 
     transition.finished.finally(() => {
-      document.documentElement.classList.remove(CLASSE_TRANSITION_THEME);
+      // Un second clic pendant les 450 ms annule CETTE transition (le navigateur en résout le
+      // `finished` presque aussitôt) et en démarre une autre, qui devient `transitionThemeCourante`.
+      // Sans ce contrôle, ce rappel retirerait la classe alors que la nouvelle transition tourne
+      // encore, et le fondu par défaut du navigateur réapparaîtrait en plein cercle.
+      if (transitionThemeCourante === transition) {
+        document.documentElement.classList.remove(CLASSE_TRANSITION_THEME);
+        transitionThemeCourante = null;
+      }
     });
   }
 
