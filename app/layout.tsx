@@ -11,10 +11,12 @@ import { Navigation } from "@/components/Navigation";
 import { ThemeScript } from "@/components/ThemeScript";
 
 const sans = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-sans" });
+// Italique seul : .pa-em est le seul usage visible ; le romain (40 Kio préchargés) ne servait qu'au
+// guillemet des recommandations, qui se replie sur l'italique.
 const accent = DM_Serif_Display({
   subsets: ["latin"],
   weight: "400",
-  style: ["normal", "italic"],
+  style: "italic",
   variable: "--font-accent",
 });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
