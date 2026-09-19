@@ -49,6 +49,29 @@ test("le lien de la carte reste atteignable au clavier avec un contour de focus 
   expect(outline).not.toBe("none");
 });
 
+test("le lien « Ouvrir le dossier » tient sur une seule ligne à 1024px", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto("/projets");
+  await page.evaluate(() => document.fonts.ready);
+  const cartes = page.getByTestId("project-card");
+  const nombre = await cartes.count();
+  expect(nombre).toBeGreaterThan(0);
+  for (let i = 0; i < nombre; i++) {
+    const lien = cartes.nth(i).getByRole("link", { name: /Ouvrir le dossier/ });
+    // Le lien est un item flex (enfant de .pa-card-foot, display: flex) : son display est donc
+    // « blockifié » et getClientRects() ne renvoie qu'un seul rectangle même si son texte
+    // s'enroule sur deux lignes. On compare donc la hauteur rendue de sa boîte à sa hauteur de
+    // ligne calculée : au-delà d'une ligne et demie, le texte s'est cassé.
+    const { hauteurBoite, hauteurLigne } = await lien.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      let lh = parseFloat(cs.lineHeight);
+      if (Number.isNaN(lh)) lh = parseFloat(cs.fontSize) * 1.2;
+      return { hauteurBoite: el.getBoundingClientRect().height, hauteurLigne: lh };
+    });
+    expect(hauteurBoite, `carte ${i}`).toBeLessThan(hauteurLigne * 1.5);
+  }
+});
+
 test("une étude de cas mène au dossier suivant et son sommaire pointe vers ses sections", async ({ page }) => {
   await page.goto("/projets/ugb-link");
   const sommaire = page.getByRole("navigation", { name: "Sommaire" });

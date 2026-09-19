@@ -100,6 +100,13 @@ body { margin: 0; min-height: 100vh; }
 /* Contraste des séparateurs de métadonnées (WCAG 1.4.1/1.4.3) et statuts non ambigus. */
 .pa-meta .pa-sep { color: var(--ink-faint); }
 .pa-meta > span { white-space: nowrap; }
+/* Pied de carte de projet (.pa-card-foot, display: flex) : à l'étroit, sans cette règle, le lien
+   « Ouvrir le dossier → » cède la place à la mention de gauche et sa flèche seule passe à la
+   ligne, avec un soulignement qui s'étend alors sur toute la largeur du lien. Le lien reste donc
+   insécable ; c'est la mention de gauche (.pa-card-foot .pa-meta) qui absorbe le manque de place
+   en repassant à la ligne. */
+.pa-card-foot .pa-link { white-space: nowrap; }
+.pa-card-foot .pa-meta { white-space: normal; }
 /* Un titre de dossier est un texte libre, potentiellement long : contrairement aux
    segments courts (numéro, année…), il doit pouvoir se retourner à la ligne sur ses
    propres espaces plutôt que de forcer un débordement horizontal (`.pa-meta > span`
