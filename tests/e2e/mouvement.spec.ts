@@ -462,7 +462,7 @@ test("sous mouvement réduit, un changement de filtre ne lance aucune animation 
     document
       .getAnimations()
       .filter((a) => a.effect instanceof KeyframeEffect && a.effect.pseudoElement?.startsWith("::view-transition"))
-      .map((a) => ({ pseudo: (a.effect as KeyframeEffect).pseudoElement, playState: a.playState })),
+      .map((a) => ({ pseudo: (a.effect as KeyframeEffect).pseudoElement, playState: a.playState, duree: a.effect?.getComputedTiming().activeDuration })),
   );
   expect(animationsVT).toEqual([]);
 });
