@@ -46,9 +46,17 @@ test("le schéma complet se construit au défilement", async ({ page, browserNam
   // `getPropertyValue` plutôt que la propriété `.animationTimeline` : cette dernière n'existe pas
   // encore dans les types DOM livrés avec TypeScript 5, alors que la méthode standard, elle,
   // retourne la valeur résolue sans recourir à un cast.
+  // Uniquement les blocs et les tracés réellement tracés au défilement (pathLength="1", .d-flow
+  // ET .d-line — troncs et branches compris) : pas tous les `.d-flow` d'un groupe [data-flux],
+  // qui inclurait le flux SSE (api-navigateur). Ce dernier garde sa propre animation en temps réel
+  // (pa-march, plan.css) et ne doit jamais recevoir la timeline de défilement — cf. le test dédié
+  // ci-dessous, qui protège spécifiquement ce cas.
   const timelines = await page.evaluate(() =>
-    Array.from(document.querySelectorAll("figure.pa-fig [data-noeud], figure.pa-fig [data-flux] .d-flow"))
-      .map((el) => getComputedStyle(el).getPropertyValue("animation-timeline")),
+    Array.from(
+      document.querySelectorAll(
+        'figure.pa-fig [data-noeud], figure.pa-fig [data-flux] :is(.d-flow, .d-line)[pathLength="1"]',
+      ),
+    ).map((el) => getComputedStyle(el).getPropertyValue("animation-timeline")),
   );
   expect(timelines.length).toBeGreaterThan(10);
   expect(timelines.every((t) => t && t !== "auto")).toBe(true);
@@ -64,10 +72,39 @@ test("le schéma complet se construit au défilement", async ({ page, browserNam
   // retard sur l'appel à `scrollTo` : deux `requestAnimationFrame` imbriqués, plutôt qu'un délai
   // arbitraire, attendent exactement ce recalcul avant de lire le style calculé.
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  // Assertion faible en elle-même (l'état final « tout à 1 » serait aussi vrai sans aucune
+  // animation) : c'est le test suivant, qui compare deux positions de défilement, qui prouve que
+  // la timeline progresse réellement. Gardée ici pour vérifier l'état final annoncé par le brief.
   const opacites = await page.evaluate(() =>
     Array.from(document.querySelectorAll("figure.pa-fig [data-noeud]")).map((el) => getComputedStyle(el).opacity),
   );
   expect(opacites.every((o) => o === "1")).toBe(true);
+});
+
+// Régression : une règle trop large (`figure.pa-fig [data-flux] :is(.d-flow, .d-line)` sans
+// filtre sur pathLength) attraperait aussi le flux SSE, qui porte sa propre animation en temps
+// réel (pa-march, `styles/plan.css`, tirets qui avancent, limitée à 3 passages par
+// `styles/mouvement.css`). Lui imposer `animation-timeline: --schema` ferait passer `pa-march` du
+// temps réel au défilement : hors défilement, l'animation resterait figée et ne rejouerait plus —
+// ce qui contredirait la consigne « les tirets animés gardent leur apparence ».
+test("le flux SSE (api-navigateur) garde son animation en temps réel, pas la timeline de défilement", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "animation-timeline : Chromium");
+  await page.goto("/projets/ugb-link");
+  const sse = await page.evaluate(() => {
+    const el = document.querySelector('[data-flux="api-navigateur"] .d-flow');
+    if (!el) return null;
+    const style = getComputedStyle(el);
+    return {
+      animationTimeline: style.getPropertyValue("animation-timeline"),
+      animationName: style.getPropertyValue("animation-name"),
+    };
+  });
+  expect(sse).not.toBeNull();
+  expect(sse?.animationName).toBe("pa-march");
+  expect(sse?.animationTimeline).toBe("auto");
 });
 
 test("la timeline de défilement progresse réellement (l'opacité d'un bloc change entre deux positions)", async ({

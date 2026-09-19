@@ -44,17 +44,19 @@
       animation-range: entry 10% cover 35%;
     }
 
-    /* Tout flux référence la timeline (utile même à un flux exclu du tracé, cf. ci-dessous, pour
-       qu'un futur ajustement de sa plage n'exige pas de nouveau sélecteur). Seuls les tracés
-       continus (pathLength="1", tâche 2) reçoivent réellement l'animation de tracé : le flux SSE
-       (api-navigateur) porte son propre stroke-dasharray en attribut, et les `.d-dash` reçoivent
-       leurs tirets par la classe (plan.css:144) — ni l'un ni l'autre n'a de pathLength et ne doit
-       être tracé ici. Sélecteur d'attribut plutôt que `:not([stroke-dasharray])` : ce dernier ne
-       verrait pas les tirets posés en CSS sur `.d-dash`.
+    /* Seuls les tracés continus (pathLength="1", tâche 2) reçoivent la timeline de défilement et
+       l'animation de tracé : le flux SSE (api-navigateur) porte son propre stroke-dasharray en
+       attribut, et les `.d-dash` reçoivent leurs tirets par la classe (plan.css:144) — ni l'un ni
+       l'autre n'a de pathLength et ne doit être tracé ici. Sélecteur d'attribut plutôt que
+       `:not([stroke-dasharray])` : ce dernier ne verrait pas les tirets posés en CSS sur `.d-dash`.
+       Pas de règle plus large posant `animation-timeline` sur TOUS les `.d-flow`/`.d-line` d'un
+       groupe [data-flux] (y compris ceux sans pathLength) : le flux SSE a sa propre animation en
+       temps réel (`pa-march`, plan.css) et cette règle plus spécifique, appliquée après, la
+       ferait basculer sur la timeline de défilement — figée hors défilement, elle ne rejouerait
+       plus (cf. tests/e2e/mouvement.spec.ts, test dédié à ce flux).
        La déclaration `animation-timeline` doit venir APRÈS le raccourci `animation` : ce dernier
        réinitialise `animation-timeline` à `auto` (il en fait partie), donc la poser avant serait
        aussitôt écrasée. */
-    figure.pa-fig [data-flux] :is(.d-flow, .d-line) { animation-timeline: --schema; }
     figure.pa-fig [data-flux] :is(.d-flow, .d-line)[pathLength="1"] {
       stroke-dasharray: 1;
       animation: pa-trace linear both;
