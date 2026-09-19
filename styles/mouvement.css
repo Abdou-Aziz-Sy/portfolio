@@ -16,6 +16,70 @@
   /* Pastilles et voyants : état statique (la pulsation ne portait aucune information).
      Mêmes sélecteurs que plan.css pour l'emporter par l'ordre, sans !important. */
   .pa-dot:not(.is-open):not(.is-done), .d-ok, .pa-timeline li.is-now .pa-rail::after { animation: none; }
+
+  /* Construction du schéma au défilement (chantier 3) : les blocs apparaissent, puis les flux se
+     tracent dans l'ordre du trajet d'une requête (data-ordre). Le nom de timeline est posé sur
+     `figure.pa-fig` et `.pa-card-fig` — jamais sur le `svg` lui-même : dans le schéma complet, le
+     `svg` vit dans `.pa-diagram-scroll` (styles/mise-en-page.css), un cadre à `overflow-x: auto`
+     qui deviendrait, si le nom y était posé, le conteneur de défilement de l'axe `block` — or ce
+     cadre ne défile jamais verticalement, la timeline resterait figée à sa valeur de départ.
+     `figure.pa-fig` est à l'extérieur de ce cadre : son conteneur de défilement est la page. Les
+     mini-schémas de cartes (`.pa-card-fig`) ne sont dans aucun cadre défilant, le nom peut donc s'y
+     poser directement. Deux noms distincts (schéma complet / mini-schémas) plutôt qu'un seul :
+     chaque élément qui pose `view-timeline-name` origine sa propre timeline pour son sous-arbre,
+     mais des noms distincts évitent tout risque qu'un mini-schéma capte, par accident, la timeline
+     d'un autre schéma de la même page. */
+  @supports (animation-timeline: view()) {
+    figure.pa-fig { view-timeline-name: --schema; view-timeline-axis: block; }
+    .pa-card-fig { view-timeline-name: --schema-mini; view-timeline-axis: block; }
+
+    figure.pa-fig [data-noeud] {
+      animation: pa-bloc linear both;
+      animation-timeline: --schema;
+      animation-range: entry 10% cover 35%;
+    }
+    .pa-card-fig .d-box, .pa-card-fig .d-box-acc {
+      animation: pa-bloc linear both;
+      animation-timeline: --schema-mini;
+      animation-range: entry 10% cover 35%;
+    }
+
+    /* Tout flux référence la timeline (utile même à un flux exclu du tracé, cf. ci-dessous, pour
+       qu'un futur ajustement de sa plage n'exige pas de nouveau sélecteur). Seuls les tracés
+       continus (pathLength="1", tâche 2) reçoivent réellement l'animation de tracé : le flux SSE
+       (api-navigateur) porte son propre stroke-dasharray en attribut, et les `.d-dash` reçoivent
+       leurs tirets par la classe (plan.css:144) — ni l'un ni l'autre n'a de pathLength et ne doit
+       être tracé ici. Sélecteur d'attribut plutôt que `:not([stroke-dasharray])` : ce dernier ne
+       verrait pas les tirets posés en CSS sur `.d-dash`.
+       La déclaration `animation-timeline` doit venir APRÈS le raccourci `animation` : ce dernier
+       réinitialise `animation-timeline` à `auto` (il en fait partie), donc la poser avant serait
+       aussitôt écrasée. */
+    figure.pa-fig [data-flux] :is(.d-flow, .d-line) { animation-timeline: --schema; }
+    figure.pa-fig [data-flux] :is(.d-flow, .d-line)[pathLength="1"] {
+      stroke-dasharray: 1;
+      animation: pa-trace linear both;
+      animation-timeline: --schema;
+    }
+    .pa-card-fig .d-flow[pathLength="1"] {
+      stroke-dasharray: 1;
+      animation: pa-trace linear both;
+      animation-timeline: --schema-mini;
+      animation-range: entry 20% cover 40%;
+    }
+
+    /* Une plage par palier de `data-ordre` : les flux d'un même palier (ex. les quatre branches
+       API → services) se tracent ensemble, un peu après les blocs, dans l'ordre du trajet d'une
+       requête. */
+    figure.pa-fig [data-flux][data-ordre="1"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 25% cover 38%; }
+    figure.pa-fig [data-flux][data-ordre="2"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 29% cover 42%; }
+    figure.pa-fig [data-flux][data-ordre="3"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 33% cover 46%; }
+    figure.pa-fig [data-flux][data-ordre="4"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 37% cover 50%; }
+    figure.pa-fig [data-flux][data-ordre="5"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 41% cover 54%; }
+    figure.pa-fig [data-flux][data-ordre="6"] :is(.d-flow, .d-line)[pathLength="1"] { animation-range: entry 45% cover 58%; }
+
+    @keyframes pa-bloc { from { opacity: 0.15; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes pa-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

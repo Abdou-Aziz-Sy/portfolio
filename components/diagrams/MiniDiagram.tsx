@@ -85,7 +85,7 @@ export function MiniDiagram({ boites, label }: { boites: readonly [Boite, Boite,
         const xFin = positionsX[i + 1];
         return (
           <g key={xDebut}>
-            <path className="d-flow" d={`M${xDebut} ${yMilieu} L${xFin} ${yMilieu}`} />
+            <path className="d-flow" pathLength={1} d={`M${xDebut} ${yMilieu} L${xFin} ${yMilieu}`} />
             <path className="d-packet" pathLength={100} d={`M${xDebut} ${yMilieu} L${xFin} ${yMilieu}`} />
             <polygon
               className="d-head"
