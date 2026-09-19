@@ -1,50 +1,82 @@
 type Boite = { titre: string; sous: string };
 
-// Largeur du cadre disponible pour ces mini-schémas (carte de projet, .pa-card-fig) : environ
-// 243px au point le plus serré (grille à trois colonnes, ~1024px). Avec trois boîtes de largeur
-// fixe, un libellé plus long que les autres imposerait sa largeur aux trois — au prix d'un texte
-// minuscule une fois mis à l'échelle. Chaque boîte est donc dimensionnée sur SON PROPRE contenu
-// (titre et sous-titre réels, cf. miniSchema de chaque projet dans content/projets/*.mdx), ce qui
-// réduit d'autant la largeur totale du schéma et augmente la mise à l'échelle du texte.
-const DECALAGE_TEXTE = 5;
-const MARGE_BOITE = 2;
-const ECART = 4;
-const MARGE_EXTERIEURE = 2;
-const TAILLE_TITRE = 15;
-const TAILLE_SOUS = 15;
-// Largeur moyenne d'un caractère, par em : chasse variable pour .d-t (police à empattements
-// proportionnels), chasse fixe pour .d-s (police mono) — un peu au-dessus de la largeur réelle
-// mesurée sur les libellés du site, en marge de sécurité.
+// Trois boîtes à deux lignes (titre + sous-titre) ne tiennent pas proprement dans le cadre d'une
+// carte de projet (environ 240px de large) à 11px de police minimum : marge intérieure écrasée,
+// titre et sous-titre collés. Le mini-schéma n'affiche donc que les TITRES, sur une seule ligne,
+// avec une vraie marge. Les sous-titres ne sont pas perdus : ils rejoignent les titres dans le nom
+// accessible du schéma (aria-label) — les technologies restent de toute façon listées en
+// étiquettes sous le schéma (cf. ProjectCard, FeaturedCase).
+const TAILLE_TITRE = 18;
+const MARGE_BOITE_X = 10;
+const MARGE_BOITE_Y = 12;
+const MARGE_EXTERIEURE = 10;
+const ECART = 16;
+// Chasse moyenne par caractère, par em (police à empattements proportionnels, cf. .d-t) :
+// légèrement au-dessus de la largeur réellement mesurée sur les libellés du site, en marge de
+// sécurité.
 const CHASSE_TITRE = 0.6;
-const CHASSE_SOUS = 0.64;
+// Hauteur du texte au-dessus et en dessous de la ligne de base, par em (police .d-t) : mesurée
+// une fois sur les titres réels (getBBox), pour centrer verticalement sans dépendre du support de
+// dominant-baseline par le moteur de rendu.
+const FACTEUR_ASCENDANCE = 0.98;
+const FACTEUR_DESCENTE = 0.26;
+// Somme des longueurs des trois titres, la plus grande relevée parmi tous les miniSchema de
+// content/projets/*.mdx (Hackathon MCN : « QR code » + « App mobile » + « Audio » = 22
+// caractères). Fixe une largeur de schéma (viewBox) commune à tous les projets : à somme égale ou
+// inférieure, les boîtes se partagent cette même largeur totale, le surplus étant réparti entre
+// elles au prorata de leur propre titre. Augmenter cette valeur si un futur projet la dépasse.
+const SOMME_CARACTERES_MAX = 22;
 
-function largeurBoite(b: Boite) {
-  const largeurTitre = b.titre.length * CHASSE_TITRE * TAILLE_TITRE;
-  const largeurSous = b.sous.length * CHASSE_SOUS * TAILLE_SOUS;
-  return DECALAGE_TEXTE + Math.max(largeurTitre, largeurSous) + MARGE_BOITE;
-}
+const LARGEUR_TOTALE =
+  SOMME_CARACTERES_MAX * CHASSE_TITRE * TAILLE_TITRE + 6 * MARGE_BOITE_X + 2 * MARGE_EXTERIEURE + 2 * ECART;
+const LARGEUR_DISPONIBLE_BOITES = LARGEUR_TOTALE - 2 * MARGE_EXTERIEURE - 2 * ECART;
+const HAUTEUR_TEXTE = TAILLE_TITRE * (FACTEUR_ASCENDANCE + FACTEUR_DESCENTE);
+const HAUTEUR_BOITE = HAUTEUR_TEXTE + 2 * MARGE_BOITE_Y;
+const HAUTEUR_TOTALE = HAUTEUR_BOITE + 2 * MARGE_EXTERIEURE;
 
-/** Schéma miniature des cartes de projet : trois boîtes reliées, celle du milieu mise en avant. */
+/**
+ * Schéma miniature des cartes de projet : trois boîtes reliées, celle du milieu mise en avant.
+ * Largeur de viewBox fixe (LARGEUR_TOTALE, indépendante du contenu) : tous les schémas de la page
+ * partagent donc la même échelle une fois mis à l'échelle dans le cadre de leur carte. Les
+ * largeurs de boîtes restent proportionnelles au titre qu'elles portent, dans cette largeur
+ * totale fixe.
+ */
 export function MiniDiagram({ boites, label }: { boites: readonly [Boite, Boite, Boite]; label: string }) {
-  const largeurs = boites.map(largeurBoite);
+  const largeursMin = boites.map((b) => b.titre.length * CHASSE_TITRE * TAILLE_TITRE + 2 * MARGE_BOITE_X);
+  const sommeMin = largeursMin.reduce((a, b) => a + b, 0);
+  const echelleBoites = LARGEUR_DISPONIBLE_BOITES / sommeMin;
+  const largeurs = largeursMin.map((l) => l * echelleBoites);
+
   const positionsX: number[] = [];
   let x = MARGE_EXTERIEURE;
   for (const largeur of largeurs) {
     positionsX.push(x);
     x += largeur + ECART;
   }
-  const largeurTotale = x - ECART + MARGE_EXTERIEURE;
+
+  const yMilieu = MARGE_EXTERIEURE + HAUTEUR_BOITE / 2;
+  const yTexte = MARGE_EXTERIEURE + MARGE_BOITE_Y + TAILLE_TITRE * FACTEUR_ASCENDANCE;
+  const description = boites.map((b) => `${b.titre} (${b.sous})`).join(", ");
 
   return (
-    <svg viewBox={`0 0 ${largeurTotale} 64`} role="img" aria-label={label}>
+    <svg viewBox={`0 0 ${LARGEUR_TOTALE} ${HAUTEUR_TOTALE}`} role="img" aria-label={`${label} : ${description}`}>
       {boites.map((b, i) => (
         <g key={b.titre}>
-          <rect className={i === 1 ? "d-box-acc" : "d-box"} x={positionsX[i]} y="10" width={largeurs[i]} height="44" />
-          <text className="d-t" x={positionsX[i] + DECALAGE_TEXTE} y="30" style={{ fontSize: TAILLE_TITRE }}>
+          <rect
+            className={i === 1 ? "d-box-acc" : "d-box"}
+            x={positionsX[i]}
+            y={MARGE_EXTERIEURE}
+            width={largeurs[i]}
+            height={HAUTEUR_BOITE}
+          />
+          <text
+            className="d-t"
+            x={positionsX[i] + largeurs[i] / 2}
+            y={yTexte}
+            textAnchor="middle"
+            style={{ fontSize: TAILLE_TITRE }}
+          >
             {b.titre}
-          </text>
-          <text className="d-s" x={positionsX[i] + DECALAGE_TEXTE} y="45" style={{ fontSize: TAILLE_SOUS }}>
-            {b.sous}
           </text>
         </g>
       ))}
@@ -53,9 +85,12 @@ export function MiniDiagram({ boites, label }: { boites: readonly [Boite, Boite,
         const xFin = positionsX[i + 1];
         return (
           <g key={xDebut}>
-            <path className="d-flow" d={`M${xDebut} 32 L${xFin} 32`} />
-            <path className="d-packet" pathLength={100} d={`M${xDebut} 32 L${xFin} 32`} />
-            <polygon className="d-head" points={`${xFin},32 ${xFin - 4},29 ${xFin - 4},35`} />
+            <path className="d-flow" d={`M${xDebut} ${yMilieu} L${xFin} ${yMilieu}`} />
+            <path className="d-packet" pathLength={100} d={`M${xDebut} ${yMilieu} L${xFin} ${yMilieu}`} />
+            <polygon
+              className="d-head"
+              points={`${xFin},${yMilieu} ${xFin - 4},${yMilieu - 3} ${xFin - 4},${yMilieu + 3}`}
+            />
           </g>
         );
       })}

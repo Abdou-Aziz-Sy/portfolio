@@ -208,6 +208,58 @@ test.describe("mise en page fluide", () => {
     }
   });
 
+  test("les mini-schémas des cartes de projet ont une marge intérieure et une échelle communes", async ({
+    page,
+  }) => {
+    for (const largeur of [320, 1024, 1920]) {
+      await page.setViewportSize({ width: largeur, height: 1000 });
+      await page.goto("/projets");
+      await expect(page.getByTestId("compteur")).toBeVisible();
+      const svgs = await page.locator(".pa-card-fig svg").all();
+      expect(svgs.length).toBeGreaterThan(0);
+
+      const hauteurs: number[] = [];
+      for (const svg of svgs) {
+        // Taille : chaque texte rend au moins 11 px (même garde que le test précédent).
+        const tailles = await taillesRendues(svg);
+        expect(Math.min(...tailles), `${largeur}px`).toBeGreaterThanOrEqual(11);
+
+        // Marge intérieure : chaque texte tient dans son rectangle (même <g> — seuls les groupes
+        // de boîte ont les deux ; les groupes de flèches n'ont ni l'un ni l'autre) avec au moins
+        // 6 px rendus de marge de chaque côté.
+        const marges = await svg.evaluate((el) => {
+          return Array.from(el.querySelectorAll("g"))
+            .map((g) => {
+              const rect = g.querySelector("rect");
+              const texte = g.querySelector("text");
+              if (!rect || !texte) return null;
+              const r = rect.getBoundingClientRect();
+              const t = texte.getBoundingClientRect();
+              return {
+                gauche: t.left - r.left,
+                droite: r.right - t.right,
+                haut: t.top - r.top,
+                bas: r.bottom - t.bottom,
+              };
+            })
+            .filter((m): m is NonNullable<typeof m> => m !== null);
+        });
+        expect(marges.length, `${largeur}px`).toBe(3);
+        for (const marge of marges) {
+          expect(marge.gauche, `${largeur}px gauche`).toBeGreaterThanOrEqual(6);
+          expect(marge.droite, `${largeur}px droite`).toBeGreaterThanOrEqual(6);
+          expect(marge.haut, `${largeur}px haut`).toBeGreaterThanOrEqual(6);
+          expect(marge.bas, `${largeur}px bas`).toBeGreaterThanOrEqual(6);
+        }
+
+        hauteurs.push(await svg.evaluate((el) => el.getBoundingClientRect().height));
+      }
+
+      // Échelle : même viewBox pour tous les schémas de la page, donc même hauteur rendue.
+      expect(Math.max(...hauteurs) - Math.min(...hauteurs), `${largeur}px`).toBeLessThanOrEqual(2);
+    }
+  });
+
   test("le bandeau Présentation s'aligne sur la grille de contenu", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 1440 });
     await page.goto("/");
