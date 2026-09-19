@@ -1,5 +1,7 @@
 # Portfolio — plan de construction
 
+> **Statut au 19/09/2026 : exécuté et fusionné dans `main`** (fusion 5955fce). Les cases ci-dessous n'ont pas été tenues à jour pendant l'exécution ; l'état réel est dans l'historique Git et dans `docs/superpowers/HANDOFF-2026-09-19.md`.
+
 > **Pour les agents :** SOUS-SKILL REQUIS : superpowers:executing-plans (exécution en ligne, choisie par l'utilisateur). Les étapes utilisent des cases à cocher (`- [ ]`).
 
 **Objectif :** construire et déployer le portfolio décrit dans `docs/superpowers/specs/2026-09-17-portfolio-design.md`.

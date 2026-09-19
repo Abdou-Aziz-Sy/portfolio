@@ -1,5 +1,7 @@
 # Chantier 1 — Corrections de l'audit UI/UX : plan d'implémentation
 
+> **Statut au 19/09/2026 : exécuté et fusionné dans `main`** (PR #1). Les cases ci-dessous n'ont pas été tenues à jour pendant l'exécution ; l'état réel est dans l'historique Git et dans `docs/superpowers/HANDOFF-2026-09-19.md`.
+
 > **Pour les agents :** SOUS-SKILL REQUIS : utiliser superpowers:subagent-driven-development (recommandé) ou superpowers:executing-plans pour exécuter ce plan tâche par tâche. Les étapes utilisent des cases à cocher (`- [ ]`).
 
 **Goal :** corriger les défauts relevés par l'audit indépendant du 17/09 (débordement mobile bloquant, identité absente, indicateur faux, défauts d'interaction et d'accessibilité) sans toucher à la mise en page générale, qui relève du chantier 2.

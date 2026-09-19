@@ -72,4 +72,4 @@ Les brouillons s'affichent alors avec un bandeau « Brouillon » et ne sont pas 
 
 ## Déploiement
 
-Vercel, production depuis `main`, prévisualisation par pull request. L'URL affichée dans le pied de page et le sitemap vient de `NEXT_PUBLIC_SITE_URL`, sinon de l'URL de production Vercel.
+Vercel, production depuis `main` (https://portfolio-gamma-rosy-74.vercel.app), prévisualisation par pull request. Ne fusionner qu'avec une CI verte : les e2e locaux tournent sous Edge et Windows, la CI sous Chromium et Linux. L'URL affichée dans le pied de page et le sitemap vient de `NEXT_PUBLIC_SITE_URL`, sinon de l'URL de production Vercel.
