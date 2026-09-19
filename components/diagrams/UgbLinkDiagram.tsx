@@ -22,26 +22,50 @@ export const NOEUDS_UGB = [
 
 export type NoeudUgb = (typeof NOEUDS_UGB)[number];
 
+/** Un segment du schéma : un groupe `<g data-flux="…">` du rendu. */
+export type SegmentUgb = { id: string; relie: readonly NoeudUgb[]; ordre: number };
+
 /**
- * Flux du schéma, dans l'ordre du trajet d'une requête (`ordre`).
- * Le tronc commun `api-bus` (API → PostgreSQL/Redis/MinIO/Ollama) n'y figure pas :
- * ce n'est pas une relation à deux extrémités mais un tracé partagé par les quatre
- * branches ci-dessous (voir le groupe `data-flux="api-bus"` dans le rendu).
+ * Tous les segments du schéma (tracé, paquet, pointe de flèche, libellé), troncs partagés
+ * compris — un par groupe `<g data-flux="…">` du rendu, dans l'ordre du trajet d'une
+ * requête (`ordre`). `id` reprend la valeur de `data-flux` ; `relie` reprend `data-relie`
+ * (les blocs que ce segment relie visuellement, dont la tâche 4 se sert pour allumer tout
+ * ce qui touche un bloc survolé).
+ *
+ * Remplace l'ancien `FLUX_UGB` (`{ de: string; vers: string }`) : un seul tableau, qui
+ * couvre aussi les troncs partagés (`api-bus`) sans forcer une relation à deux extrémités
+ * là où le tracé en a plus — et où `relie` est typé `NoeudUgb[]`, donc vérifié à la
+ * compilation contre `NOEUDS_UGB`.
  */
-export const FLUX_UGB: ReadonlyArray<{ de: string; vers: string; ordre: number }> = [
-  { de: "navigateur", vers: "nginx", ordre: 1 },
-  { de: "nginx", vers: "front", ordre: 2 },
-  { de: "nginx", vers: "api", ordre: 2 },
-  { de: "api", vers: "postgresql", ordre: 3 },
-  { de: "api", vers: "redis", ordre: 3 },
-  { de: "api", vers: "minio", ordre: 3 },
-  { de: "api", vers: "ollama", ordre: 3 },
-  { de: "api", vers: "navigateur", ordre: 4 },
-  { de: "github", vers: "deploiement", ordre: 5 },
-  { de: "postgresql", vers: "sauvegarde", ordre: 6 },
-  { de: "minio", vers: "sauvegarde", ordre: 6 },
-  { de: "sauvegarde", vers: "stockage", ordre: 6 },
+export const SEGMENTS_UGB: readonly SegmentUgb[] = [
+  { id: "navigateur-nginx", relie: ["navigateur", "nginx"], ordre: 1 },
+  { id: "nginx-front", relie: ["nginx", "front"], ordre: 2 },
+  { id: "nginx-api", relie: ["nginx", "api"], ordre: 2 },
+  // Tronc partagé (canal vertical x=616) : relie l'API à ses quatre services d'un coup.
+  { id: "api-bus", relie: ["api", "postgresql", "redis", "minio", "ollama"], ordre: 3 },
+  { id: "api-postgresql", relie: ["api", "postgresql"], ordre: 3 },
+  { id: "api-redis", relie: ["api", "redis"], ordre: 3 },
+  { id: "api-minio", relie: ["api", "minio"], ordre: 3 },
+  { id: "api-ollama", relie: ["api", "ollama"], ordre: 3 },
+  { id: "api-navigateur", relie: ["api", "navigateur"], ordre: 4 },
+  { id: "github-deploiement", relie: ["github", "deploiement"], ordre: 5 },
+  { id: "postgresql-sauvegarde", relie: ["postgresql", "sauvegarde"], ordre: 6 },
+  // Canal partagé (x=812) : ce segment ne touche pas le rectangle « sauvegarde » (il
+  // rejoint le tracé postgresql-sauvegarde à y=216, voir plus bas) mais prolonge un canal
+  // relié à ce bloc — la relation logique minio → sauvegarde reste donc dans `relie`.
+  { id: "minio-sauvegarde", relie: ["minio", "sauvegarde"], ordre: 6 },
+  { id: "sauvegarde-stockage", relie: ["sauvegarde", "stockage"], ordre: 6 },
 ];
+
+/**
+ * Attributs `data-flux`/`data-ordre`/`data-relie` d'un groupe de flux, lus depuis
+ * `SEGMENTS_UGB` : garantit que le rendu et l'export ne peuvent pas diverger.
+ */
+function flux(id: string) {
+  const segment = SEGMENTS_UGB.find((s) => s.id === id);
+  if (!segment) throw new Error(`segment UGB inconnu : ${id}`);
+  return { "data-flux": segment.id, "data-ordre": segment.ordre, "data-relie": segment.relie.join(" ") };
+}
 
 /** Branches du tronc `api-bus`, listées dans l'ordre vertical (y croissant) du tracé. */
 const BRANCHES_API = [
@@ -238,7 +262,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-flux="navigateur-nginx" data-de="navigateur" data-vers="nginx" data-ordre={1}>
+      <g data-de="navigateur" data-vers="nginx" {...flux("navigateur-nginx")}>
         <path className="d-flow" pathLength={1} d="M176 186 L226 186" />
         <path className="d-packet" pathLength={100} d="M176 186 L226 186" />
         <polygon className="d-head" points="226,186 219,182 219,190" />
@@ -247,7 +271,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-flux="nginx-front" data-de="nginx" data-vers="front" data-ordre={2}>
+      <g data-de="nginx" data-vers="front" {...flux("nginx-front")}>
         <path className="d-flow" pathLength={1} d="M356 178 L386 178 L386 90 L416 90" />
         <path className="d-packet" pathLength={100} d="M356 178 L386 178 L386 90 L416 90" />
         <polygon className="d-head" points="416,90 409,86 409,94" />
@@ -256,7 +280,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-flux="nginx-api" data-de="nginx" data-vers="api" data-ordre={2}>
+      <g data-de="nginx" data-vers="api" {...flux("nginx-api")}>
         <path className="d-flow" pathLength={1} d="M356 194 L386 194 L386 282 L416 282" />
         <path className="d-packet" pathLength={100} d="M356 194 L386 194 L386 282 L416 282" />
         <polygon className="d-head" points="416,282 409,278 409,286" />
@@ -268,20 +292,23 @@ export function UgbLinkDiagram() {
       {/*
         Tronc commun aux quatre branches API → PostgreSQL/Redis/MinIO/Ollama : inclure ce
         tracé dans chacun des quatre groupes de flux dupliquerait le trait. Il vit donc dans
-        son propre groupe, référencé par les quatre identifiants de destination.
+        son propre groupe, référencé par les quatre identifiants de destination. C'est un
+        canal partagé (vertical, x=616) : il ne touche à l'aplomb d'aucun bloc autre que
+        l'API, mais `relie` liste tout de même les quatre services, puisque chaque branche
+        qui en part (ci-dessous) le prolonge jusqu'à eux.
       */}
-      <g data-flux="api-bus" data-de="api" data-vers="postgresql redis minio ollama" data-ordre={3}>
+      <g data-de="api" data-vers="postgresql redis minio ollama" {...flux("api-bus")}>
         <path className="d-line" pathLength={1} d="M576 282 L616 282" />
         <path className="d-line" pathLength={1} d="M616 76 L616 284" />
       </g>
       {BRANCHES_API.map(({ y, vers }) => (
-        <g key={vers} data-flux={`api-${vers}`} data-de="api" data-vers={vers} data-ordre={3}>
+        <g key={vers} data-de="api" data-vers={vers} {...flux(`api-${vers}`)}>
           <path className="d-line" pathLength={1} d={`M616 ${y} L650 ${y}`} />
           <polygon className="d-head-m" points={`650,${y} 643,${y - 4} 643,${y + 4}`} />
         </g>
       ))}
 
-      <g data-flux="api-navigateur" data-de="api" data-vers="navigateur" data-ordre={4}>
+      <g data-de="api" data-vers="navigateur" {...flux("api-navigateur")}>
         <path className="d-flow" d="M416 298 L398 298 L398 330 L86 330 L86 212" strokeDasharray="4 3" />
         <polygon className="d-head" points="86,212 82,219 90,219" />
         <text className="d-s" x="236" y="324">
@@ -289,7 +316,7 @@ export function UgbLinkDiagram() {
         </text>
       </g>
 
-      <g data-flux="github-deploiement" data-de="github" data-vers="deploiement" data-ordre={5}>
+      <g data-de="github" data-vers="deploiement" {...flux("github-deploiement")}>
         <path className="d-flow" pathLength={1} d="M176 366 L226 366" />
         <path className="d-packet" pathLength={100} d="M176 366 L226 366" />
         <polygon className="d-head" points="226,366 219,362 219,370" />
@@ -300,19 +327,31 @@ export function UgbLinkDiagram() {
 
       {/*
         Ce tracé en tirets mêle deux relations : le trait descend de PostgreSQL (796,76)
-        jusqu'à la ligne de Sauvegarde (812,384), et sert aussi de tronc vertical que
-        rejoint le tracé MinIO → Sauvegarde à y=216 (groupe suivant). Faute de pouvoir le
-        scinder sans dupliquer le tracé, il est rattaché à `postgresql-sauvegarde`.
+        jusqu'à la ligne de Sauvegarde (812,384), et sert aussi de tronc vertical (canal
+        partagé, x=812) que rejoint le tracé MinIO → Sauvegarde à y=216 (groupe suivant).
+        Faute de pouvoir le scinder sans dupliquer le tracé, il est rattaché à
+        `postgresql-sauvegarde`.
       */}
-      <g data-flux="postgresql-sauvegarde" data-de="postgresql" data-vers="sauvegarde" data-ordre={6}>
+      <g data-de="postgresql" data-vers="sauvegarde" {...flux("postgresql-sauvegarde")}>
         <path className="d-dash" d="M796 76 L812 76 L812 384 L796 384" />
       </g>
 
-      <g data-flux="minio-sauvegarde" data-de="minio" data-vers="sauvegarde" data-ordre={6}>
+      {/*
+        Ce segment part du bloc MinIO mais rejoint le canal partagé x=812 (ci-dessus) sans
+        toucher directement le rectangle « sauvegarde » : il prolonge un canal relié à ce
+        bloc, donc `relie` porte quand même la relation logique minio → sauvegarde.
+      */}
+      <g data-de="minio" data-vers="sauvegarde" {...flux("minio-sauvegarde")}>
         <path className="d-dash" d="M796 216 L812 216" />
       </g>
 
-      <g data-flux="sauvegarde-stockage" data-de="sauvegarde" data-vers="stockage" data-ordre={6}>
+      {/*
+        Ce segment part lui aussi du canal partagé x=812 (pas du rectangle « sauvegarde »
+        lui-même, atteint via les deux tracés en tirets ci-dessus) pour rejoindre
+        « stockage » : même logique que minio-sauvegarde, `relie` porte la relation
+        logique sauvegarde → stockage.
+      */}
+      <g data-de="sauvegarde" data-vers="stockage" {...flux("sauvegarde-stockage")}>
         <path className="d-flow" pathLength={1} d="M812 384 L838 384" />
         <path className="d-packet" pathLength={100} d="M812 384 L838 384" />
         <polygon className="d-head" points="838,384 831,380 831,388" />
