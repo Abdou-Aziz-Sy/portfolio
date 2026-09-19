@@ -11,6 +11,11 @@ export function DiagramScroller({ label, children }: { label: string; children: 
   const ref = useRef<HTMLDivElement>(null);
   const [deborde, setDeborde] = useState(false);
   const [finAtteinte, setFinAtteinte] = useState(false);
+  // Un redimensionnement peut faire repasser `deborde` à faux pendant que le cadre a le focus
+  // (au clavier, après défilement) : lui retirer tabIndex à cet instant chasserait le focus vers
+  // le document sans avertir l'utilisateur. On ne retire le focalisable qu'au blur, une fois le
+  // cadre effectivement quitté.
+  const [aLeFocus, setALeFocus] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -29,6 +34,8 @@ export function DiagramScroller({ label, children }: { label: string; children: 
     };
   }, []);
 
+  const focalisable = deborde || aLeFocus;
+
   return (
     <div className="pa-schema-cadre">
       <div
@@ -36,9 +43,11 @@ export function DiagramScroller({ label, children }: { label: string; children: 
         className="pa-diagram-scroll"
         data-testid="schema-defilant"
         data-deborde={deborde ? "true" : "false"}
-        tabIndex={deborde ? 0 : undefined}
-        role={deborde ? "region" : undefined}
-        aria-label={deborde ? label : undefined}
+        tabIndex={focalisable ? 0 : undefined}
+        role={focalisable ? "region" : undefined}
+        aria-label={focalisable ? label : undefined}
+        onFocus={() => setALeFocus(true)}
+        onBlur={() => setALeFocus(false)}
       >
         {children}
       </div>
