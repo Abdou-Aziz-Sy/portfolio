@@ -6,6 +6,7 @@ import { extraireSections, getArticle, getArticles, getProjet } from "@/lib/cont
 import { dateIso } from "@/components/ArticleList";
 import { composantsMdx } from "@/components/mdx";
 import { numeroDossier } from "@/components/ProjectCard";
+import { ProgressionLecture } from "@/components/ProgressionLecture";
 import { MetaLine } from "@/components/StatusMeta";
 import { TextTags } from "@/components/Tags";
 
@@ -36,6 +37,7 @@ export default async function PageArticle({ params }: PageProps<"/blog/[slug]">)
 
   return (
     <article className="pa-wrap pa-articlegrid">
+      <ProgressionLecture />
       <aside style={{ paddingTop: 10 }}>
         <Link className="pa-link" href="/blog" style={{ fontSize: 14 }}>
           ← Tous les articles

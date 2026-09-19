@@ -41,6 +41,29 @@ svg[data-actif] [data-flux][data-allume] :is(.d-head, .d-head-m) { fill: var(--a
    n'est pas un rectangle). */
 [data-noeud]:focus-visible > rect, [data-noeud]:focus-visible > .d-db { stroke: var(--accent); stroke-width: 2.5; }
 
+/* Progression de lecture (tâche 8) : fine barre collée en haut de la fenêtre (ProgressionLecture.tsx,
+   études de cas et articles), qui grandit avec le défilement de la page grâce à
+   `animation-timeline: scroll()` — sans aucun JavaScript. Règle inconditionnelle posant l'état de
+   repos (`display: none`, `scaleX(0)`) : la barre ne s'affiche que là où le mouvement ET la prise
+   en charge du navigateur sont réunis (bloc `@supports` ci-dessous) ; ailleurs, elle n'apporte rien
+   (`aria-hidden`, cf. composant) et ne doit pas laisser un simple filet immobile à l'écran.
+   `z-index: 6` : au-dessus de l'en-tête collant (`.pa-nav`, `z-index: 5`, styles/plan.css) puisque
+   la barre lui est visuellement superposée (collée au bord supérieur de la fenêtre, 3px sur la
+   bordure haute de l'en-tête) — vérifié sur capture (.work/c3t8-milieu.png) que cela ne masque
+   aucun élément utile de l'en-tête. */
+.pa-progression {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  z-index: 6;
+}
+
 /* Bascule de thème en cercle (tâche 7) : le fondu croisé par défaut de `::view-transition-old(root)`/
    `::view-transition-new(root)` est remplacé par le cercle animé en JavaScript (`element.animate()`
    sur `document.documentElement`, `pseudoElement: "::view-transition-new(root)"`, ThemeToggle.tsx).
@@ -97,6 +120,26 @@ html.pa-transition-theme::view-transition-new(root) {
   [data-noeud] > * { transition: opacity 0.2s ease; }
   [data-flux] :is(.d-flow, .d-line, .d-dash) { transition: stroke 0.2s ease; }
   [data-flux] :is(.d-head, .d-head-m) { transition: fill 0.2s ease; }
+
+  /* Sommaire vivant (tâche 8) : le lien de la section visible passe à `aria-current="location"`
+     (TableOfContents.tsx, IntersectionObserver) — plan.css:224-226 fixe déjà les couleurs de
+     repos et d'état actif, ciblé ici sans le modifier pour n'ajouter que la transition (changement
+     d'état, propriétés de couleur autorisées). */
+  .pa-toc a { transition: color 0.2s ease, border-left-color 0.2s ease; }
+
+  /* Progression de lecture (tâche 8) : seule combinaison qui active la barre définie plus haut
+     (règle inconditionnelle, hors media/@supports) — mouvement non réduit ET moteur capable de
+     `animation-timeline: scroll()`. La déclaration `animation-timeline` doit venir APRÈS le
+     raccourci `animation` : ce dernier la réinitialise à `auto` (découverte de la tâche 3), donc la
+     poser avant serait aussitôt écrasée. */
+  @supports (animation-timeline: scroll()) {
+    .pa-progression {
+      display: block;
+      animation: pa-progression linear both;
+      animation-timeline: scroll(root);
+    }
+    @keyframes pa-progression { to { transform: scaleX(1); } }
+  }
 
   /* Paquets sur les flux : trois passages puis arrêt ; le paquet s'efface à l'arrivée. */
   .d-packet { animation: pa-paquet 2.8s linear 3 both; }

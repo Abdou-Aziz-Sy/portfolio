@@ -29,7 +29,7 @@ export function TableOfContents({ sections }: { sections: Section[] }) {
       <ol>
         {sections.map((s) => (
           <li key={s.id}>
-            <a href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}>
+            <a href={`#${s.id}`} aria-current={active === s.id ? "location" : undefined}>
               <span>{s.numero}</span>
               {s.titre}
             </a>

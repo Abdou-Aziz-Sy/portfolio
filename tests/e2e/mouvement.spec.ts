@@ -365,3 +365,66 @@ test("une navigation carte → étude n'anime pas la carte entière", async ({ p
   expect(instantane.length).toBeGreaterThan(0);
   expect(instantane.every((c) => c.nom === "none")).toBe(true);
 });
+
+// Tâche 8 : la barre de progression de lecture (ProgressionLecture.tsx) suit le défilement de la
+// page via `animation-timeline: scroll(root)`, sans aucun JavaScript. N'a de sens que sous
+// Chromium (seul moteur à implémenter `animation-timeline: scroll()` à ce jour) ; le mouvement
+// réduit et le défaut de prise en charge sont couverts par des tests dédiés plus bas, qui eux
+// s'exécutent sur tous les projets.
+function lireEchelleX(matrice: string): number {
+  // `matrix(a, b, c, d, e, f)` : `a` porte l'échelle horizontale (transform-origin: 0 50%, aucune
+  // rotation ici). "none" (pas de transformation) équivaut à l'identité, donc a = 1.
+  if (matrice === "none") return 1;
+  const nombres = matrice.match(/matrix\(([^)]+)\)/)?.[1].split(",").map((n) => parseFloat(n.trim()));
+  if (!nombres) throw new Error(`transform inattendu : ${matrice}`);
+  return nombres[0];
+}
+
+test("la barre de progression suit le défilement (animation-timeline: scroll(root))", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "animation-timeline: scroll() : Chromium");
+  await page.goto("/projets/ugb-link");
+  const barre = page.getByTestId("progression");
+  await expect(barre).toHaveAttribute("aria-hidden", "true");
+
+  // Le navigateur écrit la valeur résolue soit `scroll(root)`, soit `scroll(root block)` (les deux
+  // formes sont observées selon les moteurs) : on accepte les deux plutôt que de figer un format.
+  const timeline = await barre.evaluate((el) => getComputedStyle(el).getPropertyValue("animation-timeline"));
+  expect(["scroll(root)", "scroll(root block)"]).toContain(timeline.trim());
+
+  // En haut de page, la barre est quasiment invisible (échelle proche de 0).
+  const echelleHaut = await barre.evaluate((el) => getComputedStyle(el).transform);
+  expect(lireEchelleX(echelleHaut)).toBeLessThan(0.01);
+
+  // En bas de page, la barre est pleine (échelle proche de 1) — `expect.poll` plutôt qu'une seule
+  // lecture : le recalcul de style d'une animation pilotée par le défilement peut prendre une
+  // frame de retard sur `scrollTo`.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect
+    .poll(async () => {
+      const t = await barre.evaluate((el) => getComputedStyle(el).transform);
+      return lireEchelleX(t);
+    })
+    .toBeGreaterThan(0.99);
+});
+
+test("sous mouvement réduit, la barre de progression est masquée", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/projets/ugb-link");
+  const barre = page.getByTestId("progression");
+  await expect(barre).toHaveCSS("display", "none");
+});
+
+test("le sommaire annonce la section visible via aria-current=\"location\"", async ({ page }) => {
+  await page.goto("/projets/ugb-link");
+  const sommaire = page.getByRole("navigation", { name: "Sommaire" });
+  // Au chargement, aucune section n'est encore dans la zone observée par l'IntersectionObserver
+  // (TableOfContents.tsx) : on défile jusqu'à une section pour en amener une dans le champ, comme
+  // le fait déjà le test voisin (« mène au dossier suivant »).
+  await sommaire.getByRole("link", { name: /Architecture/ }).click();
+  const lienActif = sommaire.locator('a[aria-current]');
+  await expect(lienActif).toHaveAttribute("aria-current", "location");
+  await expect(lienActif).toHaveText(/Architecture/);
+});

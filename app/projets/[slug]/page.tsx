@@ -7,6 +7,7 @@ import { getProjet, getProjets } from "@/lib/content";
 import { composantsMdx } from "@/components/mdx";
 import { numeroDossier } from "@/components/ProjectCard";
 import { MetaLine, StatusMeta } from "@/components/StatusMeta";
+import { ProgressionLecture } from "@/components/ProgressionLecture";
 import { TableOfContents } from "@/components/TableOfContents";
 import { statutLabel } from "@/lib/schemas";
 
@@ -46,6 +47,7 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
 
   return (
     <>
+      <ProgressionLecture />
       <header className="pa-wrap" style={{ paddingTop: 56, paddingBottom: 56 }}>
         <span className="pa-meta">
           <Link href="/projets" style={{ textDecoration: "none" }}>
