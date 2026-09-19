@@ -477,3 +477,67 @@ test("la barre de progression est absente en dehors des pages de lecture longue"
     await expect(page.getByTestId("progression")).toHaveCount(0);
   }
 });
+
+// Régression : la timeline était posée sur `figure.pa-fig`, qui contient aussi la liste des
+// explications (≈ 2 000 px). Ses plages `cover` ne s'achevaient qu'une fois le schéma sorti de
+// l'écran : un lecteur voyait des flux à moitié tracés alors que tout le schéma était visible.
+// Spec : le schéma est terminé avant d'atteindre le milieu de l'écran.
+async function etatDuSchema(page: Page, cadre: string, blocs: string, traces: string) {
+  await page.evaluate((sel) => {
+    const el = document.querySelector(sel) as HTMLElement;
+    const bas = el.getBoundingClientRect().bottom + window.scrollY;
+    window.scrollTo(0, bas - window.innerHeight + 2);
+  }, cadre);
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  return page.evaluate(
+    ([b, t]) => ({
+      blocs: Array.from(document.querySelectorAll(b)).map((el) => getComputedStyle(el).opacity),
+      traces: Array.from(document.querySelectorAll(t)).map((el) => parseFloat(getComputedStyle(el).strokeDashoffset)),
+    }),
+    [blocs, traces],
+  );
+}
+
+test("le schéma complet est entièrement tracé dès qu'il est entièrement visible", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "animation-timeline : Chromium");
+  await page.goto("/projets/ugb-link");
+  const etat = await etatDuSchema(
+    page,
+    "figure.pa-fig .pa-schema-cadre",
+    "figure.pa-fig [data-noeud]",
+    'figure.pa-fig [data-flux] :is(.d-flow, .d-line)[pathLength="1"]',
+  );
+  expect(etat.traces.length).toBeGreaterThan(10);
+  expect(etat.blocs.every((o) => o === "1"), `opacités ${etat.blocs}`).toBe(true);
+  expect(etat.traces.every((d) => d === 0), `décalages ${etat.traces}`).toBe(true);
+});
+
+test("le mini-schéma d'une carte est entièrement tracé dès qu'il est entièrement visible", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "animation-timeline : Chromium");
+  await page.goto("/projets");
+  const etat = await etatDuSchema(
+    page,
+    ".pa-grid-projets > div:first-child .pa-card-fig",
+    ".pa-grid-projets > div:first-child .pa-card-fig :is(.d-box, .d-box-acc)",
+    '.pa-grid-projets > div:first-child .pa-card-fig .d-flow[pathLength="1"]',
+  );
+  expect(etat.traces.length).toBeGreaterThan(0);
+  expect(etat.blocs.every((o) => o === "1"), `opacités ${etat.blocs}`).toBe(true);
+  expect(etat.traces.every((d) => d === 0), `décalages ${etat.traces}`).toBe(true);
+});
+
+// Régression : l'IntersectionObserver ne signalait que les titres qui traversaient une bande de
+// l'écran ; après un saut (lien, retour arrière, défilement rapide), aucun titre ne la traversait
+// et le sommaire restait sur une section déjà quittée.
+test("le sommaire suit la section en cours après un saut de défilement", async ({ page }) => {
+  await page.goto("/projets/ugb-link");
+  await page.evaluate(() => {
+    const cible = document.querySelector("figure.pa-fig") as HTMLElement;
+    window.scrollTo(0, cible.getBoundingClientRect().top + window.scrollY - 100);
+  });
+  const lienActif = page.getByRole("navigation", { name: "Sommaire" }).locator("a[aria-current]");
+  await expect(lienActif).toHaveText(/Architecture/);
+});
