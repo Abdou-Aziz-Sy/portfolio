@@ -55,6 +55,21 @@ svg[data-actif] [data-flux][data-allume] :is(.d-head, .d-head-m) { fill: var(--a
      taille/position/fondu enchaîné). */
   ::view-transition-group(.titre) { animation-duration: 300ms; animation-timing-function: ease-out; }
 
+  /* Les filtres réorganisent la grille (tâche 6) : `<ViewTransition name={carte-…} enter={…}
+     exit={…} update={…} default="none">` sur l'enveloppe de chaque carte (ProjectGrid.tsx) — une
+     seule classe `carte`, posée pour les trois cas (persistance, sortie, entrée) UNIQUEMENT
+     pendant un changement de filtre (`transitionTypes: ["filtre-projets"]`, jamais pendant une
+     navigation carte → étude, cf. le commentaire de ProjectGrid.tsx et le test dédié dans
+     tests/e2e/mouvement.spec.ts). Comme pour `.titre`, seules `animation-duration` et
+     `animation-timing-function` sont posées (jamais le raccourci `animation`) : les trois
+     pseudo-éléments gardent ainsi l'animation par défaut du navigateur — `::view-transition-group`
+     interpole taille/position (les cartes conservées qui glissent), `::view-transition-old`/`-new`
+     le fondu par défaut (`opacity`, sortie/entrée) — chacun n'existant que quand il a un sens
+     (ancien seul = sortie, nouveau seul = entrée, les deux = mise à jour de position). */
+  ::view-transition-group(.carte) { animation-duration: 200ms; animation-timing-function: ease-out; }
+  ::view-transition-old(.carte) { animation-duration: 200ms; animation-timing-function: ease-out; }
+  ::view-transition-new(.carte) { animation-duration: 200ms; animation-timing-function: ease-out; }
+
   .pa-explications > div { transition: border-color 0.2s ease, background-color 0.2s ease; }
   [data-noeud] > * { transition: opacity 0.2s ease; }
   [data-flux] :is(.d-flow, .d-line, .d-dash) { transition: stroke 0.2s ease; }

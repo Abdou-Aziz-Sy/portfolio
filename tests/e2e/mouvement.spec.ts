@@ -278,3 +278,90 @@ test("un changement de filtre sur /projets (transition sans rapport) ne fait pas
   );
   expect(etat.noms).not.toContain("titre-ugb-link");
 });
+
+// Tâche 6 : les filtres réorganisent la grille (cartes conservées qui glissent, retirées qui
+// s'effacent, ajoutées qui apparaissent) — `<ViewTransition name={carte-${slug}} ...>` sur
+// l'enveloppe de chaque carte (components/ProjectGrid.tsx). Comme pour le titre (tâche 5), le nom
+// n'est posé sur l'élément QUE pendant une transition qui le concerne : on réutilise le même
+// mécanisme d'interception de `document.startViewTransition` que ci-dessus plutôt que d'en écrire
+// un second, en lisant cette fois `viewTransitionName` sur les enveloppes de cartes
+// (`.pa-grid-projets > div`, l'élément sur lequel le nom retombe puisque `<ViewTransition>` ne
+// pose aucun nœud DOM propre — voir le commentaire de ProjectCard.tsx, tâche 5).
+type EtatVTCartes = { appels: number; noms: { href: string | null; nom: string }[][] };
+
+async function instrumenterViewTransitionCartes(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __vtCartes: EtatVTCartes };
+    w.__vtCartes = { appels: 0, noms: [] };
+    const original = document.startViewTransition?.bind(document);
+    if (!original) return;
+    document.startViewTransition = ((callback: () => void | Promise<void>) => {
+      w.__vtCartes.appels += 1;
+      const noms = Array.from(document.querySelectorAll(".pa-grid-projets > div")).map((el) => ({
+        href: el.querySelector("a.pa-card-cible")?.getAttribute("href") ?? null,
+        nom: getComputedStyle(el).viewTransitionName,
+      }));
+      w.__vtCartes.noms.push(noms);
+      return original(callback);
+    }) as typeof document.startViewTransition;
+  });
+}
+
+// Un changement de filtre passe par `router.replace(..., { transitionTypes: ["filtre-projets"] })`
+// (ProjectGrid.tsx) : c'est CE type qui active l'animation des cartes, pas la transition en
+// elle-même (le titre partagé, lui, en est exclu par le test précédent). La lecture a lieu AVANT la
+// mutation du DOM par le navigateur (comme pour le titre) : elle capture donc l'état « ancien », qui
+// contient encore les quatre cartes de « Tous ». Le filtre « Backend » garde gamecupsn et ugb-link
+// (dossiers 3 et 1) : ce sont les cartes VISIBLES après le filtre — celles que le brief demande de
+// vérifier — donc les seules dont ce test exige le nom réel et unique.
+//
+// Observation faite pendant l'implémentation, PAS vérifiée par ce test (au-delà de son périmètre) :
+// des deux cartes qui SORTENT (hackathon-mcn et plusutra), seule plusutra reçoit un nom réel dans cet
+// instantané « ancien » — hackathon-mcn (dossier 4, dernière de la liste avant filtrage) reçoit
+// "none" alors que sa configuration `exit` est identique. Reproduit de façon stable sur plusieurs
+// filtres (Infrastructure, Backend) : toujours la carte en dernière position dans l'ordre AVANT
+// filtrage qui sort de cette façon, jamais une carte en position intermédiaire. Cause non identifiée
+// avec certitude (React interne, node_modules/next/dist/compiled/react-dom/cjs/
+// react-dom-client.development.js) : les positions non filées sont retirées via le même mécanisme de
+// réconciliation (deleteRemainingChildren) que cette dernière, qui reçoit pourtant un nom réel — donc
+// pas une simple question de chemin de code emprunté. Sans y voir un défaut à corriger dans ce
+// composant (aucune prop ni règle CSS de ce fichier ne distingue les deux cartes), consigné ici et
+// dans le rapport de tâche plutôt que passé sous silence.
+test("un changement de filtre déclenche une transition de vue ; les cartes qui restent visibles portent un nom unique", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await instrumenterViewTransitionCartes(page);
+  await page.goto("/projets");
+  await page.getByRole("button", { name: "Backend" }).click();
+  await expect(page).toHaveURL(/categorie=backend/);
+  await expect(page.getByTestId("project-card")).toHaveCount(2);
+  const etat = await page.evaluate(() => (window as unknown as { __vtCartes: EtatVTCartes }).__vtCartes);
+  expect(etat.appels).toBeGreaterThan(0);
+  const instantane = etat.noms[0];
+  const visibles = instantane.filter(
+    (c) => c.href === "/projets/ugb-link" || c.href === "/projets/gamecupsn",
+  );
+  expect(visibles).toHaveLength(2);
+  expect(visibles.every((c) => c.nom === `carte-${c.href!.split("/").pop()}`)).toBe(true);
+  expect(new Set(visibles.map((c) => c.nom)).size).toBe(2);
+});
+
+// Contre-épreuve de la protection décrite au Step 3 de la doc (props `enter`/`exit`/`update` en
+// objet, clé `default: "none"`) : une navigation carte → étude (clic sur le lien « Ouvrir le
+// dossier », PAS un changement de filtre) ne porte aucun `transitionTypes` — la carte entière ne
+// doit donc pas participer à cette transition (nom résolu à "none", donc pas de nœud
+// `::view-transition-group` pour elle), seul le titre partagé (test dédié plus haut) doit animer.
+test("une navigation carte → étude n'anime pas la carte entière", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "View Transitions API : Chromium");
+  await instrumenterViewTransitionCartes(page);
+  await page.goto("/projets");
+  await page.locator('a[href="/projets/ugb-link"]').first().click();
+  await expect(page).toHaveURL(/\/projets\/ugb-link$/);
+  const etat = await page.evaluate(() => (window as unknown as { __vtCartes: EtatVTCartes }).__vtCartes);
+  expect(etat.appels).toBeGreaterThan(0);
+  const instantane = etat.noms[0];
+  expect(instantane.length).toBeGreaterThan(0);
+  expect(instantane.every((c) => c.nom === "none")).toBe(true);
+});
