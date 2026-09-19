@@ -172,7 +172,7 @@ Préalable aux animations 1 et 2 : aujourd'hui, `UgbLinkDiagram.tsx` est une sui
 - Produces:
   - chaque bloc enveloppé dans `<g data-noeud="<id>">` (rectangle, textes, pastille, logo), ids : `navigateur`, `nginx`, `front`, `api`, `postgresql`, `redis`, `minio`, `ollama`, `github`, `deploiement`, `sauvegarde`, `stockage` ;
   - chaque flux (tracé, paquet, pointe de flèche, libellé) enveloppé dans `<g data-flux="<de>-<vers>" data-de="<id>" data-vers="<id>" data-ordre="<n>">` ;
-  - l'export `FLUX_UGB: ReadonlyArray<{ de: string; vers: string; ordre: number }>` et `NOEUDS_UGB: ReadonlyArray<string>` depuis le même fichier.
+  - l'export `FLUX_UGB: ReadonlyArray<{ de: string; vers: string; ordre: number }>` et `NOEUDS_UGB: ReadonlyArray<string>` depuis le même fichier. **Réalisé autrement** (ronde de correction) : `SEGMENTS_UGB` typé `NoeudUgb`, avec un attribut `data-relie` sur chaque segment, troncs partagés compris.
 - Flux et ordre du trajet d'une requête (`data-ordre`) :
   1. `navigateur-nginx` (HTTPS)
   2. `nginx-front` (/), `nginx-api` (/api)
@@ -289,7 +289,7 @@ L'état de départ des blocs est `opacity: 0.15`, jamais 0. Dans `MiniDiagram.ts
 - Test: `tests/e2e/schema.spec.ts` (créer)
 
 **Interfaces:**
-- Consumes: `NOEUDS_UGB`, `FLUX_UGB`, attributs `data-noeud` / `data-flux` (tâche 2).
+- Consumes: `NOEUDS_UGB`, `NoeudUgb`, `SEGMENTS_UGB` (`{ id, relie: NoeudUgb[], ordre }`, troncs partagés compris), attributs `data-noeud`, `data-flux` et `data-relie` (liste des blocs reliés par chaque segment) — tâche 2, après sa ronde de correction : `FLUX_UGB` n'existe plus.
 - Produces: `<SchemaExplorable />` (client) ; `EXPLICATIONS_UGB: Record<NoeudUgb, { titre: string; texte: string }>`.
 
 Textes d'explication (à reprendre tels quels ; ils ne s'appuient que sur le schéma complet et `content/projets/ugb-link.mdx`) :
@@ -312,7 +312,7 @@ Textes d'explication (à reprendre tels quels ; ils ne s'appuient que sur le sch
 - [ ] **Step 1: Tests qui échouent** (`tests/e2e/schema.spec.ts`) :
   - la liste `<dl>` d'explications est visible sous le schéma, sur les deux projets, sans interaction, et contient les douze titres ;
   - au clavier (projet bureau) : `Tab` jusqu'au premier bloc (`[data-noeud="navigateur"]`), `Enter` → `aria-pressed="true"`, le `svg` porte `data-actif="navigateur"`, l'entrée correspondante de la liste porte `aria-current="true"` ; `Escape` → plus aucun bloc pressé, plus de `data-actif` ;
-  - au survol du bloc `api` (projet bureau) : les groupes de flux dont `data-de` ou `data-vers` contient `api` ont la classe ou l'état « allumé » (vérifier une couleur calculée égale à `--accent`), les autres blocs ont une opacité calculée de 0,35.
+  - au survol du bloc `api` (projet bureau) : les groupes de flux dont `data-relie` contient `api` (tronc `api-bus` compris) portent l'état « allumé » (`data-allume`) (vérifier une couleur calculée égale à `--accent`), les autres blocs ont une opacité calculée de 0,35.
   - le `svg` a `role="group"` et chaque bloc un nom accessible égal à son titre.
 
 - [ ] **Step 2: Échec vérifié.**
@@ -320,7 +320,7 @@ Textes d'explication (à reprendre tels quels ; ils ne s'appuient que sur le sch
 - [ ] **Step 3: Implémenter.**
   - `UgbLinkDiagram` accepte `explorable?: boolean` : si vrai, `role="group"` sur le `svg` (au lieu de `img`), et sur chaque `g[data-noeud]` : `tabIndex={0}`, `role="button"`, `aria-label={titre}`, `aria-pressed`, `aria-describedby` vers l'entrée de liste.
   - `SchemaExplorable` (client) : état `survol` et `selection` ; `data-actif` sur le `svg` = sélection sinon survol ; `Enter`/`Espace` bascule la sélection ; `Escape` et clic hors du schéma la réinitialisent ; `onMouseEnter` / `onFocus` fixent le survol ; `onMouseLeave` / `onBlur` le retirent. La liste `<dl className="pa-explications">` suit le schéma dans la `figure`, avec `aria-current="true"` sur l'entrée active.
-  - CSS (`styles/mouvement.css`, partie inconditionnelle pour les états, transitions de 200 ms dans `no-preference`) : `svg[data-actif] [data-noeud]` → `opacity: 0.35` ; le nœud actif et ses voisins → `opacity: 1` ; flux reliés → `stroke: var(--accent)`. Le calcul des voisins et des flux reliés se fait en JavaScript (attribut `data-relie` posé sur les éléments concernés), pas en CSS.
+  - CSS (`styles/mouvement.css`, partie inconditionnelle pour les états, transitions de 200 ms dans `no-preference`) : `svg[data-actif] [data-noeud]` → `opacity: 0.35` ; le nœud actif et ses voisins → `opacity: 1` ; flux reliés → `stroke: var(--accent)`. Le calcul des voisins et des flux reliés se fait en JavaScript à partir de `SEGMENTS_UGB` (un segment est relié au bloc actif si sa liste `relie` le contient ; les voisins sont les autres blocs de ces listes), et se traduit par un attribut d'état `data-allume` posé sur les groupes concernés. Ne pas réutiliser le nom `data-relie`, qui est l'attribut structurel de la tâche 2.
   - `SchemaUgbLink` (`components/mdx.tsx`) utilise `<SchemaExplorable />` dans le `DiagramScroller` existant.
 
 - [ ] **Step 4: Succès vérifié**, suite e2e complète (`DiagramScroller` et tests de lisibilité inchangés). **Capture** à 1 440 px avec le bloc `api` sélectionné, et à 375 px (liste visible). **Commit** : `feat(schéma): schéma explorable au survol et au clavier`.
