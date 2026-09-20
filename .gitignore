@@ -47,3 +47,6 @@ playwright-report/
 
 # maquettes du compagnon visuel
 .superpowers/
+
+# configuration locale des IDE JetBrains
+.idea/
