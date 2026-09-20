@@ -82,3 +82,31 @@ test("aucune pastille de disponibilité ne pulse, sur aucune page", async ({ pag
   await page.goto("/a-propos");
   attendPasAnimee(await animationsPastillesDispo(page, "main"));
 });
+
+test("le cartouche affiche le portrait, pas les initiales", async ({ page }) => {
+  for (const chemin of ["/", "/a-propos"]) {
+    await page.goto(chemin);
+    const portrait = page.locator("figure.pa-frame img");
+    await expect(portrait, chemin).toHaveCount(1);
+    await expect(portrait, chemin).toHaveAttribute("alt", /Abdou Aziz Sy/);
+    // Dimensions déclarées dans le HTML : sans elles, l'image ne réserve pas sa place et décale
+    // la mise en page pendant le chargement (CLS). On lit les attributs, pas `naturalWidth` :
+    // ce dernier renvoie la taille RÉELLEMENT servie, que Next adapte à la largeur d'affichage.
+    const dimensions = await portrait.evaluate((el) => ({
+      largeur: el.getAttribute("width"),
+      hauteur: el.getAttribute("height"),
+    }));
+    expect(dimensions, chemin).toEqual({ largeur: "720", hauteur: "840" });
+    await expect(page.locator("figure.pa-frame .pa-initiales"), chemin).toHaveCount(0);
+  }
+});
+
+test("chaque page utilise son propre portrait", async ({ page }) => {
+  await page.goto("/");
+  const accueil = await page.locator("figure.pa-frame img").getAttribute("src");
+  await page.goto("/a-propos");
+  const apropos = await page.locator("figure.pa-frame img").getAttribute("src");
+  expect(accueil).toBeTruthy();
+  expect(apropos).toBeTruthy();
+  expect(accueil).not.toBe(apropos);
+});

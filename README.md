@@ -36,7 +36,7 @@ pnpm icons      # public/icons.svg depuis les planches
 | Un projet | `content/projets/<slug>.mdx` |
 | Un article | `content/blog/<slug>.mdx` |
 | CV téléchargeable | `public/cv.pdf` |
-| Portrait | `public/portrait.jpg`, puis `portrait: "/portrait.jpg"` dans `content/site.ts` |
+| Portraits | `public/portrait-accueil.jpg` (serré, fond neutre) et `public/portrait-apropos.jpg` (plus large), déclarés dans `site.portraits` |
 
 Le frontmatter est validé par `lib/schemas.ts` : un champ manquant ou invalide fait échouer le build en citant le fichier.
 
