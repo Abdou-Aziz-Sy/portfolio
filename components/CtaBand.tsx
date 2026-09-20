@@ -12,8 +12,13 @@ export function CtaBand() {
           <h2 id="contact-titre" style={{ marginTop: 12 }}>
             Vous cherchez un ingénieur backend ou full stack ? <span className="pa-em">Parlons-en.</span>
           </h2>
-          <p className="pa-cta-liens">
+          {/* L'adresse vit dans son propre bloc, à la taille du texte courant : un lien mailto
+              n'ouvre rien quand aucun client de messagerie n'est configuré, et le clic tombait
+              alors dans le vide. Les liens de profil restent en mention secondaire dessous. */}
+          <p className="pa-cta-adresse">
             <CopyEmail />
+          </p>
+          <p className="pa-cta-liens">
             {site.liens.github ? (
               <a className="pa-ilink" href={site.liens.github}>
                 <TechIcon name="github" size={16} />

@@ -56,3 +56,14 @@ test("le CV se télécharge sous un nom explicite", async ({ page }) => {
     }
   }
 });
+
+test("l'adresse est lisible sans interaction, au même niveau que le bouton", async ({ page }) => {
+  await page.goto("/");
+  const adresse = page.locator(".pa-cta-adresse a[href^='mailto:']");
+  await expect(adresse).toBeVisible();
+  // Un lien mailto peut ne rien ouvrir (aucun client de messagerie configuré) : l'adresse doit
+  // donc se lire à l'œil, à la taille du texte courant, pas en mention secondaire.
+  const taille = await adresse.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(taille).toBeGreaterThanOrEqual(16);
+  await expect(page.locator(".pa-cta-adresse button")).toHaveText("Copier");
+});
