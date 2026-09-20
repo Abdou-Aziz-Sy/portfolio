@@ -109,30 +109,57 @@ test("un second clic pendant la transition de thème ne retire pas prématuréme
   const racine = page.locator("html");
   await expect(racine).toHaveAttribute("data-theme", "dark");
 
-  const bouton = page.getByTestId("theme-toggle");
-  await bouton.click();
-  await page.waitForTimeout(100);
-  // `dispatchEvent` plutôt que `.click()` pour le second clic : le clic normal de Playwright
-  // attend que l'élément soit visuellement stable, ce que le repaint constant de la transition en
-  // cours empêche — constaté en pratique, le second `.click()` se retrouvait ainsi retardé de
-  // ~900 ms au lieu des 100 ms voulus, laissant la première transition se terminer naturellement
-  // avant le second clic et ne reproduisant donc jamais le chevauchement à tester.
-  await bouton.dispatchEvent("click");
+  // Chevauchement provoqué DEPUIS la page, au moment où la première transition démarre
+  // (`ready`), et non par deux clics espacés d'un délai en millisecondes : le délai dépendait de
+  // la vitesse de la machine et laissait souvent la première transition se terminer avant le
+  // second clic (3 échecs sur 16 en local). L'état observé est enregistré à la fin de CHAQUE
+  // transition, dans un `setTimeout(…, 0)` — donc après le rappel `finished.finally` de
+  // ThemeToggle.tsx, qui décide s'il retire la classe.
+  await page.evaluate(() => {
+    type Fin = { restantes: number; classe: boolean };
+    const w = window as unknown as { __transitions: { demarrees: number; terminees: number; fins: Fin[] } };
+    w.__transitions = { demarrees: 0, terminees: 0, fins: [] };
+    const original = document.startViewTransition.bind(document);
+    document.startViewTransition = ((arg: Parameters<typeof original>[0]) => {
+      const transition = original(arg);
+      const rang = ++w.__transitions.demarrees;
+      if (rang === 1) {
+        // Second clic pendant que la première transition tourne : c'est le cas à protéger.
+        transition.ready.then(
+          () => document.querySelector<HTMLButtonElement>('[data-testid="theme-toggle"]')?.click(),
+          () => {},
+        );
+      }
+      transition.finished.finally(() => {
+        w.__transitions.terminees += 1;
+        // Nombre de transitions encore en cours mesuré MAINTENANT (une transition plus récente
+        // peut se terminer avant le `setTimeout` ci-dessous) ; seule la lecture de la classe est
+        // différée, pour passer après le rappel `finished.finally` de ThemeToggle.tsx.
+        const restantes = w.__transitions.demarrees - w.__transitions.terminees;
+        setTimeout(() => {
+          w.__transitions.fins.push({
+            restantes,
+            classe: document.documentElement.classList.contains("pa-transition-theme"),
+          });
+        }, 0);
+      });
+      return transition;
+    }) as typeof document.startViewTransition;
+    document.querySelector<HTMLButtonElement>('[data-testid="theme-toggle"]')?.click();
+  });
 
-  // Attente courte mais non nulle après le second clic : le navigateur annule la première
-  // transition dès que la seconde démarre (constaté par instrumentation : son `finished` se résout
-  // en quelques dizaines de ms, bien avant les 450 ms de la seconde). Sans cette attente,
-  // l'assertion réussirait dès la lecture immédiate simplement parce que le second clic vient
-  // lui-même de poser la classe, sans jamais laisser le temps à la fin prématurée de la première
-  // transition — bogue potentiel — de la retirer. 200 ms laisse largement le temps à cette
-  // résolution précoce de se produire, tout en restant bien avant la fin légitime de la seconde
-  // transition (450 ms après le second clic).
-  await page.waitForTimeout(200);
-  const classeApresDelai = await page.evaluate(() => document.documentElement.classList.contains("pa-transition-theme"));
-  expect(classeApresDelai).toBe(true);
-
-  // Cohérence finale : deux bascules ramènent au thème initial, et la classe de garde a bien fini
-  // par disparaître (retirée par la SECONDE transition, celle qui va à son terme).
+  type Etat = { demarrees: number; terminees: number; fins: { restantes: number; classe: boolean }[] };
+  const lire = () => page.evaluate(() => (window as unknown as { __transitions: Etat }).__transitions);
+  await expect.poll(async () => (await lire()).fins.length).toBe(2);
+  const etat = await lire();
+  // Le chevauchement a bien eu lieu : à la fin de la première transition (annulée par le
+  // navigateur dès que la seconde démarre), une transition tournait encore…
+  expect(etat.fins[0].restantes, JSON.stringify(etat)).toBeGreaterThan(0);
+  // … et la classe de garde n'a pas été retirée à ce moment-là.
+  expect(etat.fins[0].classe).toBe(true);
+  // Cohérence finale : deux bascules ramènent au thème initial, et la classe a bien fini par
+  // disparaître, retirée par la SECONDE transition, celle qui va à son terme.
+  expect(etat.fins[1].classe).toBe(false);
   await expect(racine).toHaveAttribute("data-theme", "dark");
   await expect
     .poll(() => page.evaluate(() => document.documentElement.classList.contains("pa-transition-theme")))
