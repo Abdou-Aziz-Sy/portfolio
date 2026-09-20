@@ -1,4 +1,4 @@
-import { categories, type Categorie } from "@/lib/schemas";
+import { categories, type Categorie } from "@/lib/categories";
 
 export function lireCategorie(valeur: string | null | undefined): Categorie | null {
   return (categories as readonly string[]).includes(valeur ?? "") ? (valeur as Categorie) : null;

@@ -1,15 +1,8 @@
 import { z } from "zod";
+import { categories } from "@/lib/categories";
 import { iconKeys } from "@/lib/icons";
 
-export const categories = ["backend", "full-stack", "infrastructure", "ia"] as const;
-export type Categorie = (typeof categories)[number];
-
-export const categorieLabel: Record<Categorie, string> = {
-  backend: "Backend",
-  "full-stack": "Full stack",
-  infrastructure: "Infrastructure",
-  ia: "IA appliquée",
-};
+export { categories, categorieLabel, type Categorie } from "@/lib/categories";
 
 export const statutLabel = {
   "en-production": "En production",
