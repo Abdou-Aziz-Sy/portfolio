@@ -191,9 +191,13 @@
 }
 
 @media (min-width: 1920px) {
-  .pa-herogrid { grid-template-columns: minmax(0, 1fr) 360px; }
-  .pa-frame--accueil { width: 360px; }
-  .pa-frame--accueil .pa-frame-media { height: 420px; }
+  .pa-herogrid { grid-template-columns: minmax(0, 1fr) 460px; gap: 120px; }
+  .pa-frame--accueil { width: 460px; }
+  .pa-frame--accueil .pa-frame-media { height: 537px; }
+  /* Le haut de page respire à proportion de la fenêtre, pas d'une valeur fixe : sur un écran de
+     1 440 px de haut, des marges fixes laissaient près de la moitié de la première vue vide. */
+  .pa-accueil-haut { padding-block: clamp(120px, 9vh, 190px) clamp(120px, 9vh, 190px); }
+  .pa-herometa { margin-top: 72px; padding-top: 32px; }
 }
 
 /* Écran de faible hauteur (ex. téléphone à l'horizontale) : l'en-tête collant peut manger
