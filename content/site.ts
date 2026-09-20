@@ -21,8 +21,12 @@ export const site = {
   disponibilite: "Disponible pour un poste",
   disponibiliteDetail: "Disponible pour un poste · Dakar ou à distance",
   cv: { href: "/cv.pdf", fichier: "CV_Abdou_Aziz_SY.pdf" },
-  /** Chemin du portrait dans public/, à renseigner quand le fichier est fourni. */
-  portrait: undefined as string | undefined,
+  /** Un portrait par emplacement : le cartouche de l'accueil ne fait que 160 à 360 px de large,
+   *  celui d'« à propos » est bien plus grand et supporte une photo avec du décor. */
+  portraits: {
+    accueil: "/portrait-accueil.jpg" as string | undefined,
+    apropos: "/portrait-apropos.jpg" as string | undefined,
+  },
   description:
     "Ingénieur logiciel à Dakar, orienté backend, conception de systèmes et infrastructure.",
 

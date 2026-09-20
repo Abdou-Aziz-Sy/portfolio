@@ -36,13 +36,13 @@ pnpm icons      # public/icons.svg depuis les planches
 | Un projet | `content/projets/<slug>.mdx` |
 | Un article | `content/blog/<slug>.mdx` |
 | CV téléchargeable | `public/cv.pdf` |
-| Portrait | `public/portrait.jpg`, puis `portrait: "/portrait.jpg"` dans `content/site.ts` |
+| Portraits | `public/portrait-accueil.jpg` (serré, fond neutre) et `public/portrait-apropos.jpg` (plus large), déclarés dans `site.portraits` |
 
 Le frontmatter est validé par `lib/schemas.ts` : un champ manquant ou invalide fait échouer le build en citant le fichier.
 
 ### Ajouter un projet
 
-Créer `content/projets/<slug>.mdx` avec le frontmatter complet (voir `plusutra.mdx`). Chaque titre `##` devient une section numérotée et une entrée du sommaire. Composants disponibles dans le MDX : `Prose`, `Liste`, `Contexte`, `DecisionRecord`, `Exploitation`, `Galerie`, `Callout`, `Figure`, `SchemaUgbLink`.
+Créer `content/projets/<slug>.mdx` avec le frontmatter complet (voir `gamecupsn.mdx`). Chaque titre `##` devient une section numérotée et une entrée du sommaire. Composants disponibles dans le MDX : `Prose`, `Liste`, `Contexte`, `DecisionRecord`, `Exploitation`, `Galerie`, `Callout`, `Figure`, `SchemaUgbLink`.
 
 Pour des captures, déposer les images dans `public/captures/<slug>/`, puis ajouter une section :
 

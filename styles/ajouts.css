@@ -21,6 +21,13 @@ body { margin: 0; min-height: 100vh; }
 .pa-btn--center { justify-content: center; }
 .pa-cta-liens { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-4); }
 .pa-copymail { display: inline-flex; align-items: center; gap: var(--space-2); }
+/* Adresse de contact : lisible sans interaction et à la taille du texte courant. Un lien mailto
+   n'ouvre rien quand aucun client de messagerie n'est configuré : l'adresse et son bouton
+   « Copier » doivent donc être aussi visibles que le bouton principal. */
+.pa-cta-adresse { margin: var(--space-4) 0 0; font-size: 17px; }
+.pa-cta-adresse .pa-copymail { gap: var(--space-3); flex-wrap: wrap; }
+.pa-cta-adresse a { color: var(--ink); }
+.pa-cta-adresse button { font-size: 13px; }
 
 /* Navigation : bascule de thème et menu mobile */
 .pa-nav-actions { display: flex; align-items: center; gap: var(--space-3); }

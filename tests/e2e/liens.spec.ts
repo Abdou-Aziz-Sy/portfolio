@@ -6,7 +6,6 @@ export const PAGES_TEST = [
   "/projets/ugb-link",
   "/projets/gamecupsn",
   "/projets/hackathon-mcn",
-  "/projets/plusutra",
   "/a-propos",
   "/page-qui-nexiste-pas",
 ];

@@ -38,6 +38,20 @@ test("le schéma de la carte vedette reste lisible dès 320 px", async ({ page }
 test.describe("mise en page fluide", () => {
   test.skip(({ isMobile }) => isMobile, "largeurs pilotées explicitement : projet bureau seulement");
 
+  test("sur un grand écran, la première vue porte le haut de page en entier", async ({ page }) => {
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const { haut, ecran } = await page.evaluate(() => ({
+      haut: document.querySelector(".pa-accueil-haut")!.getBoundingClientRect().height,
+      ecran: window.innerHeight,
+    }));
+    // Mesuré avant ce chantier : 485 px pour 1 440 px de fenêtre, soit 34 % (812 px une fois le
+    // portrait posé) — la première vue était surtout du vide. Le haut de page doit occuper au
+    // moins 60 % de la hauteur visible.
+    expect(haut / ecran, `${Math.round(haut)}px pour ${ecran}px`).toBeGreaterThanOrEqual(0.6);
+  });
+
   test("le contenu occupe jusqu'à 1 920 px sur un écran de 2 560 px", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 1440 });
     await page.goto("/");
@@ -91,14 +105,23 @@ test.describe("mise en page fluide", () => {
       .first()
       .evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
 
+    // Deuxième mesure sur un élément à TRÈS grande police : c'est le cas qui distingue une
+    // hauteur de ligne héritée en pixels (26 px, valeur voulue) d'un ratio sans unité, qui serait
+    // recalculé sur la police de l'élément (64 px × 1,625 ≈ 104 px). Élément créé pour la mesure
+    // plutôt que pris dans la page : le précédent repère, les initiales du cartouche, a disparu
+    // le jour où un portrait a été fourni.
     await page.goto("/a-propos");
-    const hauteurInitiales = await page
-      .locator(".pa-initiales")
-      .first()
-      .evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
+    const hauteurGrandePolice = await page.locator("main").first().evaluate((main) => {
+      const sonde = document.createElement("span");
+      sonde.style.fontSize = "64px";
+      main.appendChild(sonde);
+      const hauteur = parseFloat(getComputedStyle(sonde).lineHeight);
+      sonde.remove();
+      return hauteur;
+    });
 
     expect(hauteurCardFoot).toBeCloseTo(26, 0);
-    expect(hauteurInitiales).toBeCloseTo(26, 0);
+    expect(hauteurGrandePolice).toBeCloseTo(26, 0);
   });
 
   // Avec auto-fit, les pistes surnuméraires sont conservées dans gridTemplateColumns mais
