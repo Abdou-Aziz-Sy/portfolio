@@ -16,9 +16,11 @@ PlusUtra est retiré du site (projet écrit sous assistance, non défendable en 
 |---|---|---|
 | 01 | UGB Link | Mettre en production et exploiter un système réel |
 | 02 | GamecupSN | Concevoir et modéliser avant de coder |
-| 03 | taskhandler | Java / Spring Boot : un cycle de vie métier validé |
-| 04 | Gestion_Stage | Une API Node complète, de la base aux routes |
-| 05 | Hackathon Musée des Civilisations Noires | Livrer vite sous contrainte |
+| 03 | Plateforme de mentorat (VCN 2025) | Architecture d'un système riche : temps réel, visioconférence, infrastructure |
+| 04 | taskhandler | Java / Spring Boot : un cycle de vie métier validé |
+| 05 | Gestion_Stage | Une API Node complète, de la base aux routes |
+
+Le dossier Hackathon Musée des Civilisations Noires est retiré au profit de la plateforme de mentorat, plus substantielle.
 
 ### GamecupSN — la vitrine génie logiciel
 
@@ -34,7 +36,7 @@ La section « Résultats » dit où en est réellement le projet (conception ach
 
 ### taskhandler — Java / Spring Boot
 
-Application de gestion de tâches (Spring Boot + React), menée à quatre. Contribution de l'auteur vérifiée commit par commit (20 commits, deuxième contributeur) :
+Application de gestion de tâches (Spring Boot + React), menée à quatre dans le cadre d'un cours de génie logiciel de master 1, second semestre : mener un projet de bout en bout avec les méthodes et outils du génie logiciel. Contribution de l'auteur vérifiée commit par commit (20 commits, deuxième contributeur) :
 
 - fondation données : configuration PostgreSQL, entité `User`, repository ;
 - réinitialisation de mot de passe : génération de jeton, notification par e-mail, migration SQL ;
@@ -46,13 +48,21 @@ Application de gestion de tâches (Spring Boot + React), menée à quatre. Contr
 
 ### Gestion_Stage — une API complète
 
-Plateforme de gestion de stages (Node.js, Express, MongoDB/Mongoose, JWT, dépôt de fichiers par Multer). Contribution vérifiée par les fichiers touchés : modèles, contrôleurs, routes, serveur, connexion à la base, téléversement de documents — soit l'essentiel du backend.
+Plateforme de gestion de stages (Node.js, Express, MongoDB/Mongoose, JWT, dépôt de fichiers par Multer), menée à trois dans le cadre d'un cours de conception d'interface en licence 3 : produire une maquette Figma, puis la coder. L'auteur y a pris tout le backend. Contribution vérifiée par les fichiers touchés : modèles, contrôleurs, routes, serveur, connexion à la base, téléversement de documents — soit l'essentiel du backend.
 
 **Pré-requis bloquant** : le dépôt public contient un fichier `.env` commité avec l'URI MongoDB et le secret JWT. Tant que ces secrets ne sont pas changés et le fichier retiré, le portfolio ne publie aucun lien vers ce dépôt.
 
-### Hackathon et UGB Link
+### Plateforme de mentorat pair-à-pair — VCN 2025
 
-Le hackathon gagne le récit qui lui manque : durée, équipe, rôle de l'auteur, résultat. UGB Link est inchangé, sauf la renumérotation.
+Construite pendant les **Vacances Citoyennes Numériques**, première édition, organisées par l'Université numérique Cheikh Hamidou Kane dans le cadre du New Deal Technologique : trois semaines de formation en équipes interdisciplinaires, avec prix aux meilleures solutions. Équipe de trois ; l'auteur est le contributeur principal (56 commits sur 94, du 23 septembre au 28 octobre 2025).
+
+Éléments vérifiés dans le dépôt local (`Projects/Pro/monitoring_platforme1.0/monitiring_platforme`) : backend Express 5 et Prisma 6 sur PostgreSQL, 20 modèles de données avec migrations et jeux de données de démonstration ; messagerie instantanée et notifications par Socket.io ; visioconférence BigBlueButton avec repli Jitsi ; API documentée par Swagger ; durcissement par Helmet, limitation de débit, validation par Joi et express-validator ; infrastructure en Docker Compose (PostgreSQL 15, Redis 7, MailHog) ; flux de branches `develop` → `integration` → `main`. Documentation de conception : cahier de lancement, document de modélisation (classes, cas d'usage, **diagrammes de séquence**), notes d'architecture.
+
+Le dépôt GitLab est privé : aucun lien tant qu'il ne devient pas public. Un projet GitLab ne peut pas être plus visible que son groupe — le groupe doit passer public d'abord.
+
+### UGB Link
+
+Inchangé, sauf la renumérotation.
 
 ## B. Le gabarit commun
 
