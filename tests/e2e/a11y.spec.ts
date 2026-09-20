@@ -49,10 +49,15 @@ test.describe("contraste des séparateurs de métadonnées", () => {
   });
 });
 
-test("le cartouche d'initiales est nommé correctement", async ({ page }) => {
+// Le cartouche affiche soit le portrait, soit les initiales en repli (Frame.tsx) : les deux
+// états doivent porter un nom accessible qui nomme la personne. Le test accepte l'un ou l'autre
+// pour rester vrai le jour où une photo est ajoutée ou retirée.
+test("le cartouche est nommé correctement", async ({ page }) => {
   await page.goto("/a-propos");
-  const initiales = page.getByRole("img", { name: /Initiales d'Abdou Aziz Sy/ });
-  expect(await initiales.count()).toBeGreaterThan(0);
+  const cartouche = page.locator("figure.pa-frame").getByRole("img", { name: /Abdou Aziz Sy/ });
+  await expect(cartouche).toHaveCount(1);
+  const nom = await cartouche.evaluate((el) => el.getAttribute("alt") ?? el.getAttribute("aria-label") ?? "");
+  expect(nom).toMatch(/^(Portrait de|Initiales d')/);
 });
 
 test("la pastille d'une décision acceptée ne pulse pas (statut stable)", async ({ page }) => {
