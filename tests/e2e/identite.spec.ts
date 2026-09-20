@@ -110,3 +110,16 @@ test("chaque page utilise son propre portrait", async ({ page }) => {
   expect(apropos).toBeTruthy();
   expect(accueil).not.toBe(apropos);
 });
+
+// Sur l'accueil, l'élément le plus grand est le titre, pas le portrait : précharger l'image lui
+// disputait la bande passante du chemin critique. Sur « à propos », le portrait EST l'élément le
+// plus grand : il est préchargé. Un `loading="eager"` ne remplacerait pas ce réglage — Next en
+// déduit aussi un préchargement.
+test("le portrait de l'accueil n'est pas préchargé, celui d'« à propos » l'est", async ({ page }) => {
+  await page.goto("/");
+  expect(await page.locator('link[rel="preload"][as="image"]').count()).toBe(0);
+  await expect(page.locator("figure.pa-frame img")).toHaveAttribute("loading", "lazy");
+
+  await page.goto("/a-propos");
+  expect(await page.locator('link[rel="preload"][as="image"]').count()).toBeGreaterThan(0);
+});

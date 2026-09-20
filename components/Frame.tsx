@@ -16,7 +16,13 @@ export function Frame({ feuille, variante }: { feuille: string; variante: "accue
           alt={`Portrait de ${site.nom}`}
           width={720}
           height={840}
-          priority
+          // `preload`, pas `priority` : ce dernier est déprécié depuis Next 16
+          // (node_modules/next/dist/docs/01-app/03-api-reference/02-components/image.md).
+          // Précharger ne se justifie que pour l'élément le plus grand de la page : c'est le
+          // portrait sur « à propos », mais le titre sur l'accueil, où précharger l'image lui
+          // disputait le chemin critique (94 au lieu de 95 en performance). `loading="eager"`
+          // ne résout rien ici : Next en déduit lui aussi un préchargement.
+          preload={variante === "apropos"}
           sizes={variante === "accueil" ? "(max-width: 767px) 160px, 460px" : "(max-width: 767px) 100vw, 420px"}
         />
       ) : (
