@@ -311,14 +311,13 @@ async function instrumenterViewTransitionCartes(page: Page) {
 // (ProjectGrid.tsx) : c'est CE type qui active l'animation des cartes, pas la transition en
 // elle-même (le titre partagé, lui, en est exclu par le test précédent). La lecture a lieu AVANT la
 // mutation du DOM par le navigateur (comme pour le titre) : elle capture donc l'état « ancien », qui
-// contient encore les quatre cartes de « Tous ». Le filtre « Backend » garde gamecupsn et ugb-link
-// (dossiers 3 et 1) : ce sont les cartes VISIBLES après le filtre — celles que le brief demande de
+// contient encore les trois cartes de « Tous ». Le filtre « Backend » garde gamecupsn et ugb-link
+// (dossiers 2 et 1) : ce sont les cartes VISIBLES après le filtre — celles que le brief demande de
 // vérifier — donc les seules dont ce test exige le nom réel et unique.
 //
 // Observation faite pendant l'implémentation, PAS vérifiée par ce test (au-delà de son périmètre) :
-// des deux cartes qui SORTENT (hackathon-mcn et plusutra), seule plusutra reçoit un nom réel dans cet
-// instantané « ancien » — hackathon-mcn (dossier 4, dernière de la liste avant filtrage) reçoit
-// "none" alors que sa configuration `exit` est identique. Reproduit de façon stable sur plusieurs
+// hackathon-mcn (dossier 3, dernière de la liste avant filtrage), la carte qui SORT, reçoit
+// "none" alors que sa configuration `exit` est identique à celle des autres. Reproduit de façon stable sur plusieurs
 // filtres (Infrastructure, Backend) : toujours la carte en dernière position dans l'ordre AVANT
 // filtrage qui sort de cette façon, jamais une carte en position intermédiaire. Cause non identifiée
 // avec certitude (React interne, node_modules/next/dist/compiled/react-dom/cjs/

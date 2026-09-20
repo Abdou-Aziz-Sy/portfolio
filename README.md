@@ -42,7 +42,7 @@ Le frontmatter est validé par `lib/schemas.ts` : un champ manquant ou invalide 
 
 ### Ajouter un projet
 
-Créer `content/projets/<slug>.mdx` avec le frontmatter complet (voir `plusutra.mdx`). Chaque titre `##` devient une section numérotée et une entrée du sommaire. Composants disponibles dans le MDX : `Prose`, `Liste`, `Contexte`, `DecisionRecord`, `Exploitation`, `Galerie`, `Callout`, `Figure`, `SchemaUgbLink`.
+Créer `content/projets/<slug>.mdx` avec le frontmatter complet (voir `gamecupsn.mdx`). Chaque titre `##` devient une section numérotée et une entrée du sommaire. Composants disponibles dans le MDX : `Prose`, `Liste`, `Contexte`, `DecisionRecord`, `Exploitation`, `Galerie`, `Callout`, `Figure`, `SchemaUgbLink`.
 
 Pour des captures, déposer les images dans `public/captures/<slug>/`, puis ajouter une section :
 
