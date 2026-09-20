@@ -74,7 +74,7 @@ Contraintes d'affichage, identiques au schéma d'UGB Link : lisible dès 320 px 
 ## D. Corrections d'interface
 
 1. **Contact.** Le bandeau affiche l'adresse e-mail et le bouton « Copier » au même niveau que le bouton principal, pour qu'un clic sur un lien `mailto:` sans client de messagerie ne tombe plus dans le vide. Le bouton de l'en-tête conserve son ancre.
-2. **Portrait.** La photo fournie remplace les initiales du cartouche, sur l'accueil et sur « à propos ».
+2. **Portrait.** Deux photos, selon la taille d'affichage : sur l'accueil, où le cartouche ne fait que 160 à 360 px, un portrait serré sur fond neutre, qui reste lisible ; sur « à propos », où le cadre est grand, la photo prise à l'École Supérieure Polytechnique, geste et décor compris. Le composant de cartouche accepte donc une image par variante, et conserve son repli sur les initiales quand une image manque.
 3. **Grand écran.** À 2560 px, la première vue est très vide : le haut de page ne fait que 485 px de haut pour 1440 px de fenêtre. Les espacements et la taille du cartouche sont revus pour que la première vue porte le titre, l'action principale, les chiffres clés et le portrait.
 
 ## E. Hors périmètre
