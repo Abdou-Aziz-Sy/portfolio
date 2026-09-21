@@ -1,0 +1,94 @@
+---
+titre: Gestion de stages
+accroche: L'API derrière une maquette de plateforme de stages
+resume: "Backend d'une plateforme de candidatures de stage : offres, candidats, dépôt de CV et suivi des statuts."
+dossier: 5
+annee: 2024
+statut: termine
+cadre: Cours de conception d'interface, licence 3, équipe de trois
+categories: [backend]
+stack: [nodedotjs, express]
+role: Backend
+periode: Mai — juin 2024
+stackDetail: Node.js · Express · MongoDB · Mongoose · JWT · Multer
+miniSchema:
+  - { titre: Maquette, sous: Figma }
+  - { titre: API, sous: Express }
+  - { titre: MongoDB, sous: candidatures }
+publie: false
+---
+
+## Contexte
+
+<Prose>
+Cours de conception d'interface en licence 3 : dessiner une maquette Figma d'une plateforme de gestion des stages, puis la coder. Le sujet du cours était l'interface ; l'application, elle, avait besoin d'un serveur pour exister.
+
+À trois, chacun a pris un versant. J'ai pris **tout le backend** : modèles, contrôleurs, routes, connexion à la base, dépôt de fichiers, authentification. C'est mon premier serveur écrit entièrement de bout en bout.
+</Prose>
+
+## Contraintes
+
+<Liste
+  prefixe="C"
+  items={[
+    "Une maquette déjà dessinée : l'API doit servir les écrans prévus, pas l'inverse.",
+    "Une candidature comporte un fichier — le CV — qu'il faut recevoir et retrouver.",
+    "Un cours d'interface : le backend devait tenir en quelques semaines, à côté du reste.",
+  ]}
+/>
+
+## Architecture
+
+<Prose>
+Un serveur Express découpé par domaine — authentification, utilisateurs, offres de stage, candidats — avec, pour chacun, son modèle Mongoose, son contrôleur et ses routes. MongoDB pour les données, un jeton JWT pour les sessions, des mots de passe hachés par bcrypt, et Multer pour recevoir les CV.
+
+Une candidature référence son offre et porte un statut parmi trois valeurs : en attente, accepté, rejeté. C'est ce statut que l'interface affiche et fait évoluer.
+</Prose>
+
+## Décisions
+
+<DecisionRecord
+  numero="01"
+  titre="Un statut de candidature fermé à trois valeurs"
+  contexte="Le suivi d'une candidature est l'information que tout le monde regarde. Laissée libre, la valeur du statut aurait été écrite différemment à chaque endroit du code et de l'interface."
+  options={[
+    { libelle: "Un champ texte libre", note: "« Accepté », « accepte », « OK » : impossible à filtrer" },
+    { libelle: "Une table de statuts séparée", note: "hors de proportion pour trois valeurs stables" },
+    { libelle: "Une énumération de trois valeurs, avec défaut", retenue: true },
+  ]}
+  decision="Le statut est contraint à trois valeurs — en attente, accepté, rejeté — et vaut « en attente » à la création."
+  consequences="Le filtrage et l'affichage deviennent fiables. Ajouter un état, par exemple « entretien planifié », demande une migration des documents existants."
+/>
+
+<DecisionRecord
+  numero="02"
+  titre="Stocker le CV sur le disque, garder son chemin en base"
+  contexte="Une candidature arrive avec un fichier. MongoDB sait stocker des binaires, mais chaque lecture de la liste des candidats aurait alors transporté les CV."
+  options={[
+    { libelle: "Le fichier dans le document de candidature", note: "documents lourds, listes ralenties" },
+    { libelle: "Un service de stockage externe", note: "hors périmètre d'un projet de cours" },
+    { libelle: "Le fichier sur le disque, le chemin en base", retenue: true },
+  ]}
+  decision="Multer reçoit le fichier et l'écrit dans un dossier de dépôt ; le document de candidature ne garde que son chemin."
+  consequences="Les listes restent légères. En contrepartie, la base et le disque peuvent diverger : un document sans fichier, ou l'inverse. Rien, dans le projet, ne réconcilie les deux."
+/>
+
+## Résultats
+
+<Liste
+  prefixe="R"
+  items={[
+    "Une API complète pour les écrans de la maquette : comptes, offres, candidatures, dépôt et consultation des CV.",
+    "Le suivi d'une candidature fonctionne de bout en bout, du dépôt à la décision.",
+  ]}
+/>
+
+## Ce que je referais autrement
+
+<Prose>
+Deux choses, apprises depuis et sans discussion possible.
+
+D'abord, **ne jamais commiter un fichier de secrets**. Le dépôt de ce projet contient encore un fichier d'environnement avec l'adresse de la base et la clé de signature des jetons. Un secret publié est un secret perdu : il se révoque, il ne se cache pas.
+
+Ensuite, des messages de commit qui disent ce qu'ils font. Les miens, sur ce projet, s'appellent « comm » et « zzzz2 ». Le code qu'ils portent est pourtant l'essentiel du serveur — personne ne pouvait le deviner en lisant l'historique, moi compris, deux ans plus tard.
+</Prose>
