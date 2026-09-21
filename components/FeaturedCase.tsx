@@ -27,7 +27,7 @@ export function FeaturedCase({ projet }: { projet: Projet }) {
           />
         </span>
         {projet.commanditaire ? (
-          <Commanditaire commanditaire={projet.commanditaire} hauteur={22} avecNom />
+          <Commanditaire commanditaire={projet.commanditaire} hauteur={22} />
         ) : (
           <span className="pa-meta">Étude de cas</span>
         )}

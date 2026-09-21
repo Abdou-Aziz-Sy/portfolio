@@ -108,7 +108,7 @@ function Galerie({ images }: { images: (CaptureProps & { large?: boolean })[] })
 /** Démonstration filmée dans le même cadre que les figures, avec sa légende. */
 function Demo({ legende, ...video }: { src: string; poster: string; titre: string; largeur: number; hauteur: number; legende: string }) {
   return (
-    <figure className="pa-surface pa-fig pa-demo">
+    <figure className="pa-surface pa-demo">
       <Video {...video} />
       <figcaption className="pa-small">
         <span className="pa-meta">Vidéo</span>&nbsp; {legende}
