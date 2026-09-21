@@ -103,3 +103,17 @@ test("la validation du contenu (Zod) n'est pas envoyée au navigateur", async ({
     }
   }
 });
+
+// Chantier 4b : le dossier GamecupSN prouve la conception. Les chiffres cités viennent du dépôt
+// du projet (14 classes, 9 énumérations, 27 associations, 105 user stories couvertes), pas d'une
+// estimation : le test les vérifie pour qu'aucune réécriture ne les arrondisse.
+test("le dossier GamecupSN montre la modélisation du domaine", async ({ page }) => {
+  await page.goto("/projets/gamecupsn");
+  await expect(page.getByRole("heading", { name: /Modélisation/ })).toBeVisible();
+  const schema = page.locator('img[src*="gamecupsn-domaine"]');
+  await expect(schema).toHaveCount(1);
+  await expect(schema).toHaveAttribute("alt", /.{40,}/);
+  const corps = page.locator("main");
+  await expect(corps).toContainText("27 associations");
+  await expect(corps).toContainText("105");
+});
