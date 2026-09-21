@@ -110,7 +110,7 @@ test("la validation du contenu (Zod) n'est pas envoyée au navigateur", async ({
 test("le dossier GamecupSN montre la modélisation du domaine", async ({ page }) => {
   await page.goto("/projets/gamecupsn");
   await expect(page.getByRole("heading", { name: /Modélisation/ })).toBeVisible();
-  const schema = page.locator('img[src*="gamecupsn-domaine"]');
+  const schema = page.locator('img[src*="gamecupsn-classes"]');
   await expect(schema).toHaveCount(1);
   await expect(schema).toHaveAttribute("alt", /.{40,}/);
   const corps = page.locator("main");
@@ -118,11 +118,11 @@ test("le dossier GamecupSN montre la modélisation du domaine", async ({ page })
   await expect(corps).toContainText("105");
 });
 
-// Diagrammes de cas d'utilisation transcrits du fichier draw.io de l'équipe
+// Diagrammes transcrits du fichier draw.io de l'équipe (cas d'utilisation, classes, annexes)
 // (scripts/drawio-vers-svg.mjs) : présents, décrits, différés, et réellement chargés.
-test("le dossier GamecupSN montre les cas d'utilisation du visiteur et de l'abonné", async ({ page }) => {
+test("les diagrammes draw.io de GamecupSN sont présents, décrits et chargés", async ({ page }) => {
   await page.goto("/projets/gamecupsn");
-  for (const nom of ["gamecupsn-cas-visiteur", "gamecupsn-cas-abonne"]) {
+  for (const nom of ["gamecupsn-cas-visiteur", "gamecupsn-cas-abonne", "gamecupsn-classes", "gamecupsn-annexes"]) {
     const schema = page.locator(`img[src*="${nom}"]`);
     await expect(schema).toHaveCount(1);
     await expect(schema).toHaveAttribute("alt", /.{60,}/);
@@ -136,7 +136,7 @@ test("le dossier GamecupSN montre les cas d'utilisation du visiteur et de l'abon
 // suite retardait le premier affichage de la page (1,4 s contre 0,9 s sur les autres pages).
 test("le diagramme d'une étude de cas se charge en différé", async ({ page }) => {
   await page.goto("/projets/gamecupsn");
-  const schema = page.locator('img[src*="gamecupsn-domaine"]');
+  const schema = page.locator('img[src*="gamecupsn-classes"]');
   await expect(schema).toHaveAttribute("loading", "lazy");
   await expect(schema).toHaveAttribute("decoding", "async");
 });
