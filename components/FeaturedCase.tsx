@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Projet } from "@/lib/content";
 import { Button } from "@/components/Button";
+import { Commanditaire } from "@/components/Commanditaire";
 import { UgbLinkDiagramSimple } from "@/components/diagrams/UgbLinkDiagramSimple";
 import { MiniDiagram } from "@/components/diagrams/MiniDiagram";
 import { numeroDossier } from "@/components/ProjectCard";
@@ -25,7 +26,11 @@ export function FeaturedCase({ projet }: { projet: Projet }) {
             ]}
           />
         </span>
-        <span className="pa-meta">Étude de cas</span>
+        {projet.commanditaire ? (
+          <Commanditaire commanditaire={projet.commanditaire} hauteur={22} avecNom />
+        ) : (
+          <span className="pa-meta">Étude de cas</span>
+        )}
       </div>
       <div className="pa-feature">
         <div className="pa-feature-text">

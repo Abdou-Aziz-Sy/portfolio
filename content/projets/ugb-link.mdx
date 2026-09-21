@@ -19,6 +19,7 @@ lignesStatut:
   - { service: "backend · express + ocr", detail: "", etat: "en production" }
   - { service: "ollama · llm", detail: "", etat: "en production" }
   - { service: "sauvegarde · nocturne", detail: "", etat: "opérationnel" }
+commanditaire: { nom: "Université Gaston Berger", detail: "antenne de Dakar", logo: "/logo-ugb.png", largeur: 242, hauteur: 202 }
 miniSchema:
   - { titre: Nginx, sous: ":443" }
   - { titre: API, sous: Express }
@@ -31,6 +32,26 @@ publie: true
 <Contexte flux={[["candidatures", "excel"], ["courrier", "papier"], ["copies d'examens", "papier"], ["paiements", "téléphone"]]}>
 L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, courrier, copies d'examens et paiements étaient suivis sur Excel, sur papier et par téléphone, **sans traçabilité**.
 </Contexte>
+
+## L'application
+
+<Demo
+  src="/projets/ugb-link/parcours-candidature.mp4"
+  poster="/projets/ugb-link/parcours-candidature.jpg"
+  titre="Démonstration : dépôt d'une candidature, de l'appel publié jusqu'à la décharge"
+  largeur={1280}
+  hauteur={720}
+  legende="Une candidature de bout en bout, en accéléré : le candidat choisit un appel sur le portail public et signe son dépôt, l'agent enregistre le paiement, et la décharge officielle est générée."
+/>
+
+<Galerie
+  images={[
+    { src: "/projets/ugb-link/tableau-de-bord.png", alt: "Tableau de bord annoté : alertes prioritaires, indicateurs du jour, répartition des candidatures et suivi des courriers", legende: "Le tableau de bord : les alertes d'abord (dossiers à valider, courriers en retard, bordereau en litige), puis les indicateurs de chaque service.", largeur: 1911, hauteur: 1078, large: true },
+    { src: "/projets/ugb-link/suivi-copies.png", alt: "Kanban annoté du suivi des copies d'examens : colonnes par étape, compteurs par état, lots en alerte", legende: "Les copies d'examens suivies étape par étape ; un lot qui traîne passe en alerte.", largeur: 1918, hauteur: 1078 },
+    { src: "/projets/ugb-link/fiche-signature.png", alt: "Fiche d'un lot de copies annotée : statut, accusé de réception signé et historique horodaté", legende: "Chaque remise est signée et horodatée : la preuve remplace le coup de téléphone.", largeur: 1917, hauteur: 1078 },
+    { src: "/projets/ugb-link/calendrier-salles.png", alt: "Calendrier annoté des salles et prestations : indicateurs du mois, filtre par salle, vues du planning", legende: "Les réservations de salles, avec les recettes du mois.", largeur: 1907, hauteur: 1078, large: true },
+  ]}
+/>
 
 ## Contraintes
 
@@ -88,6 +109,13 @@ L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, c
   consequences="Les incidents de production ont donné lieu à des cas de non-régression. Contrepartie : des suites plus lentes, et des tests unitaires à poser plus tôt."
 />
 
+<Galerie
+  images={[
+    { src: "/projets/ugb-link/extraction-ia.png", alt: "Formulaire d'appel à candidature pré-rempli par le modèle, annoté : analyse réussie, champs extraits, champ laissé vide, vérification humaine", legende: "Décision 01 à l'écran : les champs extraits du document sont pré-remplis, un champ absent du document reste vide, et l'agent vérifie avant de soumettre.", largeur: 1918, hauteur: 1077, large: true },
+    { src: "/projets/ugb-link/bordereau-historique.png", alt: "Fiche d'un bordereau annotée : courriers rattachés et historique mis à jour en temps réel jusqu'à la réception à Saint-Louis", legende: "Décision 02 à l'écran : l'historique d'un bordereau se met à jour en direct, de sa création à Dakar jusqu'à la réception confirmée à Saint-Louis.", largeur: 1918, hauteur: 1278, large: true },
+  ]}
+/>
+
 ## Exploitation
 
 <Exploitation
@@ -108,6 +136,13 @@ L'antenne de Dakar sert de relais avec le siège de Saint-Louis. Candidatures, c
     "Documents officiels générés et archivés automatiquement.",
     "Notifications à la place des relances téléphoniques.",
     "Un suivi partagé entre Dakar et Saint-Louis.",
+  ]}
+/>
+
+<Galerie
+  images={[
+    { src: "/projets/ugb-link/portail-public.png", alt: "Portail public annoté d'un appel à candidature : échéance, pièces à fournir, dépôt en ligne", legende: "Le portail public : chaque appel publié peut recevoir des candidatures en ligne.", largeur: 1118, hauteur: 1073 },
+    { src: "/projets/ugb-link/decharge-pdf.png", alt: "Décharge de dépôt générée en PDF, annotée : numéro de décharge, QR de vérification, cachet et signature", legende: "La décharge générée automatiquement, avec son numéro et un QR de vérification.", largeur: 682, hauteur: 868 },
   ]}
 />
 
