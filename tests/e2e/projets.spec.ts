@@ -4,19 +4,19 @@ test("les filtres réduisent la grille et s'inscrivent dans l'URL", async ({ pag
   await page.goto("/projets");
   const cartes = page.getByTestId("project-card");
   const compteur = page.getByTestId("compteur");
-  await expect(cartes).toHaveCount(3);
+  await expect(cartes).toHaveCount(5);
 
   await page.getByRole("button", { name: "Infrastructure" }).click();
   await expect(page).toHaveURL(/\?categorie=infrastructure$/);
-  await expect(cartes).toHaveCount(1);
+  await expect(cartes).toHaveCount(2);
   await expect(cartes.first()).toContainText("UGB Link");
-  await expect(compteur).toHaveText("1 dossier");
+  await expect(compteur).toHaveText("2 dossiers");
   await expect(page.getByRole("button", { name: "Infrastructure" })).toHaveAttribute("aria-pressed", "true");
 
   await page.getByRole("button", { name: "Tous" }).click();
   await expect(page).toHaveURL(/\/projets$/);
-  await expect(cartes).toHaveCount(3);
-  await expect(compteur).toHaveText("3 dossiers");
+  await expect(cartes).toHaveCount(5);
+  await expect(compteur).toHaveText("5 dossiers");
 });
 
 test("un lien filtré s'ouvre directement sur le bon filtre", async ({ page }) => {

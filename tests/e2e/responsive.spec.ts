@@ -172,8 +172,9 @@ test.describe("mise en page fluide", () => {
 
   test("une carte filtrée sur /projets garde sa largeur de colonne à 1 920 px", async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    // « Infrastructure » ne laisse qu'un seul dossier (UGB Link, cf. tests/e2e/projets.spec.ts).
-    await page.goto("/projets?categorie=infrastructure");
+    // « IA appliquée » ne laisse qu'un seul dossier (UGB Link) : le cas qui prouve qu'une carte
+    // seule ne s'étire pas sur toute la largeur de la grille.
+    await page.goto("/projets?categorie=ia");
     const grille = page.locator(".pa-grid-projets");
     await expect(page.getByTestId("project-card")).toHaveCount(1);
     const largeurGrille = await grille.evaluate((el) => el.getBoundingClientRect().width);
