@@ -67,18 +67,30 @@ Sept diagrammes de cas d'usage, un par acteur — visiteur, abonné, organisateu
 Le diagramme de classes couvre **14 classes, 9 énumérations et 27 associations**. Les **105 user stories** de la spécification sont couvertes à 105 : la vérification compare les identifiants des cas d'utilisation à ceux de la spécification, elle n'est pas faite à l'œil.
 </Prose>
 
-<Figure numero="03" legende="Le modèle du domaine : 14 classes, 27 associations. Diagramme généré depuis le modèle qui transcrit la spécification, et non dessiné à la main.">
+<Figure numero="03" legende="Le modèle du domaine : 14 classes et 27 associations, avec leurs multiplicités. Les losanges pleins marquent les compositions.">
   <SchemaFichier
-    src="/schemas/gamecupsn-domaine.svg"
-    alt="Diagramme de classes de GamecupSN : l'identité (User) est reliée à ses profils de jeu, ses équipes, ses tournois et ses signalements ; un tournoi engage des parties, qui composent des matchs et leurs picks et bans."
-    largeur={1210}
-    hauteur={515}
+    src="/schemas/gamecupsn-classes.svg"
+    alt="Diagramme de classes de GamecupSN : User est relié à ses profils de jeu, ses notifications, ses équipes, ses tournois et ses signalements ; un tournoi engage des parties (Party), qui composent des matchs et leurs picks et bans (MatchVeto) ; Team et TeamMember portent l'équipe permanente, Party et PartyPlayer l'équipe engagée dans un tournoi."
+    largeur={2289}
+    hauteur={1662}
+    minLargeur={1800}
   />
 </Figure>
 
+[Ouvrir le diagramme de classes en grand →](/schemas/gamecupsn-classes.svg)
+
 <Prose>
-Ce diagramme n'est pas dessiné : il est **généré** depuis un modèle qui transcrit la spécification, et un script vérifie que les deux ne divergent pas. Un schéma dessiné à la main vieillit dès la première évolution du modèle ; celui-ci se régénère.
+Le diagramme part du modèle qui transcrit la spécification : un script vérifie, champ par champ, que le modèle et la spécification concordent. Il a ensuite été **mis en page à la main** dans draw.io, pour que les 27 associations se suivent sans se croiser inutilement.
 </Prose>
+
+<Figure numero="04" legende="Les 9 énumérations et les notes de conception qui accompagnent le modèle, chacune renvoyant à la décision qui la justifie.">
+  <SchemaFichier
+    src="/schemas/gamecupsn-annexes.svg"
+    alt="Énumérations du modèle (statuts d'utilisateur, de tournoi, de party, de match, de signalement, rôles d'équipe, actions de veto, cibles de signalement, types de notification) et six notes de conception : l'identité ne connaît aucun jeu, l'équipe permanente distincte de l'équipe engagée, une seule composition par tournoi, Match pointe vers Party, aucune valeur dérivée stockée."
+    largeur={901}
+    hauteur={1872}
+  />
+</Figure>
 
 ## Architecture
 
