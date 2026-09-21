@@ -42,11 +42,32 @@ Le pari du projet est simple : **passer plus de temps à décider qu'à recoder*
 
 <Prose>
 Sept diagrammes de cas d'usage, un par acteur — visiteur, abonné, organisateur, capitaine de tournoi, gestionnaire de bracket, super administrateur — plus un huitième, réservé aux cas **émis par le système**. Ce huitième diagramme n'est pas un ornement : sept cas, dont l'envoi des notifications, n'ont aucun acteur humain déclencheur. Un découpage strictement par acteur les aurait tout simplement perdus.
+</Prose>
 
+<Figure numero="01" legende="Le visiteur : tout est consultable sans compte, et la demande de compte n'apparaît qu'au moment de s'inscrire. En pointillé gris, le périmètre reporté après le MVP.">
+  <SchemaFichier
+    src="/schemas/gamecupsn-cas-visiteur.svg"
+    alt="Diagramme de cas d'utilisation du visiteur : consulter les tournois, leurs brackets, les profils de joueurs, les pages d'équipes et les picks et bans ; créer un compte étend la consultation au moment de l'inscription ; filtrer les tournois est reporté après le MVP."
+    largeur={910}
+    hauteur={748}
+  />
+</Figure>
+
+<Figure numero="02" legende="L'abonné hérite des cas du visiteur et y ajoute son compte, ses profils de jeu, son équipe, ses notifications et ses signalements. La règle « une équipe par jeu » figure en note : c'est une contrainte en base, pas un cas d'utilisation.">
+  <SchemaFichier
+    src="/schemas/gamecupsn-cas-abonne.svg"
+    alt="Diagramme de cas d'utilisation de l'abonné, qui hérite du visiteur : 27 cas répartis entre compte, profils de jeu, équipe, notifications, historique et signalements, avec leurs relations include et extend."
+    largeur={1220}
+    hauteur={1080}
+    minLargeur={1100}
+  />
+</Figure>
+
+<Prose>
 Le diagramme de classes couvre **14 classes, 9 énumérations et 27 associations**. Les **105 user stories** de la spécification sont couvertes à 105 : la vérification compare les identifiants des cas d'utilisation à ceux de la spécification, elle n'est pas faite à l'œil.
 </Prose>
 
-<Figure numero="01" legende="Le modèle du domaine : 14 classes, 27 associations. Diagramme généré depuis le modèle qui transcrit la spécification, et non dessiné à la main.">
+<Figure numero="03" legende="Le modèle du domaine : 14 classes, 27 associations. Diagramme généré depuis le modèle qui transcrit la spécification, et non dessiné à la main.">
   <SchemaFichier
     src="/schemas/gamecupsn-domaine.svg"
     alt="Diagramme de classes de GamecupSN : l'identité (User) est reliée à ses profils de jeu, ses équipes, ses tournois et ses signalements ; un tournoi engage des parties, qui composent des matchs et leurs picks et bans."

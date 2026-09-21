@@ -41,3 +41,17 @@ Le placement de PlantUML croise parfois des traits. Une alternative acceptable :
 `.drawio` du dépôt en SVG depuis draw.io (Fichier → Exporter → SVG), au prix d'un fichier figé,
 qu'il faut penser à réexporter à chaque évolution du modèle. Le choix retenu aujourd'hui est la
 génération, pour que le schéma ne puisse pas diverger du modèle.
+
+## Diagrammes de cas d'utilisation (draw.io)
+
+Source : `docs/sources/gamecupsn.drawio`, fichier de l'équipe (pages `Page-3` visiteur, `Page-4` abonné ;
+`Page-5` est le diagramme de classes, déjà couvert par la génération PlantUML ci-dessus). Pour une
+nouvelle version, remplacer le fichier (enregistré non compressé), puis :
+
+```bash
+node scripts/drawio-vers-svg.mjs docs/sources/gamecupsn.drawio Page-3 public/schemas/gamecupsn-cas-visiteur.svg
+node scripts/drawio-vers-svg.mjs docs/sources/gamecupsn.drawio Page-4 public/schemas/gamecupsn-cas-abonne.svg
+```
+
+Le script reprend coordonnées et couleurs du fichier ; il échoue sur toute forme qu'il ne connaît pas.
+Reporter les dimensions affichées dans `content/projets/gamecupsn.mdx` (`largeur`, `hauteur`).

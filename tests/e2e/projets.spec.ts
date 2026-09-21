@@ -118,6 +118,20 @@ test("le dossier GamecupSN montre la modélisation du domaine", async ({ page })
   await expect(corps).toContainText("105");
 });
 
+// Diagrammes de cas d'utilisation transcrits du fichier draw.io de l'équipe
+// (scripts/drawio-vers-svg.mjs) : présents, décrits, différés, et réellement chargés.
+test("le dossier GamecupSN montre les cas d'utilisation du visiteur et de l'abonné", async ({ page }) => {
+  await page.goto("/projets/gamecupsn");
+  for (const nom of ["gamecupsn-cas-visiteur", "gamecupsn-cas-abonne"]) {
+    const schema = page.locator(`img[src*="${nom}"]`);
+    await expect(schema).toHaveCount(1);
+    await expect(schema).toHaveAttribute("alt", /.{60,}/);
+    await expect(schema).toHaveAttribute("loading", "lazy");
+    await schema.scrollIntoViewIfNeeded();
+    await expect.poll(() => schema.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+  }
+});
+
 // Le diagramme vit au milieu de l'étude de cas, sous la ligne de flottaison : le charger tout de
 // suite retardait le premier affichage de la page (1,4 s contre 0,9 s sur les autres pages).
 test("le diagramme d'une étude de cas se charge en différé", async ({ page }) => {
