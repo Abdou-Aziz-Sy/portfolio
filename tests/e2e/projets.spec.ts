@@ -75,7 +75,7 @@ test("le lien « Ouvrir le dossier » tient sur une seule ligne à 1024px", asyn
 test("une étude de cas mène au dossier suivant et son sommaire pointe vers ses sections", async ({ page }) => {
   await page.goto("/projets/ugb-link");
   const sommaire = page.getByRole("navigation", { name: "Sommaire" });
-  await expect(sommaire.locator('a[href^="#"]')).toHaveCount(7);
+  await expect(sommaire.locator('a[href^="#"]')).toHaveCount(8);
   await sommaire.getByRole("link", { name: /Architecture/ }).click();
   await expect(page).toHaveURL(/#architecture$/);
   await expect(page.locator("#architecture")).toBeInViewport();

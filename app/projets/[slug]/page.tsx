@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getProjet, getProjets } from "@/lib/content";
+import { Commanditaire } from "@/components/Commanditaire";
 import { composantsMdx } from "@/components/mdx";
 import { numeroDossier } from "@/components/ProjectCard";
 import { MetaLine, StatusMeta } from "@/components/StatusMeta";
@@ -81,6 +82,11 @@ export default async function EtudeDeCas({ params }: PageProps<"/projets/[slug]"
         <p className="pa-lead pa-muted" style={{ marginTop: 20, maxWidth: "56ch" }}>
           {projet.resume}
         </p>
+        {projet.commanditaire ? (
+          <div style={{ marginTop: 24 }}>
+            <Commanditaire commanditaire={projet.commanditaire} hauteur={40} avecNom />
+          </div>
+        ) : null}
         <dl className="pa-surface pa-metaband" style={{ margin: "40px 0 0" }}>
           {bandeau.map((ligne) => (
             <div key={ligne.terme}>

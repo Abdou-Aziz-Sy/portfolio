@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { Commanditaire } from "@/components/Commanditaire";
 import { ViewTransition } from "react";
 import type { Projet } from "@/lib/content";
 import { MiniDiagram } from "@/components/diagrams/MiniDiagram";
@@ -24,8 +26,12 @@ export function ProjectCard({ projet }: { projet: Projet }) {
           <StatusMeta statut={projet.statut} />
         </span>
       </div>
-      <div className="pa-card-fig">
-        <MiniDiagram boites={projet.miniSchema} label={`Schéma de ${projet.titre}`} />
+      <div className={projet.couverture ? "pa-card-fig pa-card-fig--image" : "pa-card-fig"}>
+        {projet.couverture ? (
+          <Image src={projet.couverture} alt="" width={1280} height={720} sizes="(max-width: 767px) 100vw, 400px" />
+        ) : (
+          <MiniDiagram boites={projet.miniSchema} label={`Schéma de ${projet.titre}`} />
+        )}
       </div>
       <div className="pa-card-body">
         {/* Animation 3 : le titre devient l'en-tête de l'étude au clic (tâche 5). Le `h3`, pas
@@ -58,7 +64,10 @@ export function ProjectCard({ projet }: { projet: Projet }) {
         <ProjectTags projet={projet} />
       </div>
       <div className="pa-card-foot">
-        <span className="pa-meta">{projet.cadre}</span>
+        <span className="pa-card-cadre">
+          {projet.commanditaire ? <Commanditaire commanditaire={projet.commanditaire} hauteur={18} /> : null}
+          <span className="pa-meta">{projet.cadre}</span>
+        </span>
         <Link className="pa-link pa-card-cible" href={`/projets/${projet.slug}`}>
           Ouvrir le dossier<span className="pa-sr"> {projet.titre}</span> →
         </Link>

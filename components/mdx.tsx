@@ -1,11 +1,12 @@
-import Image from "next/image";
 import { Children, isValidElement, type ReactNode } from "react";
 import type { Section } from "@/lib/content";
 import { slugifier } from "@/lib/slug";
+import { Capture, type CaptureProps } from "@/components/Capture";
 import { DecisionRecord } from "@/components/DecisionRecord";
 import { DiagramScroller } from "@/components/DiagramScroller";
 import { SchemaExplorable } from "@/components/diagrams/SchemaExplorable";
 import { FluxAvant } from "@/components/StatusLines";
+import { Video } from "@/components/Video";
 
 /** Met en gras les passages entre ** dans un texte court (listes du frontmatter MDX). */
 function gras(texte: string): ReactNode {
@@ -91,18 +92,28 @@ function Exploitation({ items }: { items: { titre: string; texte: string }[] }) 
   );
 }
 
-function Galerie({ images }: { images: { src: string; legende: string; largeur: number; hauteur: number; large?: boolean }[] }) {
+/** Captures côte à côte (une colonne sur mobile) ; `large` fait occuper toute la ligne. */
+function Galerie({ images }: { images: (CaptureProps & { large?: boolean })[] }) {
   return (
     <div className="pa-gallery">
-      {images.map((img) => (
-        <figure key={img.src} style={img.large ? { gridColumn: "1 / -1" } : undefined}>
-          <Image src={img.src} alt={img.legende} width={img.largeur} height={img.hauteur} sizes="(max-width: 767px) 100vw, 640px" />
-          <figcaption className="pa-small" style={{ marginTop: 8 }}>
-            {img.legende}
-          </figcaption>
-        </figure>
+      {images.map(({ large, ...img }) => (
+        <div key={img.src} className={large ? "pa-gallery-large" : undefined}>
+          <Capture {...img} sizes={large ? undefined : "(max-width: 767px) 100vw, 380px"} />
+        </div>
       ))}
     </div>
+  );
+}
+
+/** Démonstration filmée dans le même cadre que les figures, avec sa légende. */
+function Demo({ legende, ...video }: { src: string; poster: string; titre: string; largeur: number; hauteur: number; legende: string }) {
+  return (
+    <figure className="pa-surface pa-demo">
+      <Video {...video} />
+      <figcaption className="pa-small">
+        <span className="pa-meta">Vidéo</span>&nbsp; {legende}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -214,6 +225,8 @@ export function composantsMdx(sections: Section[]) {
     SchemaFichier,
     Exploitation,
     Galerie,
+    Capture,
+    Demo,
     Callout,
     Figure,
     DecisionRecord,

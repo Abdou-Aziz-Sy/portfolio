@@ -38,6 +38,19 @@ export const projetSchema = z.object({
   misEnAvant: z.boolean().default(false),
   lignesStatut: z.array(ligneStatutSchema).optional(),
   miniSchema: z.tuple([boite, boite, boite]),
+  /** Établissement pour lequel le projet a été réalisé ; son logo (fichier de public/) et ses
+   *  dimensions réelles, pour que next/image réserve la bonne place. */
+  commanditaire: z
+    .object({
+      nom: z.string().min(1),
+      detail: z.string().optional(),
+      logo: z.string().startsWith("/"),
+      largeur: z.number().int().positive(),
+      hauteur: z.number().int().positive(),
+    })
+    .optional(),
+  /** Vignette de la carte à la place du mini-schéma (image de public/, format 16:9 attendu). */
+  couverture: z.string().startsWith("/").optional(),
   depot: z.url().optional(),
   demo: z.url().optional(),
   publie: z.boolean(),
