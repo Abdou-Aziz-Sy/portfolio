@@ -126,8 +126,19 @@ function SchemaFichier({
 }) {
   return (
     <DiagramScroller label={alt}>
+      {/* Chargement différé : le diagramme vit au milieu de l'étude de cas, sous la ligne de
+          flottaison. Le charger tout de suite retardait le premier affichage de la page (1,4 s
+          contre 0,9 s sur les autres pages). */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="pa-schema-image" src={src} alt={alt} width={largeur} height={hauteur} />
+      <img
+        className="pa-schema-image"
+        src={src}
+        alt={alt}
+        width={largeur}
+        height={hauteur}
+        loading="lazy"
+        decoding="async"
+      />
     </DiagramScroller>
   );
 }
