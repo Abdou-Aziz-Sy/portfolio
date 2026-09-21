@@ -8,6 +8,7 @@ import { Disponibilite } from "@/components/Disponibilite";
 import { DomainColumns } from "@/components/DomainColumn";
 import { FactStrip } from "@/components/FactStrip";
 import { FeaturedCase } from "@/components/FeaturedCase";
+import { HaloCurseur } from "@/components/HaloCurseur";
 import { Frame } from "@/components/Frame";
 import { ProjectCard } from "@/components/ProjectCard";
 import { numeroteur, SectionHead } from "@/components/SectionHead";
@@ -25,6 +26,7 @@ export default function Accueil() {
 
   return (
     <>
+      <HaloCurseur cible=".pa-accueil-haut" />
       <section className="pa-wrap pa-accueil-haut">
         <div className="pa-herogrid">
           <div className="pa-rise">

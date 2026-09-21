@@ -112,6 +112,33 @@ body { margin: 0; min-height: 100vh; }
 .pa-demo { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .pa-video { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: var(--surface-2); }
 
+/* Halo du curseur sur la première vue (components/HaloCurseur.tsx). Même grille que .pa-ground,
+   tracée plus fort dans la couleur d'accent, et révélée par un masque radial centré sur le
+   pointeur ; ::before ajoute une lueur diffuse. z-index -1 : sous le contenu, au-dessus du fond. */
+.pa-halo {
+  --x: -1000px; --y: -1000px;
+  position: absolute; top: 0; left: 0; width: 100%; z-index: -1; pointer-events: none;
+  opacity: 0; transition: opacity 400ms ease;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, var(--grid-pitch) var(--grid-pitch), var(--grid-pitch) var(--grid-pitch);
+  mask-image: radial-gradient(circle 240px at var(--x) var(--y), #000, transparent);
+}
+.pa-halo::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle 420px at var(--x) var(--y), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
+}
+.pa-halo[data-actif="1"] { opacity: 1; }
+/* Sans souris ou avec moins d'animations, le halo ne s'allume jamais : autant ne pas le rendre. */
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) { .pa-halo { display: none; } }
+/* <html> a son propre fond : celui de <body> n'est donc pas reporté sur le canevas, il se peint
+   par-dessus tout calque en z-index négatif du contexte racine. Isoler <body> en fait le contexte
+   du halo, qui se peint alors au-dessus du fond de <body> et sous le contenu. */
+body.pa-ground { isolation: isolate; }
+
 /* Commanditaire d'un projet : le logo de l'établissement, en mention discrète. */
 .pa-commanditaire { display: inline-flex; align-items: center; gap: 10px; }
 .pa-commanditaire img { display: block; width: auto; background: #fff; padding: 3px; border: 1px solid var(--line); }
