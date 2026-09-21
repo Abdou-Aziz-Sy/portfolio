@@ -117,3 +117,12 @@ test("le dossier GamecupSN montre la modélisation du domaine", async ({ page })
   await expect(corps).toContainText("27 associations");
   await expect(corps).toContainText("105");
 });
+
+// Le diagramme vit au milieu de l'étude de cas, sous la ligne de flottaison : le charger tout de
+// suite retardait le premier affichage de la page (1,4 s contre 0,9 s sur les autres pages).
+test("le diagramme d'une étude de cas se charge en différé", async ({ page }) => {
+  await page.goto("/projets/gamecupsn");
+  const schema = page.locator('img[src*="gamecupsn-domaine"]');
+  await expect(schema).toHaveAttribute("loading", "lazy");
+  await expect(schema).toHaveAttribute("decoding", "async");
+});
