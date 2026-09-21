@@ -129,11 +129,15 @@ function SchemaFichier({
   alt,
   largeur,
   hauteur,
+  minLargeur,
 }: {
   src: string;
   alt: string;
   largeur: number;
   hauteur: number;
+  /** Largeur sous laquelle le schéma défile au lieu de rétrécir (800 px par défaut, via la
+   *  feuille de style) : un schéma dense a besoin de plus pour rester lisible. */
+  minLargeur?: number;
 }) {
   return (
     <DiagramScroller label={alt}>
@@ -147,6 +151,7 @@ function SchemaFichier({
         alt={alt}
         width={largeur}
         height={hauteur}
+        style={minLargeur ? { minWidth: minLargeur } : undefined}
         loading="lazy"
         decoding="async"
       />
