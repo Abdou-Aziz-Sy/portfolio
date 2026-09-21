@@ -1,13 +1,14 @@
 ---
 titre: GamecupSN
-accroche: Une plateforme de tournois e-sport pour la scène sénégalaise
-resume: Plateforme de tournois e-sport pour la scène sénégalaise.
+accroche: Concevoir une plateforme de tournois avant d'écrire une ligne de code
+resume: "Plateforme de tournois e-sport pour la scène sénégalaise, conçue d'abord : acteurs, cas d'usage, modèle de classes et décisions datées."
 dossier: 2
 annee: 2026
 statut: en-cours
 cadre: En équipe de trois
 categories: [backend, full-stack]
 stack: [typescript, express, postgresql]
+role: Architecture backend, modélisation et DevOps
 periode: 2026 — en cours
 stackDetail: React · Vite · TypeScript · Node.js/Express · PostgreSQL · Docker Compose
 miniSchema:
@@ -20,27 +21,103 @@ publie: true
 ## Contexte
 
 <Prose>
-Une plateforme pour organiser des tournois Valorant au Sénégal : inscription des équipes, arbres de tournoi, palmarès publics. Le projet est mené à trois, et chaque décision de cadrage est écrite et datée dans le dépôt.
+Une plateforme pour organiser des tournois Valorant au Sénégal : inscription des équipes, arbres de tournoi qui progressent seuls, palmarès publics. Le projet est mené à trois. J'y tiens l'architecture du backend, la modélisation du domaine et la partie DevOps.
+
+Le pari du projet est simple : **passer plus de temps à décider qu'à recoder**. Avant la première route, le domaine a été modélisé, les cas d'usage listés acteur par acteur, et chaque arbitrage écrit et daté.
+</Prose>
+
+## Contraintes
+
+<Liste
+  prefixe="C"
+  items={[
+    "Le MVP se lance sur un seul jeu, mais le modèle doit être **multi-jeux dès le départ**.",
+    "Aucun paiement, sous aucune forme, dans le premier périmètre.",
+    "Rien n'est masquable : profils, historiques et palmarès sont publics.",
+    "Une équipe par joueur et par jeu, mais l'équipe engagée dans un tournoi peut différer de l'équipe d'appartenance.",
+  ]}
+/>
+
+## Modélisation
+
+<Prose>
+Sept diagrammes de cas d'usage, un par acteur — visiteur, abonné, organisateur, capitaine de tournoi, gestionnaire de bracket, super administrateur — plus un huitième, réservé aux cas **émis par le système**. Ce huitième diagramme n'est pas un ornement : sept cas, dont l'envoi des notifications, n'ont aucun acteur humain déclencheur. Un découpage strictement par acteur les aurait tout simplement perdus.
+
+Le diagramme de classes couvre **14 classes, 9 énumérations et 27 associations**. Les **105 user stories** de la spécification sont couvertes à 105 : la vérification compare les identifiants des cas d'utilisation à ceux de la spécification, elle n'est pas faite à l'œil.
+</Prose>
+
+<Figure numero="01" legende="Le modèle du domaine : 14 classes, 27 associations. Diagramme généré depuis le modèle qui transcrit la spécification, et non dessiné à la main.">
+  <SchemaFichier
+    src="/schemas/gamecupsn-domaine.svg"
+    alt="Diagramme de classes de GamecupSN : l'identité (User) est reliée à ses profils de jeu, ses équipes, ses tournois et ses signalements ; un tournoi engage des parties, qui composent des matchs et leurs picks et bans."
+    largeur={1210}
+    hauteur={515}
+  />
+</Figure>
+
+<Prose>
+Ce diagramme n'est pas dessiné : il est **généré** depuis un modèle qui transcrit la spécification, et un script vérifie que les deux ne divergent pas. Un schéma dessiné à la main vieillit dès la première évolution du modèle ; celui-ci se régénère.
 </Prose>
 
 ## Architecture
 
 <Prose>
-Un front React construit avec Vite, une API Express en TypeScript et une base PostgreSQL. Le modèle de données sépare l'identité des joueurs de leurs données de jeu, pour pouvoir accueillir d'autres jeux sans refonte.
+Un front React construit avec Vite, une API Express en TypeScript, une base PostgreSQL. Le modèle sépare l'identité d'un joueur de ses données de jeu : ajouter un jeu revient à ajouter une ligne en base, sans migration ni refonte.
 </Prose>
 
 ## Décisions
 
-<Liste
-  prefixe="D"
-  items={[
-    "Un seul jeu au départ, Valorant, mais un modèle multi-jeux dès l'origine.",
-    "Génération et progression automatiques des arbres de tournoi.",
-    "Paiement exclu du premier périmètre.",
-    "Profils, historiques et palmarès publics.",
+<DecisionRecord
+  numero="01"
+  titre="Multi-jeux dès le modèle, un seul jeu à l'écran"
+  contexte="La scène sénégalaise ne se limite pas à Valorant, mais livrer plusieurs jeux d'un coup aurait repoussé la première mise en ligne de plusieurs mois."
+  options={[
+    { libelle: "Un modèle mono-jeu, élargi plus tard", note: "migration lourde et risquée le jour venu" },
+    { libelle: "Plusieurs jeux livrés d'emblée", note: "périmètre ingérable pour une équipe de trois" },
+    { libelle: "Modèle multi-jeux, périmètre mono-jeu", retenue: true },
   ]}
+  decision="L'identité d'un utilisateur ne connaît aucun jeu : tout ce qui est propre à un jeu vit dans un profil de jeu dédié ou sur la fiche du jeu, y compris ses règles de picks et bans."
+  consequences="Ajouter un jeu est une ligne en base, sans migration. En contrepartie, chaque appartenance d'équipe porte son jeu, ce qui impose une donnée dénormalisée pour garantir la règle « une seule équipe par joueur et par jeu »."
+/>
+
+<DecisionRecord
+  numero="02"
+  titre="Un diagramme séparé pour ce que le système déclenche seul"
+  contexte="Les diagrammes de cas d'usage se découpent d'ordinaire par acteur. Or sept cas du périmètre — les notifications, pour l'essentiel — ne sont déclenchés par personne : ils réagissent à une action faite ailleurs."
+  options={[
+    { libelle: "Les rattacher à l'acteur qui a provoqué l'action", note: "affirme un déclenchement qui n'existe pas" },
+    { libelle: "Les laisser hors des diagrammes", note: "sept cas non couverts, et une couverture fausse" },
+    { libelle: "Un diagramme dont l'acteur principal est le système", retenue: true },
+  ]}
+  decision="Un huitième diagramme regroupe les cas émis par le système, avec le système comme acteur principal."
+  consequences="La couverture reste vérifiable case par case, et le lecteur voit d'un coup d'œil ce qui part tout seul. Le prix à payer : un diagramme de plus à tenir à jour."
+/>
+
+<DecisionRecord
+  numero="03"
+  titre="Les décisions s'écrivent et se datent, jamais ne s'effacent"
+  contexte="À trois, sur un projet mené en parallèle des cours, le même débat revenait à quelques semaines d'intervalle, sans que personne ne se rappelle ce qui avait été tranché."
+  options={[
+    { libelle: "Décider au fil de l'eau, dans les discussions", note: "aucune trace, arbitrages rejoués" },
+    { libelle: "Un journal de décisions numérotées et datées", retenue: true },
+  ]}
+  decision="Ce qui est décidé est écrit avec sa date. Une décision qui change ne remplace pas la précédente : elle devient une nouvelle ligne, datée, qui l'annule."
+  consequences="Quarante-sept décisions consignées à ce jour, dont celles qui ont été renversées. On sait non seulement ce qui a été choisi, mais quand, et à la place de quoi."
 />
 
 ## Résultats
 
-<Liste prefixe="R" items={["Projet en cours de construction."]} />
+<Liste
+  prefixe="R"
+  items={[
+    "Conception terminée : spécification du MVP, 105 user stories, 8 diagrammes, modèle de données complet.",
+    "Squelette applicatif, outillage et intégration continue en place.",
+    "Développement des fonctionnalités en cours — aucune mise en ligne à ce jour.",
+  ]}
+/>
+
+## Ce que je referais autrement
+
+<Prose>
+Je ferais générer les diagrammes de cas d'usage comme le diagramme de classes. Ils sont aujourd'hui dessinés à la main, et ce sont eux qui vieilliront le plus vite : chaque évolution du périmètre demande de rouvrir huit fichiers au lieu de relancer un script.
+</Prose>

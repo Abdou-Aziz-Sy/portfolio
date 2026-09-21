@@ -3,6 +3,7 @@ import { Children, isValidElement, type ReactNode } from "react";
 import type { Section } from "@/lib/content";
 import { slugifier } from "@/lib/slug";
 import { DecisionRecord } from "@/components/DecisionRecord";
+import { DiagramScroller } from "@/components/DiagramScroller";
 import { SchemaExplorable } from "@/components/diagrams/SchemaExplorable";
 import { FluxAvant } from "@/components/StatusLines";
 
@@ -105,6 +106,32 @@ function Galerie({ images }: { images: { src: string; legende: string; largeur: 
   );
 }
 
+/**
+ * Schéma livré sous forme de fichier (diagramme UML généré, exporté en SVG). Même cadre défilant
+ * que le schéma d'UGB Link : sur un écran étroit, le schéma garde sa taille lisible et défile,
+ * plutôt que d'être réduit jusqu'à l'illisible. Balise `img` et non `next/image` : Next
+ * n'optimise pas les SVG sans autorisation explicite, et un diagramme vectoriel n'a rien à y
+ * gagner. Le fond clair est assumé — un tirage de plan posé sur la page.
+ */
+function SchemaFichier({
+  src,
+  alt,
+  largeur,
+  hauteur,
+}: {
+  src: string;
+  alt: string;
+  largeur: number;
+  hauteur: number;
+}) {
+  return (
+    <DiagramScroller label={alt}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="pa-schema-image" src={src} alt={alt} width={largeur} height={hauteur} />
+    </DiagramScroller>
+  );
+}
+
 function Callout({ titre = "À retenir", children }: { titre?: string; children: ReactNode }) {
   return (
     <aside className="pa-callout">
@@ -173,6 +200,7 @@ export function composantsMdx(sections: Section[]) {
     Contexte,
     Prose,
     SchemaUgbLink,
+    SchemaFichier,
     Exploitation,
     Galerie,
     Callout,

@@ -1,0 +1,119 @@
+---
+titre: taskhandler
+accroche: Le cycle de vie d'une tâche, validé et historisé
+resume: "Gestionnaire de tâches en Spring Boot et React, mené à quatre en cours de génie logiciel : mon périmètre était le domaine des tâches."
+dossier: 4
+annee: 2025
+statut: termine
+cadre: Cours de génie logiciel
+categories: [backend]
+stack: [postgresql, react]
+role: Backend — domaine des tâches et socle de données
+periode: Avril — juin 2025
+stackDetail: Java · Spring Boot · Spring Data JPA · PostgreSQL · React
+depot: https://github.com/noreyni03/taskhandler
+miniSchema:
+  - { titre: React, sous: interface }
+  - { titre: API, sous: Spring Boot }
+  - { titre: PostgreSQL, sous: tâches }
+publie: true
+---
+
+## Contexte
+
+<Prose>
+Cours de génie logiciel de master 1, second semestre : mener un projet à quatre, de bout en bout, avec les méthodes et les outils du métier — branches par fonctionnalité, revues croisées, intégration continue.
+
+L'application gère des tâches d'équipe : création, affectation, suivi jusqu'à la clôture. Je suis le deuxième contributeur du dépôt avec 20 commits, et mon périmètre était le **domaine des tâches** et le socle de données.
+</Prose>
+
+## Contraintes
+
+<Liste
+  prefixe="C"
+  items={[
+    "Quatre développeurs sur un même dépôt, chacun sur son domaine.",
+    "Une interface React consomme l'API : la forme des réponses est un contrat, y compris celle des erreurs.",
+    "Un statut de tâche ne peut pas changer n'importe comment : certaines transitions n'ont pas de sens métier.",
+  ]}
+/>
+
+## Architecture
+
+<Prose>
+Un Spring Boot découpé par responsabilité : contrôleurs, services, dépôts Spring Data, objets de transfert, et une couche d'exceptions dédiée. PostgreSQL pour les données, avec des migrations SQL versionnées. React côté interface.
+</Prose>
+
+## Mon périmètre
+
+<Liste
+  prefixe="P"
+  items={[
+    "Le socle de données : configuration PostgreSQL, entité utilisateur et son dépôt — les premières briques du projet.",
+    "La réinitialisation de mot de passe : génération d'un jeton, notification par e-mail, migration des champs nécessaires.",
+    "La création et la mise à jour d'une tâche, avec leur validation.",
+    "La normalisation des erreurs, dans un gestionnaire global.",
+    "Le cycle de vie des statuts : transitions contrôlées et historisées.",
+  ]}
+/>
+
+<Callout titre="Ce que je n'ai pas écrit">
+L'authentification par jeton JWT, la chaîne d'intégration continue et l'intégration finale des branches sont le travail des autres membres de l'équipe. Elles font partie du projet, pas de mon périmètre.
+</Callout>
+
+## Décisions
+
+<DecisionRecord
+  numero="01"
+  titre="Historiser les changements de statut, pas seulement l'état courant"
+  contexte="Une tâche passe d'« à faire » à « en cours », puis « terminée » — parfois en arrière. Ne stocker que le statut courant suffit à afficher un tableau, mais ne dit jamais qui a changé quoi, ni quand."
+  options={[
+    { libelle: "Un champ statut, écrasé à chaque changement", note: "aucune trace, aucun recours en cas de litige" },
+    { libelle: "Un journal applicatif", note: "hors de la base, difficile à recouper avec les données" },
+    { libelle: "Une entité d'historique des statuts", retenue: true },
+  ]}
+  decision="Chaque changement de statut crée une ligne d'historique liée à la tâche, à côté du statut courant qui reste lisible directement."
+  consequences="L'historique d'une tâche se lit sans reconstituer quoi que ce soit. En contrepartie, une écriture de plus à chaque transition, et une table qui grandit avec l'usage."
+/>
+
+<DecisionRecord
+  numero="02"
+  titre="Refuser une transition impossible plutôt que l'enregistrer"
+  contexte="Rien n'empêchait, côté base, de passer une tâche archivée à « en cours ». L'interface ne proposait pas le cas, mais l'API restait ouverte à qui l'appelait directement."
+  options={[
+    { libelle: "Laisser l'interface garantir les transitions", note: "l'API reste la vraie porte d'entrée" },
+    { libelle: "Contrôler et renvoyer une erreur générique", note: "l'appelant ne sait pas ce qu'il a fait de travers" },
+    { libelle: "Une exception métier dédiée à la transition invalide", retenue: true },
+  ]}
+  decision="Le service vérifie la transition demandée et lève une exception dédiée quand elle n'est pas permise ; le gestionnaire global la traduit en réponse explicite."
+  consequences="La règle vit au même endroit que le métier, pas dans l'interface. Elle devient testable seule, et l'appelant reçoit la raison du refus."
+/>
+
+<DecisionRecord
+  numero="03"
+  titre="Une seule forme d'erreur pour toute l'API"
+  contexte="Chaque contrôleur renvoyait ses erreurs de validation à sa façon. L'interface devait deviner la forme de la réponse selon la route appelée."
+  options={[
+    { libelle: "Gérer l'erreur dans chaque contrôleur", note: "autant de formats que de routes" },
+    { libelle: "Un gestionnaire d'exceptions global", retenue: true },
+  ]}
+  decision="Un gestionnaire global intercepte les erreurs de validation et les exceptions métier, et les rend dans une forme unique, champ par champ."
+  consequences="L'interface écrit un seul afficheur d'erreurs. Le contrat devient implicite : toute nouvelle exception doit être déclarée au gestionnaire, sinon elle retombe dans le cas général."
+/>
+
+## Résultats
+
+<Liste
+  prefixe="R"
+  items={[
+    "Le domaine des tâches est livré et intégré à l'application : création, mise à jour, cycle de vie complet des statuts avec son historique.",
+    "Les erreurs de validation de l'API ont une forme unique, consommée telle quelle par l'interface.",
+    "Le projet a été mené à son terme par l'équipe, branches intégrées dans la principale.",
+  ]}
+/>
+
+## Ce que je referais autrement
+
+<Prose>
+J'écrirais les transitions permises comme une table de vérité, dans un seul endroit, plutôt que dispersées dans les conditions du service. La règle serait lisible d'un coup d'œil, et les tests pourraient la parcourir exhaustivement au lieu de vérifier les cas auxquels on a pensé.
+</Prose>

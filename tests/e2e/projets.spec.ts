@@ -4,19 +4,19 @@ test("les filtres réduisent la grille et s'inscrivent dans l'URL", async ({ pag
   await page.goto("/projets");
   const cartes = page.getByTestId("project-card");
   const compteur = page.getByTestId("compteur");
-  await expect(cartes).toHaveCount(3);
+  await expect(cartes).toHaveCount(5);
 
   await page.getByRole("button", { name: "Infrastructure" }).click();
   await expect(page).toHaveURL(/\?categorie=infrastructure$/);
-  await expect(cartes).toHaveCount(1);
+  await expect(cartes).toHaveCount(2);
   await expect(cartes.first()).toContainText("UGB Link");
-  await expect(compteur).toHaveText("1 dossier");
+  await expect(compteur).toHaveText("2 dossiers");
   await expect(page.getByRole("button", { name: "Infrastructure" })).toHaveAttribute("aria-pressed", "true");
 
   await page.getByRole("button", { name: "Tous" }).click();
   await expect(page).toHaveURL(/\/projets$/);
-  await expect(cartes).toHaveCount(3);
-  await expect(compteur).toHaveText("3 dossiers");
+  await expect(cartes).toHaveCount(5);
+  await expect(compteur).toHaveText("5 dossiers");
 });
 
 test("un lien filtré s'ouvre directement sur le bon filtre", async ({ page }) => {
@@ -102,4 +102,18 @@ test("la validation du contenu (Zod) n'est pas envoyée au navigateur", async ({
       expect(code.includes("Invalid input to safeExtend"), `${chemin} charge Zod : ${url}`).toBe(false);
     }
   }
+});
+
+// Chantier 4b : le dossier GamecupSN prouve la conception. Les chiffres cités viennent du dépôt
+// du projet (14 classes, 9 énumérations, 27 associations, 105 user stories couvertes), pas d'une
+// estimation : le test les vérifie pour qu'aucune réécriture ne les arrondisse.
+test("le dossier GamecupSN montre la modélisation du domaine", async ({ page }) => {
+  await page.goto("/projets/gamecupsn");
+  await expect(page.getByRole("heading", { name: /Modélisation/ })).toBeVisible();
+  const schema = page.locator('img[src*="gamecupsn-domaine"]');
+  await expect(schema).toHaveCount(1);
+  await expect(schema).toHaveAttribute("alt", /.{40,}/);
+  const corps = page.locator("main");
+  await expect(corps).toContainText("27 associations");
+  await expect(corps).toContainText("105");
 });

@@ -311,14 +311,15 @@ async function instrumenterViewTransitionCartes(page: Page) {
 // (ProjectGrid.tsx) : c'est CE type qui active l'animation des cartes, pas la transition en
 // elle-même (le titre partagé, lui, en est exclu par le test précédent). La lecture a lieu AVANT la
 // mutation du DOM par le navigateur (comme pour le titre) : elle capture donc l'état « ancien », qui
-// contient encore les trois cartes de « Tous ». Le filtre « Backend » garde gamecupsn et ugb-link
-// (dossiers 2 et 1) : ce sont les cartes VISIBLES après le filtre — celles que le brief demande de
-// vérifier — donc les seules dont ce test exige le nom réel et unique.
+// contient encore les cinq cartes de « Tous ». Le filtre « Infrastructure » garde ugb-link et
+// mentorat-vcn (dossiers 1 et 3) : ce sont les cartes VISIBLES après le filtre — celles que le
+// brief demande de vérifier — donc les seules dont ce test exige le nom réel et unique. Le filtre
+// « Backend » ne conviendrait plus : il garde les cinq dossiers, donc aucune carte ne sortirait.
 //
 // Observation faite pendant l'implémentation, PAS vérifiée par ce test (au-delà de son périmètre) :
-// hackathon-mcn (dossier 3, dernière de la liste avant filtrage), la carte qui SORT, reçoit
-// "none" alors que sa configuration `exit` est identique à celle des autres. Reproduit de façon stable sur plusieurs
-// filtres (Infrastructure, Backend) : toujours la carte en dernière position dans l'ordre AVANT
+// la DERNIÈRE carte de la liste avant filtrage, quand elle sort, reçoit "none" alors que sa
+// configuration `exit` est identique à celle des autres. Reproduit de façon stable sur plusieurs
+// filtres : toujours la carte en dernière position dans l'ordre AVANT
 // filtrage qui sort de cette façon, jamais une carte en position intermédiaire. Cause non identifiée
 // avec certitude (React interne, node_modules/next/dist/compiled/react-dom/cjs/
 // react-dom-client.development.js) : les positions non filées sont retirées via le même mécanisme de
@@ -333,14 +334,14 @@ test("un changement de filtre déclenche une transition de vue ; les cartes qui 
   test.skip(browserName !== "chromium", "View Transitions API : Chromium");
   await instrumenterViewTransitionCartes(page);
   await page.goto("/projets");
-  await page.getByRole("button", { name: "Backend" }).click();
-  await expect(page).toHaveURL(/categorie=backend/);
+  await page.getByRole("button", { name: "Infrastructure" }).click();
+  await expect(page).toHaveURL(/categorie=infrastructure/);
   await expect(page.getByTestId("project-card")).toHaveCount(2);
   const etat = await page.evaluate(() => (window as unknown as { __vtCartes: EtatVTCartes }).__vtCartes);
   expect(etat.appels).toBeGreaterThan(0);
   const instantane = etat.noms[0];
   const visibles = instantane.filter(
-    (c) => c.href === "/projets/ugb-link" || c.href === "/projets/gamecupsn",
+    (c) => c.href === "/projets/ugb-link" || c.href === "/projets/mentorat-vcn",
   );
   expect(visibles).toHaveLength(2);
   expect(visibles.every((c) => c.nom === `carte-${c.href!.split("/").pop()}`)).toBe(true);

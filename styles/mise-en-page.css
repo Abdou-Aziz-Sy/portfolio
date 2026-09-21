@@ -101,6 +101,9 @@
 .pa-schema-cadre { position: relative; }
 .pa-diagram-scroll { overflow-x: auto; max-width: 100%; }
 .pa-diagram-scroll svg { min-width: 800px; }
+/* Schéma livré en fichier (SchemaFichier, components/mdx.tsx) : même largeur minimale lisible que
+   les schémas dessinés dans la page. Fond clair assumé, comme un tirage de plan posé sur la page. */
+.pa-schema-image { display: block; min-width: 800px; width: 100%; height: auto; background: #fbfcfd; border: 1px solid var(--line); }
 .pa-schema-indice {
   position: absolute; top: 0; right: 0; bottom: 0; width: 48px;
   display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;
