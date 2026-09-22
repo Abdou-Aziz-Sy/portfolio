@@ -1,4 +1,9 @@
-# Régénérer le diagramme de classes de GamecupSN
+# Régénérer les diagrammes de GamecupSN
+
+> **Depuis le 2026-09-21, le site publie le diagramme de classes draw.io de l'équipe** (version mise en
+> page à la main, sur Drive), et non plus la sortie PlantUML décrite ci-dessous, retirée du dépôt.
+> Voir « Diagrammes draw.io » en fin de fichier. Écart connu : le modèle du dépôt a un champ
+> `Tournament.maxTeamMembers` absent de la version Drive.
 
 `public/schemas/gamecupsn-domaine.svg` n'est pas dessiné à la main : il est **généré** depuis le
 modèle de classes du dépôt GamecupSN, qui transcrit lui-même `docs/SPECIFICATIONS.md` §5. Le
@@ -41,3 +46,19 @@ Le placement de PlantUML croise parfois des traits. Une alternative acceptable :
 `.drawio` du dépôt en SVG depuis draw.io (Fichier → Exporter → SVG), au prix d'un fichier figé,
 qu'il faut penser à réexporter à chaque évolution du modèle. Le choix retenu aujourd'hui est la
 génération, pour que le schéma ne puisse pas diverger du modèle.
+
+## Diagrammes draw.io
+
+Source : `docs/sources/gamecupsn.drawio`, fichier de l'équipe (pages `Page-3` visiteur, `Page-4` abonné ;
+`Page-5` le diagramme de classes). Pour une
+nouvelle version, remplacer le fichier (enregistré non compressé), puis :
+
+```bash
+node scripts/drawio-vers-svg.mjs docs/sources/gamecupsn.drawio Page-3 public/schemas/gamecupsn-cas-visiteur.svg
+node scripts/drawio-vers-svg.mjs docs/sources/gamecupsn.drawio Page-4 public/schemas/gamecupsn-cas-abonne.svg
+node scripts/drawio-vers-svg.mjs docs/sources/gamecupsn.drawio Page-5 public/schemas/gamecupsn-classes.svg modele
+node scripts/drawio-vers-svg.mjs docs/sources/gamecupsn.drawio Page-5 public/schemas/gamecupsn-annexes.svg annexes
+```
+
+Le script reprend coordonnées et couleurs du fichier ; il échoue sur toute forme qu'il ne connaît pas.
+Reporter les dimensions affichées dans `content/projets/gamecupsn.mdx` (`largeur`, `hauteur`).
