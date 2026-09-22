@@ -19,8 +19,9 @@ ffmpeg -ss 1.5 -i parcours-candidature.mp4 -frames:v 1 -q:v 4 parcours-candidatu
 
 Accélérée ×2 (84 s → 42 s), sans son, 1,4 Mo. Viser moins de 4 Mo par vidéo.
 
-## Couverture `couverture.jpg` (pas encore affichée)
+## Couverture de la carte (`public/projets/couvertures/ugb-link.jpg`)
 
-Image propre (sans annotations) tirée à 1 s de l'enregistrement du tableau de bord, 1280 px.
-À activer par `couverture:` dans le frontmatter quand chaque projet aura la sienne : une seule
-carte à photo décale les titres de la grille.
+Image propre (sans annotations) tirée à 1 s de l'enregistrement du tableau de bord, 1280 × 720.
+Les couvertures des autres projets : `scripts/couvertures.mjs` (diagrammes) et
+`scripts/captures/mentorat.mjs` (capture). Toutes au format 16:9, pour garder les titres des
+cartes alignés.

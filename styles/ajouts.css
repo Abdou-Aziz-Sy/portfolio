@@ -73,8 +73,15 @@ body { margin: 0; min-height: 100vh; }
 
 /* Page Projets */
 .pa-filterbar { margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-top: 20px; border-top: 1px solid var(--line); flex-wrap: wrap; }
-.pa-grid-projets > div { display: flex; }
-.pa-grid-projets > div > .pa-card { flex: 1; }
+/* Cartes de projet alignées d'une carte à l'autre : chacune occupe quatre lignes de la grille
+   parente (en-tête, couverture, texte, pied) en sous-grille. Un en-tête qui passe sur deux lignes
+   (« En production », plus long que les autres statuts) agrandit toute la rangée au lieu de
+   décaler la seule carte concernée. Sur /projets, la carte est enveloppée d'un div (transitions
+   de vue, components/ProjectGrid.tsx) qui relaie la sous-grille ; sur l'accueil, elle est
+   directement dans .pa-grid. `row-gap: 0` : l'écart de la grille reste entre les cartes. */
+.pa-grid-projets > div,
+.pa-grid > .pa-card--lien,
+.pa-grid-projets > div > .pa-card--lien { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
 .pa-tabs button:disabled { cursor: default; opacity: 1; }
 
 /* Étude de cas */
