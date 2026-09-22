@@ -79,7 +79,7 @@ L'authentification par jeton JWT, la chaîne d'intégration continue et l'intég
 <DecisionRecord
   numero="02"
   titre="Refuser une transition impossible plutôt que l'enregistrer"
-  contexte="Rien n'empêchait, côté base, de passer une tâche archivée à « en cours ». L'interface ne proposait pas le cas, mais l'API restait ouverte à qui l'appelait directement."
+  contexte="Rien n'empêchait, côté base, de passer une tâche annulée à « en cours ». L'interface ne proposait pas le cas, mais l'API restait ouverte à qui l'appelait directement."
   options={[
     { libelle: "Laisser l'interface garantir les transitions", note: "l'API reste la vraie porte d'entrée" },
     { libelle: "Contrôler et renvoyer une erreur générique", note: "l'appelant ne sait pas ce qu'il a fait de travers" },
@@ -88,6 +88,15 @@ L'authentification par jeton JWT, la chaîne d'intégration continue et l'intég
   decision="Le service vérifie la transition demandée et lève une exception dédiée quand elle n'est pas permise ; le gestionnaire global la traduit en réponse explicite."
   consequences="La règle vit au même endroit que le métier, pas dans l'interface. Elle devient testable seule, et l'appelant reçoit la raison du refus."
 />
+
+<Figure numero="01" legende="Les transitions permises, lues dans le code (TaskStatus.getAllowedTransitions) : une tâche terminée peut être rouverte, une tâche annulée repart à « à faire ». Tout le reste est refusé.">
+  <SchemaFichier
+    src="/schemas/taskhandler-etats.svg"
+    alt="Diagramme d'états d'une tâche : à faire, en cours, en révision, terminé, annulé. À faire va vers en cours ou annulé ; en cours vers à faire, en révision, terminé ou annulé ; en révision vers en cours, terminé ou annulé ; terminé revient en cours ; annulé revient à faire. Toute autre transition lève InvalidStatusTransitionException, rendue en 400."
+    largeur={1000}
+    hauteur={520}
+  />
+</Figure>
 
 <DecisionRecord
   numero="03"
@@ -100,6 +109,28 @@ L'authentification par jeton JWT, la chaîne d'intégration continue et l'intég
   decision="Un gestionnaire global intercepte les erreurs de validation et les exceptions métier, et les rend dans une forme unique, champ par champ."
   consequences="L'interface écrit un seul afficheur d'erreurs. Le contrat devient implicite : toute nouvelle exception doit être déclarée au gestionnaire, sinon elle retombe dans le cas général."
 />
+
+Deux réponses de l'API, dans la forme que leur donne le gestionnaire global : une erreur de validation, champ par champ, puis une transition refusée.
+
+```json
+{
+  "status": 400,
+  "message": "Erreur de validation",
+  "timestamp": "2025-06-01T10:15:30",
+  "errors": {
+    "title": "Le titre est obligatoire",
+    "priority": "La priorité est obligatoire"
+  }
+}
+```
+
+```json
+{
+  "status": 400,
+  "message": "Transition invalide: impossible de passer du statut 'Annulé' au statut 'En cours'",
+  "timestamp": "2025-06-01T10:16:02"
+}
+```
 
 ## Résultats
 
