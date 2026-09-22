@@ -10,7 +10,8 @@ Sources : `Documents\Projects\Pro\monitoring_platforme1.0\monitiring_platforme`.
 affichées sont celles du jeu de démonstration du projet (comptes fictifs, mot de passe `password123`).
 
 1. **Base** : le `.env` du backend vise le PostgreSQL local (port 5432). Créer une base à part, y
-   pousser le schéma (les migrations sont en retard sur `schema.prisma`) et la peupler :
+   appliquer le schéma et la peupler (`db push` a servi pour ces captures ; `migrate deploy` crée
+   les mêmes vingt tables) :
    ```bash
    psql "<DATABASE_URL sans le nom de base>/postgres" -c "create database mentoring_db;"
    cd backend && npx prisma db push && node seed-database.js
