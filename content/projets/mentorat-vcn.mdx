@@ -40,6 +40,14 @@ Le besoin retenu : l'accompagnement individuel des étudiants, aujourd'hui dépe
   ]}
 />
 
+<Capture
+  src="/projets/mentorat/verification-mentors.png"
+  alt="Écran d'administration « Vérification des mentors » annoté : la colonne Vérifié décide de la visibilité d'un mentor auprès des étudiants."
+  legende="La contrainte C-04 à l'écran : l'administrateur vérifie chaque mentor avant qu'il n'apparaisse aux étudiants."
+  largeur={1440}
+  hauteur={700}
+/>
+
 ## Architecture
 
 <Prose>
@@ -47,6 +55,14 @@ Une API Express 5 et un front React, séparés dans le même dépôt. Les donné
 
 La messagerie et les notifications passent par Socket.io ; la visioconférence par BigBlueButton. L'API est documentée par Swagger, protégée par Helmet, une limitation de débit et une double validation — Joi et express-validator. L'infrastructure de développement tient dans un Docker Compose : PostgreSQL 15, Redis 7 et MailHog pour capturer les e-mails sans en envoyer un seul.
 </Prose>
+
+<Capture
+  src="/projets/mentorat/api-swagger.png"
+  alt="Documentation Swagger de l'API annotée : les routes sont groupées par domaine, ici les campagnes avec leurs verbes GET, POST, PUT et DELETE."
+  legende="L'API documentée par Swagger, route par route, groupée par domaine."
+  largeur={1440}
+  hauteur={900}
+/>
 
 ## Décisions
 
@@ -61,6 +77,13 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
   ]}
   decision="Le modèle porte des disponibilités récurrentes et des créneaux spécifiques. Le calendrier proposé à l'étudiant est calculé à partir des deux, une fois les sessions déjà réservées retirées."
   consequences="Le mentor déclare sa semaine type une fois. Le calcul des créneaux libres devient le point sensible du domaine : c'est là que se concentrent les cas limites."
+/>
+
+<Galerie
+  images={[
+    { src: "/projets/mentorat/disponibilites-recurrentes.png", alt: "Écran du mentor annoté : deux onglets, disponibilités récurrentes et créneaux spécifiques ; la semaine type (mardi et jeudi 18 h – 20 h, samedi 10 h – 12 h) est déclarée une seule fois.", legende: "La semaine type : déclarée une fois, valable chaque semaine.", largeur: 1440, hauteur: 900 },
+    { src: "/projets/mentorat/creneaux-specifiques.png", alt: "Écran du mentor annoté : un créneau spécifique daté, hors semaine type, avec son objet (revue de CV avant les candidatures).", legende: "L'exception : un créneau daté, avec son objet.", largeur: 1440, hauteur: 900 },
+  ]}
 />
 
 <DecisionRecord
@@ -89,6 +112,14 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
   consequences="Les échanges sont immédiats. L'état de connexion devient une préoccupation à part entière : reconnexion, salons par conversation, et un serveur qui ne peut plus être considéré comme sans état."
 />
 
+<Capture
+  src="/projets/mentorat/messagerie.png"
+  alt="Messagerie de l'étudiant annotée : la liste de ses conversations, l'échange avec son mentor, et le champ de saisie qui accepte un message ou une pièce jointe."
+  legende="Une conversation entre un étudiant et son mentor."
+  largeur={1440}
+  hauteur={900}
+/>
+
 ## Résultats
 
 <Liste
@@ -98,6 +129,14 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
     "Une API documentée par Swagger, et une infrastructure de développement reproductible en une commande.",
     "Un plan de finalisation écrit avant l'arrêt : chat en session, interface des campagnes, mise en relation plus fine, tests d'intégration.",
   ]}
+/>
+
+<Capture
+  src="/projets/mentorat/campagnes.png"
+  alt="Écran d'administration des campagnes annoté : chaque campagne a un type, un statut (active ou archivée) et un compteur d'inscrits sur le nombre de places."
+  legende="Les campagnes collectives : ateliers, orientation, insertion professionnelle, avec leurs places."
+  largeur={1440}
+  hauteur={600}
 />
 
 ## Ce que je referais autrement

@@ -85,6 +85,8 @@ body { margin: 0; min-height: 100vh; }
 .pa-secmeta { display: block; margin-top: 72px; }
 .pa-casebody h2.pa-h2 { margin: 8px 0 24px; scroll-margin-top: 110px; }
 .pa-casebody > .pa-adr + .pa-adr { margin-top: 24px; }
+/* Médias entre deux blocs (fiches de décision, listes) : même respiration que deux fiches. */
+.pa-casebody > :is(.pa-gallery, .pa-capture, .pa-demo) { margin-block: 24px; }
 /* max-width borné par --prose-max (styles/mise-en-page.css), pas ici : une seule source pour
    la largeur de lecture. */
 .pa-casebody > p { font-size: 18px; line-height: 30px; margin: 0 0 16px; }
