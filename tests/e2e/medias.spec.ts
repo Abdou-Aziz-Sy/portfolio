@@ -49,9 +49,24 @@ test.describe("médias de l'étude de cas UGB Link", () => {
     await page.goto(URL_UGB);
     const video = page.locator("video");
     await expect(video).toHaveCount(1);
+    await video.scrollIntoViewIfNeeded();
     await expect(video).toHaveAttribute("poster", /parcours-candidature\.jpg$/);
     await expect(video).toHaveAttribute("controls", "");
     expect(await video.evaluate((v: HTMLVideoElement) => v.muted)).toBe(true);
+  });
+
+  // Mesuré par PageSpeed (mobile, 4G lente) : l'affiche de 1280 px partait au chargement, loin
+  // sous la ligne de flottaison, et disputait la bande passante aux polices du titre (le LCP).
+  test("l'affiche de la vidéo n'est demandée qu'à l'approche de la vidéo", async ({ page }) => {
+    const demandes: string[] = [];
+    page.on("request", (r) => {
+      if (r.url().includes("parcours-candidature")) demandes.push(r.url());
+    });
+    await page.goto(URL_UGB);
+    await page.waitForLoadState("networkidle");
+    expect(demandes, "rien ne doit partir tant que la vidéo est loin").toEqual([]);
+    await page.locator("video").scrollIntoViewIfNeeded();
+    await expect.poll(() => demandes.some((u) => u.endsWith("parcours-candidature.jpg"))).toBe(true);
   });
 
   test("avec les animations réduites, la vidéo ne démarre pas seule", async ({ page }) => {
