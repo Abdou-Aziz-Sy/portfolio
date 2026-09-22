@@ -14,7 +14,7 @@ export const site = {
   villeCourte: "DAKAR, SN",
   email: "abdouazizsy@esp.sn",
   liens: {
-    linkedin: undefined as string | undefined,
+    linkedin: "https://www.linkedin.com/in/abdouazizsy/" as string | undefined,
     github: "https://github.com/Abdou-Aziz-Sy" as string | undefined,
   },
   diplome: "Diplômé ESP 2026",
