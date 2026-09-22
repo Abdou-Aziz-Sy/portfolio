@@ -6,7 +6,7 @@ test("les captures de la plateforme de mentorat se chargent", async ({ page }) =
   await expect(images).toHaveCount(6);
   for (const image of await images.all()) {
     await image.scrollIntoViewIfNeeded();
-    // 30 s : voir le premier test de ce fichier (optimiseur de Next à froid en CI).
+    // 30 s : voir le premier test de medias.spec.ts (optimiseur de Next à froid en CI).
     await expect
       .poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), { timeout: 30_000 })
       .toBe(true);
