@@ -32,7 +32,7 @@ Cours de conception d'interface en licence 3 : dessiner une maquette Figma d'une
   prefixe="C"
   items={[
     "Une maquette déjà dessinée : l'API doit servir les écrans prévus, pas l'inverse.",
-    "Une candidature comporte un fichier — le CV — qu'il faut recevoir et retrouver.",
+    "Une candidature comporte deux fichiers — le CV et la lettre de motivation — qu'il faut recevoir et retrouver.",
     "Un cours d'interface : le backend devait tenir en quelques semaines, à côté du reste.",
   ]}
 />
@@ -44,6 +44,15 @@ Un serveur Express découpé par domaine — authentification, utilisateurs, off
 
 Une candidature référence son offre et porte un statut parmi trois valeurs : en attente, accepté, rejeté. C'est ce statut que l'interface affiche et fait évoluer.
 </Prose>
+
+<Figure numero="01" legende="Le dépôt d'une candidature, relevé dans le code : Multer écrit les fichiers sur le disque, le contrôleur crée le document avec leurs chemins. Entre la base et le disque, rien d'autre qu'un chemin.">
+  <SchemaFichier
+    src="/schemas/gestion-stage-candidature.svg"
+    alt="Schéma du dépôt d'une candidature : le navigateur envoie POST /api/candidates en multipart ; Multer écrit le CV et la lettre de motivation dans backend/uploads/ et transmet leurs chemins au contrôleur, qui crée le document Candidate dans MongoDB (identité, offre référencée, statut en attente, chemins des deux fichiers). La suppression d'une candidature laisse ses fichiers sur le disque."
+    largeur={1000}
+    hauteur={540}
+  />
+</Figure>
 
 ## Décisions
 
@@ -63,13 +72,13 @@ Une candidature référence son offre et porte un statut parmi trois valeurs : e
 <DecisionRecord
   numero="02"
   titre="Stocker le CV sur le disque, garder son chemin en base"
-  contexte="Une candidature arrive avec un fichier. MongoDB sait stocker des binaires, mais chaque lecture de la liste des candidats aurait alors transporté les CV."
+  contexte="Une candidature arrive avec deux fichiers, le CV et la lettre de motivation. MongoDB sait stocker des binaires, mais chaque lecture de la liste des candidats aurait alors transporté les deux."
   options={[
     { libelle: "Le fichier dans le document de candidature", note: "documents lourds, listes ralenties" },
     { libelle: "Un service de stockage externe", note: "hors périmètre d'un projet de cours" },
     { libelle: "Le fichier sur le disque, le chemin en base", retenue: true },
   ]}
-  decision="Multer reçoit le fichier et l'écrit dans un dossier de dépôt ; le document de candidature ne garde que son chemin."
+  decision="Multer reçoit les deux fichiers et les écrit dans un dossier de dépôt ; le document de candidature ne garde que leurs chemins."
   consequences="Les listes restent légères. En contrepartie, la base et le disque peuvent diverger : un document sans fichier, ou l'inverse. Rien, dans le projet, ne réconcilie les deux."
 />
 
