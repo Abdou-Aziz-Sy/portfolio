@@ -7,10 +7,10 @@ annee: 2025
 statut: termine
 cadre: Vacances Citoyennes Numériques
 categories: [backend, full-stack, infrastructure]
-stack: [nodedotjs, express, postgresql, redis, docker]
+stack: [nodedotjs, express, postgresql, docker]
 role: Contributeur principal — backend, temps réel et infrastructure
 periode: Septembre — octobre 2025
-stackDetail: Node.js · Express 5 · Prisma · PostgreSQL · Redis · Socket.io · Docker Compose · React
+stackDetail: Node.js · Express 5 · Prisma · PostgreSQL · Socket.io · Docker Compose · React
 miniSchema:
   - { titre: React, sous: étudiants · mentors }
   - { titre: API, sous: Express · Socket.io }
@@ -40,13 +40,29 @@ Le besoin retenu : l'accompagnement individuel des étudiants, aujourd'hui dépe
   ]}
 />
 
+<Capture
+  src="/projets/mentorat/verification-mentors.png"
+  alt="Écran d'administration « Vérification des mentors » annoté : la colonne Vérifié décide de la visibilité d'un mentor auprès des étudiants."
+  legende="La contrainte C-04 à l'écran : l'administrateur vérifie chaque mentor avant qu'il n'apparaisse aux étudiants."
+  largeur={1440}
+  hauteur={700}
+/>
+
 ## Architecture
 
 <Prose>
 Une API Express 5 et un front React, séparés dans le même dépôt. Les données vivent dans PostgreSQL, décrites par **20 modèles Prisma** avec leurs migrations et un jeu de données de démonstration qui permet de repartir d'une base peuplée en une commande.
 
-La messagerie et les notifications passent par Socket.io ; la visioconférence par BigBlueButton. L'API est documentée par Swagger, protégée par Helmet, une limitation de débit et une double validation — Joi et express-validator. L'infrastructure de développement tient dans un Docker Compose : PostgreSQL 15, Redis 7 et MailHog pour capturer les e-mails sans en envoyer un seul.
+Le temps réel passe par Socket.io : le serveur authentifie chaque connexion, ouvre un salon par conversation et diffuse les notifications de campagne. La visioconférence passe par BigBlueButton. L'API est documentée par Swagger, protégée par Helmet et par une double validation — Joi et express-validator. L'infrastructure de développement tient dans un Docker Compose : PostgreSQL 15, MailHog pour capturer les e-mails sans en envoyer un seul, et un Redis 7 prévu, que le code n'utilise pas encore.
 </Prose>
+
+<Capture
+  src="/projets/mentorat/api-swagger.png"
+  alt="Documentation Swagger de l'API annotée : les routes sont groupées par domaine, ici les campagnes avec leurs verbes GET, POST, PUT et DELETE."
+  legende="L'API documentée par Swagger, route par route, groupée par domaine."
+  largeur={1440}
+  hauteur={900}
+/>
 
 ## Décisions
 
@@ -63,6 +79,13 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
   consequences="Le mentor déclare sa semaine type une fois. Le calcul des créneaux libres devient le point sensible du domaine : c'est là que se concentrent les cas limites."
 />
 
+<Galerie
+  images={[
+    { src: "/projets/mentorat/disponibilites-recurrentes.png", alt: "Écran du mentor annoté : deux onglets, disponibilités récurrentes et créneaux spécifiques ; la semaine type (mardi et jeudi 18 h – 20 h, samedi 10 h – 12 h) est déclarée une seule fois.", legende: "La semaine type : déclarée une fois, valable chaque semaine.", largeur: 1440, hauteur: 900 },
+    { src: "/projets/mentorat/creneaux-specifiques.png", alt: "Écran du mentor annoté : un créneau spécifique daté, hors semaine type, avec son objet (revue de CV avant les candidatures).", legende: "L'exception : un créneau daté, avec son objet.", largeur: 1440, hauteur: 900 },
+  ]}
+/>
+
 <DecisionRecord
   numero="02"
   titre="Un repli quand la visioconférence refuse du monde"
@@ -72,7 +95,7 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
     { libelle: "Faire la queue jusqu'à libération", note: "attente indéterminée, en plein rendez-vous" },
     { libelle: "Basculer sur un service de repli", retenue: true },
   ]}
-  decision="Quand la création d'une réunion BigBlueButton échoue pour cause de limite atteinte, la session reçoit un lien Jitsi et se tient quand même."
+  decision="Quand la création d'une réunion BigBlueButton échoue — limite atteinte, abonnement, configuration ou toute autre erreur —, la session reçoit un lien Jitsi et se tient quand même."
   consequences="Aucune session perdue pour une raison d'infrastructure. En contrepartie, deux chemins de visioconférence à maintenir, et un enregistrement indisponible sur le chemin de repli."
 />
 
@@ -85,8 +108,16 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
     { libelle: "Server-Sent Events", note: "à sens unique, insuffisant pour une messagerie" },
     { libelle: "Socket.io", retenue: true },
   ]}
-  decision="Une connexion Socket.io par session ouverte, qui porte les messages de conversation comme les notifications."
-  consequences="Les échanges sont immédiats. L'état de connexion devient une préoccupation à part entière : reconnexion, salons par conversation, et un serveur qui ne peut plus être considéré comme sans état."
+  decision="Une connexion Socket.io par page ouverte : elle rejoint le salon de la conversation affichée, y reçoit les nouveaux messages, et reçoit les notifications."
+  consequences="Côté serveur, le circuit est complet : connexion authentifiée, salon par conversation, diffusion d'un nouveau message à ses membres. Mais l'interface envoie ses messages par l'API REST, qui les enregistre sans les diffuser : le destinataire ne les voit qu'en rechargeant la page. Le temps réel n'est effectif que pour les notifications. Et l'état de connexion devient une préoccupation à part entière : reconnexion, salons, serveur qui ne peut plus être considéré comme sans état."
+/>
+
+<Capture
+  src="/projets/mentorat/messagerie.png"
+  alt="Messagerie de l'étudiant annotée : la liste de ses conversations, l'échange avec son mentor, et le champ de saisie qui accepte un message ou une pièce jointe."
+  legende="Une conversation entre un étudiant et son mentor."
+  largeur={1440}
+  hauteur={900}
 />
 
 ## Résultats
@@ -98,6 +129,14 @@ La messagerie et les notifications passent par Socket.io ; la visioconférence p
     "Une API documentée par Swagger, et une infrastructure de développement reproductible en une commande.",
     "Un plan de finalisation écrit avant l'arrêt : chat en session, interface des campagnes, mise en relation plus fine, tests d'intégration.",
   ]}
+/>
+
+<Capture
+  src="/projets/mentorat/campagnes.png"
+  alt="Écran d'administration des campagnes annoté : chaque campagne a un type, un statut (active ou archivée) et un compteur d'inscrits sur le nombre de places."
+  legende="Les campagnes collectives : ateliers, orientation, insertion professionnelle, avec leurs places."
+  largeur={1440}
+  hauteur={600}
 />
 
 ## Ce que je referais autrement
