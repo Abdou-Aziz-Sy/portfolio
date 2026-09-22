@@ -15,8 +15,8 @@ mkdirSync(SORTIE, { recursive: true });
 
 const navigateur = await chromium.launch({ channel: "msedge" });
 
-async function session(email, role) {
-  const page = await navigateur.newPage({ viewport: VUE });
+async function session(email, role, vue = VUE) {
+  const page = await navigateur.newPage({ viewport: vue });
   await page.goto(`${FRONT}/login`);
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', "password123");
@@ -44,6 +44,15 @@ await capturer(mentor, "disponibilites-recurrentes", [
   { cible: mentor.getByText("Créneaux spécifiques", { exact: false }), texte: "Deux façons de déclarer", cote: "bas" },
   { cible: mentor.getByText("Mes disponibilités récurrentes"), texte: "Semaine type, déclarée une fois", cote: "droite" },
 ]);
+// Couverture de la carte du projet : même écran, sans annotations, au format commun 1280 × 720.
+const couverture = await session("abdou.sow@mentor.pro.sn", "mentor", { width: 1280, height: 720 });
+await couverture.goto(`${FRONT}/mentor/availabilities`);
+await couverture.getByText("Mes disponibilités récurrentes").waitFor();
+await couverture.waitForTimeout(1500);
+await couverture.screenshot({ path: "public/projets/couvertures/mentorat-vcn.jpg", type: "jpeg", quality: 82 });
+console.log("public/projets/couvertures/mentorat-vcn.jpg");
+await couverture.close();
+
 await mentor.getByText("Créneaux spécifiques", { exact: false }).first().click();
 await mentor.getByText("Mes créneaux spécifiques").waitFor();
 await mentor.waitForTimeout(600);

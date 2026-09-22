@@ -140,3 +140,37 @@ test("le diagramme d'une étude de cas se charge en différé", async ({ page })
   await expect(schema).toHaveAttribute("loading", "lazy");
   await expect(schema).toHaveAttribute("decoding", "async");
 });
+
+// Chaque carte montre une couverture au même format 16:9 : c'est ce qui garde les titres alignés
+// d'une carte à l'autre (une seule carte à photo les décalait tous).
+test("chaque carte de projet a une couverture 16:9 chargée, et les titres d'une rangée sont alignés", async ({ page }) => {
+  await page.goto("/projets");
+  const cartes = page.getByTestId("project-card");
+  await expect(cartes).toHaveCount(5);
+  for (const carte of await cartes.all()) {
+    const image = carte.locator(".pa-card-fig--image img");
+    await image.scrollIntoViewIfNeeded();
+    // Décorative : le titre de la carte, juste en dessous, dit déjà de quel projet il s'agit.
+    await expect(image).toHaveAttribute("alt", "");
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), { timeout: 30_000 })
+      .toBe(true);
+    const boite = await carte.locator(".pa-card-fig").boundingBox();
+    expect(Math.abs(boite!.width / boite!.height - 16 / 9)).toBeLessThan(0.02);
+  }
+  // Titres : même hauteur pour toutes les cartes qui partagent une rangée, à chaque largeur où la
+  // grille a plusieurs colonnes (à 1440 px, l'en-tête « En production » passait à la ligne et
+  // décalait de 16 px l'image et le titre d'UGB Link).
+  for (const largeur of [1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width: largeur, height: 1000 });
+    const titres = await cartes.locator("h3").evaluateAll((els) =>
+      els.map((el) => {
+        const carte = el.closest("[data-testid=project-card]")!.getBoundingClientRect();
+        return { rangee: Math.round(carte.top), titre: Math.round(el.getBoundingClientRect().top) };
+      }),
+    );
+    const parRangee = new Map<number, number[]>();
+    for (const { rangee, titre } of titres) parRangee.set(rangee, [...(parRangee.get(rangee) ?? []), titre]);
+    for (const hauts of parRangee.values()) expect(Math.max(...hauts) - Math.min(...hauts), `${largeur}px`).toBeLessThanOrEqual(1);
+  }
+});

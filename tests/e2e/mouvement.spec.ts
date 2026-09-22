@@ -537,23 +537,6 @@ test("le schéma complet est entièrement tracé dès qu'il est entièrement vis
   expect(etat.traces.every((d) => d === 0), `décalages ${etat.traces}`).toBe(true);
 });
 
-test("le mini-schéma d'une carte est entièrement tracé dès qu'il est entièrement visible", async ({
-  page,
-  browserName,
-}) => {
-  test.skip(browserName !== "chromium", "animation-timeline : Chromium");
-  await page.goto("/projets");
-  const etat = await etatDuSchema(
-    page,
-    ".pa-grid-projets > div:first-child .pa-card-fig",
-    ".pa-grid-projets > div:first-child .pa-card-fig :is(.d-box, .d-box-acc)",
-    '.pa-grid-projets > div:first-child .pa-card-fig .d-flow[pathLength="1"]',
-  );
-  expect(etat.traces.length).toBeGreaterThan(0);
-  expect(etat.blocs.every((o) => o === "1"), `opacités ${etat.blocs}`).toBe(true);
-  expect(etat.traces.every((d) => d === 0), `décalages ${etat.traces}`).toBe(true);
-});
-
 // Régression : l'IntersectionObserver ne signalait que les titres qui traversaient une bande de
 // l'écran ; après un saut (lien, retour arrière, défilement rapide), aucun titre ne la traversait
 // et le sommaire restait sur une section déjà quittée.
