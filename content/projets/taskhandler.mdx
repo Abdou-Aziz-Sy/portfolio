@@ -106,7 +106,7 @@ L'authentification par jeton JWT, la chaîne d'intégration continue et l'intég
     { libelle: "Gérer l'erreur dans chaque contrôleur", note: "autant de formats que de routes" },
     { libelle: "Un gestionnaire d'exceptions global", retenue: true },
   ]}
-  decision="Un gestionnaire global intercepte les erreurs de validation et les exceptions métier, et les rend dans une forme unique, champ par champ."
+  decision="Un gestionnaire global intercepte les erreurs de validation et les exceptions métier, et les rend dans une même forme — statut, message, horodatage —, complétée du détail champ par champ pour les erreurs de validation."
   consequences="L'interface écrit un seul afficheur d'erreurs. Le contrat devient implicite : toute nouvelle exception doit être déclarée au gestionnaire, sinon elle retombe dans le cas général."
 />
 
@@ -146,5 +146,5 @@ Deux réponses de l'API, dans la forme que leur donne le gestionnaire global : u
 ## Ce que je referais autrement
 
 <Prose>
-J'écrirais les transitions permises comme une table de vérité, dans un seul endroit, plutôt que dispersées dans les conditions du service. La règle serait lisible d'un coup d'œil, et les tests pourraient la parcourir exhaustivement au lieu de vérifier les cas auxquels on a pensé.
+Les transitions permises sont réunies en un seul endroit — l'énumération des statuts, que le service interroge et d'où le schéma ci-dessus est tiré. Ce qui manque, ce sont les tests qui la parcourent : ceux du dépôt vérifient les transitions offertes depuis « à faire » et trois changements de statut, alors que la table compte vingt-cinq couples, dont onze permis. J'écrirais un test paramétré qui les passe tous en revue, pour qu'une transition ajoutée ou retirée par erreur casse la suite au lieu de passer inaperçue.
 </Prose>
