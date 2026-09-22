@@ -8,7 +8,7 @@ statut: termine
 cadre: Cours d'interface, licence 3
 categories: [backend]
 stack: [nodedotjs, express]
-role: Backend
+role: Backend, en binôme
 periode: Mai — juin 2024
 stackDetail: Node.js · Express · MongoDB · Mongoose · JWT · Multer
 miniSchema:
@@ -23,7 +23,7 @@ publie: true
 <Prose>
 Cours de conception d'interface en licence 3 : dessiner une maquette Figma d'une plateforme de gestion des stages, puis la coder. Le sujet du cours était l'interface ; l'application, elle, avait besoin d'un serveur pour exister.
 
-À trois, chacun a pris un versant. J'ai pris **tout le backend** : modèles, contrôleurs, routes, connexion à la base, dépôt de fichiers, authentification. C'est mon premier serveur écrit entièrement de bout en bout.
+À trois, chacun a pris un versant. J'ai pris le backend, en binôme avec un coéquipier : modèles, contrôleurs, routes, connexion à la base, dépôt de fichiers, authentification. Nous l'avons écrit ensemble, le plus souvent sur son poste : l'historique porte surtout son nom, et les commits au mien, la connexion à la base et l'authentification. C'est le premier serveur que j'ai construit de bout en bout.
 </Prose>
 
 ## Contraintes
@@ -40,7 +40,7 @@ Cours de conception d'interface en licence 3 : dessiner une maquette Figma d'une
 ## Architecture
 
 <Prose>
-Un serveur Express découpé par domaine — authentification, utilisateurs, offres de stage, candidats — avec, pour chacun, son modèle Mongoose, son contrôleur et ses routes. MongoDB pour les données, un jeton JWT pour les sessions, des mots de passe hachés par bcrypt, et Multer pour recevoir les CV.
+Un serveur Express découpé par domaine — authentification, utilisateurs, offres de stage, candidats — avec, pour chacun, son contrôleur et ses routes, et un modèle Mongoose par entité : utilisateur, offre, candidature. MongoDB pour les données, des mots de passe hachés par bcrypt, et Multer pour recevoir les fichiers de candidature. La connexion signe un jeton JWT valable une heure, mais aucune route ne le vérifie encore : aucun intermédiaire ne lit l'en-tête d'autorisation, et toute l'API reste ouverte.
 
 Une candidature référence son offre et porte un statut parmi trois valeurs : en attente, accepté, rejeté. C'est ce statut que l'interface affiche et fait évoluer.
 </Prose>
@@ -66,7 +66,7 @@ Une candidature référence son offre et porte un statut parmi trois valeurs : e
     { libelle: "Une énumération de trois valeurs, avec défaut", retenue: true },
   ]}
   decision="Le statut est contraint à trois valeurs — en attente, accepté, rejeté — et vaut « en attente » à la création."
-  consequences="Le filtrage et l'affichage deviennent fiables. Ajouter un état, par exemple « entretien planifié », demande une migration des documents existants."
+  consequences="À la création, la contrainte tient : Mongoose refuse toute autre valeur et pose « en attente » par défaut. Mais les deux routes de mise à jour passent par findByIdAndUpdate sans l'option runValidators : Mongoose n'y vérifie pas l'énumération, et n'importe quelle chaîne est acceptée. La garantie ne vaut donc qu'à moitié. Ajouter un état, par exemple « entretien planifié », demande en outre une migration des documents existants."
 />
 
 <DecisionRecord
@@ -99,5 +99,5 @@ Deux choses, apprises depuis et sans discussion possible.
 
 D'abord, **ne jamais commiter un fichier de secrets**. Le dépôt de ce projet contient encore un fichier d'environnement avec l'adresse de la base et la clé de signature des jetons. Un secret publié est un secret perdu : il se révoque, il ne se cache pas.
 
-Ensuite, des messages de commit qui disent ce qu'ils font. Les miens, sur ce projet, s'appellent « comm » et « zzzz2 ». Le code qu'ils portent est pourtant l'essentiel du serveur — personne ne pouvait le deviner en lisant l'historique, moi compris, deux ans plus tard.
+Ensuite, des messages de commit qui disent ce qu'ils font. Les miens, sur ce projet, s'appellent « comm », « zzzz2 » ou « zzzz3 » — et ce dernier ajoute toute l'authentification. Personne ne pouvait le deviner en lisant l'historique, moi compris, deux ans plus tard.
 </Prose>
