@@ -115,7 +115,7 @@ export const EXPLICATIONS_UGB: Record<NoeudUgb, { titre: string; texte: string }
   stockage: {
     titre: "Stockage distant",
     texte:
-      "Les sauvegardes partent hors site ; un exercice de restauration automatisé les restaure dans un environnement isolé et en contrôle le contenu.",
+      "Les sauvegardes automatisées partent hors site chaque nuit.",
   },
 };
 
