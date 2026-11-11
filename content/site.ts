@@ -76,12 +76,12 @@ export const site = {
     {
       cle: "infra",
       titre: "Infrastructure & exploitation",
-      phrase: "Livrer, surveiller, restaurer.",
+      phrase: "Livrer, surveiller, sauvegarder.",
       fais: [
         "Conteneurisation",
         "Déploiement continu",
         "Durcissement de serveurs",
-        "Sauvegardes et exercices de restauration",
+        "Sauvegardes automatisées",
       ],
       outils: [
         { libelle: "Docker", icone: "docker" },
@@ -103,10 +103,9 @@ export const site = {
       detail: "École Supérieure Polytechnique (ESP/UCAD)",
     },
     {
-      periode: "fév. 2026 →",
+      periode: "fév. — sept. 2026",
       titre: "Alternance — Antenne UGB, Dakar",
       detail: "Ingénieur logiciel · UGB Link, en production",
-      actuel: true,
     },
   ] as { periode: string; titre: string; detail?: string; actuel?: boolean }[],
 
