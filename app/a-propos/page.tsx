@@ -10,7 +10,8 @@ import { TechIcon } from "@/components/TechIcon";
 
 export const metadata: Metadata = {
   title: "À propos",
-  description: "Ingénieur logiciel diplômé de l'École Supérieure Polytechnique de Dakar, orienté backend.",
+  description:
+    "Ingénieur logiciel full stack diplômé de l'École Supérieure Polytechnique de Dakar : de l'interface React à la base PostgreSQL, jusqu'à la mise en production.",
   alternates: { canonical: "/a-propos" },
 };
 
@@ -39,7 +40,7 @@ export default function APropos() {
       <div>
         <span className="pa-meta">À propos</span>
         <h1 className="pa-hero" style={{ marginTop: 12 }}>
-          Ingénieur logiciel, du côté <span className="pa-em">backend</span> de l&apos;écran.
+          Ingénieur logiciel <span className="pa-em">full&nbsp;stack</span>, des deux côtés de l&apos;écran.
         </h1>
         <p className="pa-lead pa-muted" style={{ marginTop: 20, maxWidth: "56ch" }}>
           Diplômé de l&apos;École Supérieure Polytechnique en 2026. Depuis février 2026, je conçois et exploite UGB Link

@@ -28,7 +28,7 @@ export const site = {
     apropos: "/portrait-apropos.jpg" as string | undefined,
   },
   description:
-    "Ingénieur logiciel à Dakar, orienté backend, conception de systèmes et infrastructure.",
+    "Ingénieur logiciel full stack à Dakar : de l'interface React à la base PostgreSQL, jusqu'à la mise en production.",
 
   faits: [
     { valeur: "8", libelle: "processus administratifs en production" },

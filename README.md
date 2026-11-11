@@ -1,6 +1,6 @@
 # Portfolio — Abdou Aziz Sy
 
-Site personnel d'un ingénieur logiciel à Dakar, orienté backend, conception de systèmes et infrastructure.
+Site personnel d'un ingénieur logiciel full stack à Dakar : de l'interface React à la base PostgreSQL, jusqu'à la mise en production.
 
 - **Pile** : Next.js 16 (App Router, rendu statique), TypeScript, MDX (`next-mdx-remote`), Zod, Vitest, Playwright.
 - **Design** : système « Plan d'architecte », conçu avec Claude Design et copié dans [`docs/design/`](docs/design/).
