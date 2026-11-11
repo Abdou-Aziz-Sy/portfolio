@@ -36,7 +36,7 @@ export default function Accueil() {
             <h1 className="pa-hero">
               <span className="pa-hero-intro">Ingénieur logiciel à Dakar. </span>Je construis des{" "}
               <Link className="pa-inlink" href="/projets?categorie=full-stack">
-                applications full stack
+                applications full&nbsp;stack
               </Link>{" "}
               qui tiennent <span className="pa-em">en production</span>, je dessine des{" "}
               <Link className="pa-inlink" href="/projets/ugb-link#architecture">

@@ -40,7 +40,7 @@ export default function APropos() {
       <div>
         <span className="pa-meta">À propos</span>
         <h1 className="pa-hero" style={{ marginTop: 12 }}>
-          Ingénieur logiciel <span className="pa-em">full stack</span>, des deux côtés de l&apos;écran.
+          Ingénieur logiciel <span className="pa-em">full&nbsp;stack</span>, des deux côtés de l&apos;écran.
         </h1>
         <p className="pa-lead pa-muted" style={{ marginTop: 20, maxWidth: "56ch" }}>
           Diplômé de l&apos;École Supérieure Polytechnique en 2026. Depuis février 2026, je conçois et exploite UGB Link
