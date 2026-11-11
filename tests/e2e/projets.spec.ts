@@ -21,7 +21,8 @@ test("les filtres réduisent la grille et s'inscrivent dans l'URL", async ({ pag
 
 test("un lien filtré s'ouvre directement sur le bon filtre", async ({ page }) => {
   await page.goto("/projets?categorie=full-stack");
-  await expect(page.getByTestId("project-card")).toHaveCount(2);
+  // ugb-link, gamecupsn et mentorat-vcn.
+  await expect(page.getByTestId("project-card")).toHaveCount(3);
   await expect(page.getByRole("button", { name: "Full stack" })).toHaveAttribute("aria-pressed", "true");
 });
 
