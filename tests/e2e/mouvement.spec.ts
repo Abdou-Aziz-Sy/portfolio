@@ -233,7 +233,7 @@ test("le remplacement du repli par la grille réelle à l'hydratation de /projet
 });
 
 // Preuve du rôle réel de `default="none"` : un changement de filtre sur /projets (clic sur l'onglet
-// « Backend », qui reste compatible avec UGB Link — categories: [backend, infrastructure, ia] dans
+// « Backend », qui reste compatible avec UGB Link — categories: [backend, full-stack, infrastructure, ia] dans
 // content/projets/ugb-link.mdx — sa carte n'est donc ni démontée ni remontée, seulement réordonnée/
 // conservée) passe par `router.replace` (components/ProjectGrid.tsx), une Transition React côté
 // client, SANS RAPPORT avec l'appariement carte→étude. Le titre partagé PERSISTE pendant cette

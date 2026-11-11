@@ -43,8 +43,8 @@ export default function APropos() {
           Ingénieur logiciel <span className="pa-em">full&nbsp;stack</span>, des deux côtés de l&apos;écran.
         </h1>
         <p className="pa-lead pa-muted" style={{ marginTop: 20, maxWidth: "56ch" }}>
-          Diplômé de l&apos;École Supérieure Polytechnique en 2026. Depuis février 2026, je conçois et exploite UGB Link
-          en alternance à l&apos;Antenne de l&apos;Université Gaston Berger.
+          Diplômé de l&apos;École Supérieure Polytechnique en 2026. De février à septembre 2026, j&apos;ai conçu et
+          exploité UGB Link en alternance à l&apos;Antenne de l&apos;Université Gaston Berger.
         </p>
 
         <div style={{ marginTop: 64 }}>
