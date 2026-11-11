@@ -1,8 +1,8 @@
-Le portfolio d'Abdou Aziz Sy, ingénieur logiciel à Dakar, orienté backend, conception de systèmes et infrastructure. Il sert à décrocher un poste backend ou full stack : des recruteurs et des responsables techniques viennent vérifier qu'il sait faire. Chaque page mène à deux actions, dans cet ordre : **voir le travail**, puis **le contacter**. « Me contacter » reste visible en permanence.
+Le portfolio d'Abdou Aziz Sy, ingénieur logiciel full stack à Dakar : de l'interface React à la base PostgreSQL, jusqu'à la mise en production. Il sert à décrocher un poste backend ou full stack : des recruteurs et des responsables techniques viennent vérifier qu'il sait faire. Chaque page mène à deux actions, dans cet ordre : **voir le travail**, puis **le contacter**. « Me contacter » reste visible en permanence.
 
 ## Contenu et ton
 
-- Tout est en français, à la première personne, phrases courtes et concrètes : « Je construis des backends qui tiennent en production, je dessine des systèmes avant de les coder. »
+- Tout est en français, à la première personne, phrases courtes et concrètes : « Je construis des applications full stack qui tiennent en production, je dessine des systèmes avant de les coder. »
 - Parler de ce que l'utilisateur ne voit pas : services, données, déploiement, pannes.
 - **Aucun chiffre inventé.** Seuls les faits connus s'affichent en chiffres (8 processus, 13 domaines d'API testés, 2 sites, 260 km). Un résultat non mesuré s'écrit en toutes lettres.
 - Métadonnées au format dossier technique, en `meta` : « DOSSIER 01 — UGB LINK — 2026 — EN PRODUCTION ». Dates ISO `2026-09-02`. Services et chemins en minuscules monospace : « api · en production », `/api`.
